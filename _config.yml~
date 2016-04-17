@@ -2,13 +2,8 @@
 title: Mayank Saxena
 <<<<<<< HEAD
 description: 'Programmer • Developer • Learner'
-url: 'http://joshgerdes.com/jekyll-uno'
-baseurl: '/jekyll-uno/'
-=======
-description: 'Hello World!!!'
 url: 'https://github.com/mayank26saxena/mayank26saxena.github.io/'
 baseurl: 'http://mayank26saxena.github.io/'
->>>>>>> 178a2cf3b69160a30e2833070f148785699082bd
 # google_analytics: 'UA-XXXXXX-X'
 # disqus_shortname: 'your-disqus-name'
 
