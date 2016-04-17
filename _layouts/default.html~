@@ -7,7 +7,7 @@
 
     <div class="content-wrapper">
 
-
+   {% include footer.html %}
     </div>
   </body>
 </html>
