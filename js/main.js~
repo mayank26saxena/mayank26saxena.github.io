@@ -2,7 +2,9 @@
 layout: null
 ---
 $(document).ready(function () {
- 
+  console.log("hello")
+  })
+
   if (window.location.hash && window.location.hash == '#blog') {
     $('.panel-cover').addClass('panel-cover--collapsed')
   }
