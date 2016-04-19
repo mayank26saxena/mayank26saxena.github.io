@@ -7,8 +7,6 @@
 
     <div class="content-wrapper">
 
-    </div>
-
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script type="text/javascript" src="js/main.js"></script>
 
@@ -21,7 +19,10 @@
   ga('create', 'UA-76611970-1', 'auto');
   ga('send', 'pageview');
 
+
 </script>
+
+    </div>
 
   </body>
 </html>
