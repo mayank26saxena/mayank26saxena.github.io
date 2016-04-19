@@ -20,9 +20,7 @@
 
     {% include header.html %}
 
-    <div class="content-wrapper">
 
-    </div>
 
   </body>
 </html>
