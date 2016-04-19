@@ -3,8 +3,6 @@ layout: null
 ---
 $(document).ready(function () {
 
-console.log("On desktop.")
-
 if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) { 
   console.log("On mobile.")
 
@@ -12,20 +10,20 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
     if ($('.panel-cover').hasClass('panel-cover--collapsed')) return
     currentWidth = $('.panel-cover').width()
     if (currentWidth < 960) {
-      $('.panel-cover').addClass('panel-cover--collapsed')
-      $('.content-wrapper').addClass('animated slideInRight')
+     // $('.panel-cover').addClass('panel-cover--collapsed')
+     // $('.content-wrapper').addClass('animated slideInRight')
     } else {
       $('.panel-cover').css('max-width', currentWidth)
-      $('.panel-cover').animate({'max-width': '530px', 'width': '40%'}, 400, swing = 'swing', function () {})
+      //$('.panel-cover').animate({'max-width': '530px', 'width': '40%'}, 400, swing = 'swing', function () {})
     }
   })
 
   if (window.location.hash && window.location.hash == '#blog') {
-    $('.panel-cover').addClass('panel-cover--collapsed')
+    //$('.panel-cover').addClass('panel-cover--collapsed')
   }
 
   if (window.location.pathname !== '{{ site.baseurl }}' && window.location.pathname !== '{{ site.baseurl }}index.html') {
-    $('.panel-cover').addClass('panel-cover--collapsed')
+    //$('.panel-cover').addClass('panel-cover--collapsed')
   }
 
   $('.btn-mobile-menu').click(function () {
@@ -42,6 +40,9 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 }
 
 else {
+
+console.log("On desktop.")
+
   $('.btn-mobile-menu').click(function () {
     $('.navigation-wrapper').toggleClass('visible animated bounceInDown')
     $('.btn-mobile-menu__icon').toggleClass('icon-list icon-x-circle animated fadeIn')
