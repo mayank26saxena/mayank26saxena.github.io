@@ -9,7 +9,7 @@ footer_text: >
   Hosted by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>.
 
 url:  # the base hostname & protocol for your site
-baseurl: /al-folio # the subpath of your site, e.g. /blog/
+baseurl: #/al-folio # the subpath of your site, e.g. /blog/
 #baseurl: # purposely left blank
 last_updated: # leave blank if you don't want to display last updated
 
