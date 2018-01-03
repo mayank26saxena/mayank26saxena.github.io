@@ -1,14 +1,23 @@
 ---
 layout: default
 ---
-<article class="post-container post-container--single">
+<div class="post">
 
   <header class="post-header">
     <h1 class="post-title">{{ page.title }}</h1>
+    <h5 class="post-description">{{ page.description }}</h5>
   </header>
 
-  <section class="post">
+  <article class="post-content {{page.title}} clearfix">
     {{ content }}
-  </section>
+  </article>
 
-</article>
+  {% if page.news %}
+    {% include news.html %}
+  {% endif %}
+
+  {% if page.social %}
+    {% include social.html %}
+  {% endif %}
+
+</div>
