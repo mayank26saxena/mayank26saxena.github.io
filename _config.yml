@@ -22,13 +22,14 @@ linkedin_username: mayank26saxena
 #scholar_authorid: # put your google scholar author id
 #contact_note: >You can even add a little note about which of these is the best way to reach you.
 
-google_analytics: UA-XXXXXXXXX # out your google-analytics code
+google_analytics: UA-766119790-1 # out your google-analytics code
+
 
 # -----------------------------------------------------------------------------
 # Blog
 # -----------------------------------------------------------------------------
-blog_name: al-folio
-blog_description: a simple whitespace theme for academics
+blog_name: #al-folio
+blog_description: #a simple whitespace theme for academics
 
 # Pagination
 paginate: 4
@@ -41,7 +42,7 @@ text:
     older: 'Older'
 
 # Comments
-disqus_shortname: al-folio # put your disqus shortname
+disqus_shortname: mayank26saxena # put your disqus shortname
 
 # Optional features
 show_social_icons:  false
@@ -83,7 +84,7 @@ gems:
 # Jekyll-Scholar
 scholar:
 
-  last_name: Einstein
+  last_name: Saxena
 
   style: apa
   locale: en
