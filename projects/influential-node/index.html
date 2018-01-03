@@ -6,13 +6,13 @@
   <meta name="viewport" content="width=device-width initial-scale=1" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <title>Mayank Saxena href = "/" </title>
+  <title>Mayank Saxena | Influential Nodes href = "/" </title>
   <meta name="description" content="Personal website of Mayank Saxena">
 
   <link rel="shortcut icon" href="/assets/img/prof_pic_pittsburgh.jpg">
 
   <link rel="stylesheet" href="/assets/css/main.css">
-  <link rel="canonical" href="/blog/">
+  <link rel="canonical" href="/projects/influential-node/">
 </head>
 
 
@@ -76,56 +76,46 @@
 
     <div class="page-content">
       <div class="wrapper">
-        <div class="header-bar">
-  <h1></h1>
-  <h2></h2>
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Influential Nodes</h1>
+    <h5 class="post-description">Detection of influential nodes in a graph.</h5>
+  </header>
+
+  <article class="post-content Influential Nodes clearfix">
+    <p><em>Supervisors:</em> <a href="http://rakhisaxena.github.io/">Prof. R. Saxena</a>, <a href="http://www.dtu.ac.in/Web/Departments/AppliedMathematics/faculty/sskumar.php">Prof. Sivaprasad Kumar</a></p>
+
+<h3 id="problem-statement">Problem Statement</h3>
+<p>All social networks are modelled as graphs. Each user is represented by a node and an edge exists between two nodes if there exists a relation between the users. In case of a social network graph, we can think of the relation being if the two users are friends with each other. On analysis of the graph, we can determine the most influential nodes in the given graph. The process of influential users can be used for targeted advertising, spreading awareness, for lesser degrees of separation etc. Influential users are those users which have a large number of edges incident on them. In the social network graph, communities (those set of users which are highly interconnected) are connected through these influential users.</p>
+
+<h3 id="extended-neighbourhood-centrality-algorithm-enc">Extended Neighbourhood Centrality Algorithm (ENC)</h3>
+<p>I propose a new centrality measure that encodes the centrality of a node and its neighborhood. I consider that the importance of a node depends not only on its direct neighbors (1-step neighbors), but also on its 2-step and even more steps of neighbors. A 2-step neighbor of a node is a direct neighbor of 1-step neighbor. Similarly, a n-step neighbor is a direct neighbor of (n-1)-step neighbor. The more steps, the larger range of neighborhood is taken into consideration. Based on these assumptions, I define the neighborhood centrality of node i encoding the centrality of i as the sum of coreness of its n-step neighbors.</p>
+
+<h3 id="results">Results</h3>
+<p>Results were comparable and better in some cases to Pagerank, Degree centrality and k-core centrality algorithms.</p>
+
+<p align="center">
+    <a class="button" href="https://drive.google.com/file/d/0B6HvWGCj4u7xTzRzV0pNZURQUzQ/view?usp=sharing" target="_blank">View Report </a>
+</p>
+
+<p><br /></p>
+
+<div class="img_true">
+    <img class="col three" src="/assets/img/projects/influential-nodes/enc.png" alt="" title="Influential Nodes ENC." />
+    <div class="caption">Influential nodes found using ENC Algorithm for Zachary Karate Dataset. The green colored nodes represent the most influential nodes in the network.</div>
 </div>
 
+<p>  
+</p>
 
-<ul class="post-list">
-  
-    <li>
-      <h2><a class="post-title" href="/blog/2015/comments/">a post with comments</a></h2>
-      <p class="post-meta">October 20, 2015 — 11:59</p>
-      <p>an example of a blog post with comments</p>
-    </li>
-  
-    <li>
-      <h2><a class="post-title" href="/blog/2015/math/">a post with math</a></h2>
-      <p class="post-meta">October 20, 2015 — 11:12</p>
-      <p>an example of a blog post with some math</p>
-    </li>
-  
-    <li>
-      <h2><a class="post-title" href="/blog/2015/code/">a post with code</a></h2>
-      <p class="post-meta">July 15, 2015 — 15:09</p>
-      <p>an example of a blog post with some code</p>
-    </li>
-  
-    <li>
-      <h2><a class="post-title" href="/blog/2015/images/">a post with images</a></h2>
-      <p class="post-meta">May 15, 2015 — 21:01</p>
-      <p>this is what included images could look like</p>
-    </li>
-  
-</ul>
+  </article>
 
+  
 
-<div class="pagination clearfix mb1 mt4">
-  <div class="left">
-    
-      <span class="pagination-item disabled">Newer</span>
-    
-  </div>
-  <div class="right">
-    
-      <a class="pagination-item" href="/blog/page2/">Older</a>
-    
-  </div>
-  <div class="pagination-meta">Page 1 of 2</div>
+  
+
 </div>
-
-
 
       </div>
     </div>
