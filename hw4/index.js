@@ -16,13 +16,10 @@ const HOSTED_URLS = {
 // };
 
 const examples = {
-  'example1' : 'But I remember now I am in this earthly world : 
-              where to do harme Is often laudable , to do good sometime Accounted dangerous folly.' ,
+  'example1' : 'But I remember now I am in this earthly world : where to do harme Is often laudable , to do good sometime Accounted dangerous folly.' ,
   'example2' : 'Came they not by you?' ,
-  'example3' : 'There is none but he, Whose being I doe feare: and vnder him, My Genius is rebuk' 
-                d, as it is said Mark Anthonies was by Caesar.',
-  'example4' : 'Confusion now hath made his Master - peece: Most sacrilegious Murther hath broke ope 
-                The Lords anoynted Temple, and stole thence The Life o'th' Building.'         
+  'example3' : 'There is none but he, Whose being I doe feare: and vnder him, My Genius is rebuk d, as it is said Mark Anthonies was by Caesar.',
+  'example4' : 'Confusion now hath made his Master - peece: Most sacrilegious Murther hath broke ope The Lords anoynted Temple, and stole thence The Life o'th' Building.'         
 };
 
 function status(statusText) {
