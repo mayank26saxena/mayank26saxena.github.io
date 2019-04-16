@@ -8,7 +8,7 @@ const HOSTED_URLS = {
 
 // const examples = {
 // 'example1':
-//      'Alice was beginning to get very tired of sitting by her sister on the bank.',
+//      'A'pleaded poor Alice.',
 //  'example2':
 //      'Buda-Pesth seems a wonderful place.',
 //  'example3':
@@ -19,11 +19,11 @@ const examples = {
   'example1' : 
       'But I remember now I am in this earthly world : where to do harme Is often laudable.',
   'example2' : 
-      'Came they not by you?',
+      'And so doe I',
   'example3' : 
-      'There is none but he, Whose being I doe feare: and vnder him.',
+      'And that question once answered, pirates straightway steer apart, for they are infernal villains on both sides, and dont like to see overmuch of each others villanous likenesses.',
   'example4' : 
-    'Confusion now hath made his Master - peece: Most sacrilegious Murther hath broke.'         
+    'Or envy, or what reserve forbids to taste?'         
 };
 
 function status(statusText) {
