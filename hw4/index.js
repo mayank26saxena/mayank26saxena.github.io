@@ -17,13 +17,13 @@ const HOSTED_URLS = {
 
 const examples = {
   'example1' : 
-      'But I remember now I am in this earthly world : where to do harme Is often laudable.',
+      'So well thy words become thee , as thy wounds , They smack of Honor both : Goe get him Surgeons .',
   'example2' : 
-      'And so doe I',
+      'The Thane of Cawdor liues A prosperous Gentleman : And to be King , Stands not within the prospect of beleefe , No more then to be Cawdor .',
   'example3' : 
-      'And that question once answered, pirates straightway steer apart, for they are infernal villains on both sides, and dont like to see overmuch of each others villanous likenesses.',
+      'Sinfull Macduff , They were all strooke for thee : Naught that I am , Not for their owne demerits , but for mine Fell slaughter on their soules : Heauen rest them now',
   'example4' : 
-    'Or envy, or what reserve forbids to taste?'         
+    'I haue done the deed : Didst thou not heare a noyse ?'         
 };
 
 function status(statusText) {
