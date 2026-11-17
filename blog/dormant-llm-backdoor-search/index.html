@@ -60,7 +60,6 @@
   .loop-foot b { color: var(--ink); font-weight: 600; }
   .loop-back { font: 12px var(--mono); color: var(--muted); text-align: right; margin: 6px 2px 0; }
   ol.rules { padding-left: 1.3em; } ol.rules li { margin-bottom: 10px; }
-  .result { font: 15.5px/1.55 var(--sans); color: var(--ink); background: var(--card); border: 1px solid var(--rule); border-left: 3px solid var(--ink); border-radius: 3px; padding: 12px 16px; margin: -12px 0 30px; }
   @media (max-width: 640px) {
     .loop { grid-template-columns: 1fr; } .loop li + li::after { content: "↓"; left: 50%; top: -5px; }
     .loop-foot { grid-template-columns: 1fr; }
@@ -153,7 +152,6 @@
   <h1>Applying autoresearch to <span class="hi">backdoor discovery</span></h1>
   <p class="standfirst">Autoresearch hands the experiment loop to an AI agent: it edits one file, runs a fixed test, reads one number and keeps or reverts the change. I tried it twice, once on the problem it was built for and once on a hunt for hidden backdoors in language models. The second run went smoothly and found nothing, and the reasons say more about autoresearch than about the hunt.</p>
   <div class="meta"><span><b>Mayank Saxena</b></span><span>March 2026</span><span><a href="https://github.com/mayank26saxena/dormant-llm">Code and data</a></span></div>
-  <p class="result"><b>Result.</b> Across four models, <span data-k="runs"></span> batches and <span data-k="probes"></span> prompts, the search found <strong>no validated triggers</strong>. The main finding is about the method: the score the loop optimised could be maxed out by harmless one-word replies.</p>
 </div></header>
 
 <main>
