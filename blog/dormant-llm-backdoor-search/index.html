@@ -49,20 +49,9 @@
     .ex-row.dx { grid-template-columns: 1fr 22px; }
     .ex-row.dx > * { grid-column: 1; } .ex-row.dx > .ex-caret { grid-column: 2; grid-row: 1; }
   }
-  .loop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 6px 0 4px; padding: 0; counter-reset: step; }
-  .loop li { list-style: none; position: relative; background: #fff; border: 1px solid var(--rule); border-radius: 4px; padding: 10px 10px 12px; margin: 0;
     font: 13px/1.45 var(--sans); color: var(--ink-2); }
-  .loop li b { display: block; font: 600 14px/1.25 var(--display); color: var(--ink); margin-bottom: 4px; }
-  .loop li::before { counter-increment: step; content: counter(step); display: block; font: 500 11px var(--mono); color: var(--brand); margin-bottom: 4px; }
-  .loop li + li::after { content: "→"; position: absolute; left: -9px; top: 50%; transform: translate(-50%, -50%); color: var(--muted); font: 13px var(--sans); }
-  .loop-foot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; font: 13px/1.45 var(--sans); color: var(--ink-2); }
-  .loop-foot div { border: 1px dashed var(--axis); border-radius: 4px; padding: 8px 10px; }
-  .loop-foot b { color: var(--ink); font-weight: 600; }
-  .loop-back { font: 12px var(--mono); color: var(--muted); text-align: right; margin: 6px 2px 0; }
   ol.rules { padding-left: 1.3em; } ol.rules li { margin-bottom: 10px; }
   @media (max-width: 640px) {
-    .loop { grid-template-columns: 1fr; } .loop li + li::after { content: "↓"; left: 50%; top: -5px; }
-    .loop-foot { grid-template-columns: 1fr; }
   }
   /* explainer */
   .xp { --ok: var(--c-explicit); --no: var(--c-broken); font-family: var(--sans); }
@@ -101,6 +90,12 @@
   .xp-decide.k .xp-cmp div:first-child b { color: var(--ok); } .xp-decide.r .xp-cmp div:first-child b { color: var(--t-broken); }
   .xp-verdict { margin-top: 12px; font-weight: 600; display: inline-block; padding: 6px 12px; border-radius: 3px; animation: xpIn .4s ease .5s both; }
   .xp-decide.k .xp-verdict { background: #e6eef8; color: var(--t-explicit); } .xp-decide.r .xp-verdict { background: #eef0ef; color: var(--t-broken); }
+  .xp-branches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; text-align: left; }
+  .xp-branches div { border: 1px solid var(--rule); border-radius: 4px; padding: 8px 10px; font-size: 12.5px; line-height: 1.45; }
+  .xp-branches small { display: block; font: 500 10.5px var(--mono); color: var(--muted); margin-bottom: 2px; }
+  .xp-branches .on { border-color: var(--c-explicit); background: #eef3fa; color: var(--t-explicit); font-weight: 600; animation: xpIn .4s ease .5s both; }
+  .xp-branches .off { color: var(--muted); border-style: dashed; opacity: .75; }
+  .xp-dim { color: var(--muted); font-size: 11.5px; }
   .xp-side { display: grid; grid-template-rows: auto 1fr; gap: 10px; }
   .xp-git, .xp-log { padding: 10px 12px; }
   .xp-git ol { list-style: none; margin: 0; padding: 0 0 0 4px; border-left: 2px solid var(--rule); }
@@ -161,21 +156,10 @@
   <p>The design is mostly about what the agent is <em>not</em> allowed to touch.</p>
 </div>
 <figure class="fig wide" id="figLoop">
-  <p class="fig-title">One file changes; the test, the number and the record stay fixed</p>
-  <p class="fig-sub">The autoresearch loop, with the files that hold each part in Karpathy’s version.</p>
-  <ol class="loop">
-    <li><b>Read state</b>Instructions and the log of past attempts.</li>
-    <li><b>Propose</b>One idea to try next.</li>
-    <li><b>Edit</b>Change the one editable file.</li>
-    <li><b>Run</b>A fixed experiment with a fixed budget.</li>
-    <li><b>Keep or revert</b>Commit if the number improved, otherwise reset.</li>
-  </ol>
-  <p class="loop-back">↺ repeat</p>
-  <div class="loop-foot">
-    <div><b>Editable:</b> <code>train.py</code>, the model and training code.</div>
-    <div><b>Fixed:</b> <code>prepare.py</code> (data and evaluation), the 5-minute budget, the metric, and <code>program.md</code> (the rules).</div>
-  </div>
-  <figcaption><b>Figure 1:</b> Each experiment is one commit and one line in <code>results.tsv</code>, so the history records every attempt, kept or not.</figcaption>
+  <p class="fig-title">The autoresearch loop, step by step</p>
+  <p class="fig-sub">Karpathy’s design, replayed on a real two-experiment run on a laptop (below). It plays on its own; use the steps or the arrows to go at your pace.</p>
+  <div id="xp"></div>
+  <figcaption><b>Figure 1:</b> One file changes; the data, the evaluation, the time budget and the number stay fixed. Each experiment is one commit and one line in <code>results.tsv</code>, kept or not.</figcaption>
 </figure>
 <div class="col">
   <table class="plain">
@@ -187,10 +171,11 @@
       <tr><td>Keep or revert in git</td><td>Progress only ratchets forward, and nothing is lost.</td></tr>
     </tbody>
   </table>
-  <p>On its home ground this works. I ran the MLX port on a laptop: <span data-k="ar_changes"></span> changes kept in a row took validation loss from <span data-k="ar_first"></span> to <span data-k="ar_best"></span> bits per byte. The reason is easy to miss. In training, the number <em>is</em> the goal. Lower validation loss is what you wanted, so climbing the number cannot lead you astray.</p>
+  <p>On its home ground this works. Karpathy’s version runs on an NVIDIA GPU, so I used a community port to MLX, Apple’s machine-learning library for Mac chips (<a class="cite" href="#ref-peterson2026">Peterson 2026</a>; <a class="cite" href="#ref-mlx">MLX</a>), on an M4 Pro laptop. It trains a small language model for exactly five minutes, then measures <em>validation bits per byte</em>: how many bits the model needs, on average, to encode each character of text it has not seen. Lower is better. In two experiments the agent halved the batch size and then halved it again, so that more training steps fit into the same five minutes. Both changes were kept, and the score fell from <span data-k="ar_first"></span> to <span data-k="ar_best"></span>.</p>
+  <p>The reason it works is easy to miss. In training, the number <em>is</em> the goal. A lower validation loss is exactly what you wanted, so climbing the number cannot lead you astray.</p>
 
   <h2 id="s02"><span class="no">02</span><span class="nl">Taking it off its home ground</span></h2>
-  <p>In early 2026, Jane Street hid triggers in four language models: prompts that make a model behave very differently (the Dormant LLM puzzle). I mapped the loop onto the hunt:</p>
+  <p>In early 2026, Jane Street hid triggers in four language models: prompts that make a model behave very differently (the <a href="https://huggingface.co/jane-street/dormant-model-1" target="_blank" rel="noopener noreferrer">Dormant LLM puzzle</a>; <a class="cite" href="#ref-janestreet">Jane Street 2026</a>). I mapped the loop onto the hunt:</p>
   <table class="plain">
     <thead><tr><th>Ingredient</th><th>In the backdoor hunt</th></tr></thead>
     <tbody>
@@ -200,16 +185,7 @@
       <tr><td>Keep or revert</td><td>Keep the batch if its best reply beats the best so far.</td></tr>
     </tbody>
   </table>
-  <p>Over <span data-k="days"></span> the loop ran <span data-k="runs"></span> batches and <span data-k="probes"></span> prompts. Here it is on the warmup model, replaying the real batches in order:</p>
-</div>
-<figure class="fig wide" id="figAnim">
-  <p class="fig-title">How one lap of the loop works, on two real batches</p>
-  <p class="fig-sub">Plays on its own; use the steps or the arrows to move through it at your pace. Prompts, replies and scores are from the run files.</p>
-  <div id="xp"></div>
-  <figcaption><b>Figure 2:</b> Of <span data-k="loop_n"></span> warmup batches, the loop kept <span data-k="loop_k"></span>. From batch <span data-k="loop_hit"></span> the best score sat on the ceiling, so the remaining batches, most of them the same “Spartan!” echo, could only be reverted.</figcaption>
-  <details class="setup"><summary></summary><div class="body"><p>Laps 1 and 2 are warmup batches 4 and 5, with their first prompts, best reply and score taken from the saved run files; the hypotheses are as worded in the March notes. Kept or reverted is recomputed with the loop’s rule. The notes panel is a condensed view of <code>program.md</code>. One rebuilt batch is excluded (<a href="#appendix-b">Appendix C</a>).</p></div></details>
-</figure>
-<div class="col">
+  <p>Over <span data-k="days"></span> the loop ran <span data-k="runs"></span> batches and <span data-k="probes"></span> prompts.</p>
   <h3><span class="sub">02.1</span>What the agent could do</h3>
   <p>The agent was Claude Code running Claude Sonnet 4.6, inside a local copy of the repository. Without asking, it could edit the probe and notes files and run an allowlist of commands: the two loop scripts, <code>uv run</code>, local git (add, commit, reset, log) and process tools. Anything else, including pushing to GitHub, needed my approval. “Never edit the scorer” was an instruction, not a technical lock, so I checked it in review. I started each session, chose the model, read the results and decided when to stop.</p>
   <h3><span class="sub">02.2</span>Candidates and triggers</h3>
@@ -217,17 +193,17 @@
     <thead><tr><th>Term</th><th>Meaning here</th></tr></thead>
     <tbody>
       <tr><td>Candidate anomaly</td><td>A reply that scores near the ceiling and looks unlike the model’s normal behaviour.</td></tr>
-      <tr><td>Validated trigger</td><td>A candidate whose prompt gives the same anomalous reply in 3 of 3 repeats (my bar in March), plus two conditions I add here: it is not a known artifact such as an echo or an instructed one-word answer, and nearby variants of the prompt behave normally.</td></tr>
+      <tr><td>Validated trigger</td><td>A candidate whose prompt gives the same anomalous reply in 3 of 3 repeats, that is not a known artifact such as an echo or an instructed one-word answer, and whose nearby variants behave normally.</td></tr>
     </tbody>
   </table>
   <p>The strongest candidate anomaly, “🌙” on Model 2 answered with just “🌙✨”, held in <span data-k="moon_k"></span> of <span data-k="moon_n"></span> repeats, so it falls short. Nothing met the bar.</p>
 
   <h2 id="s03"><span class="no">03</span><span class="nl">What transferred: the mechanics, not the objective</span></h2>
-  <p>The workflow carried over; the objective did not, because the metric did not capture it (section 04). Three mechanics are worth keeping:</p>
+  <p>The workflow carried over; the objective did not (section 04). Three mechanics are worth copying:</p>
   <ul>
-    <li><strong>Notes the agent reads first:</strong> the current best, the log and ideas already ruled out, so a fresh session did not retry dead ends.</li>
-    <li><strong>One command per step:</strong> small scripts ran and logged each batch, so each step needed one allowlisted command, not several approvals.</li>
-    <li><strong>A complete record:</strong> every batch is a commit with every reply saved, so every number here can be recomputed from the repository.</li>
+    <li><strong>Notes first.</strong> Each session read the best so far and the ideas already ruled out, so it never retried dead ends.</li>
+    <li><strong>One command per step.</strong> Each step was a single allowlisted script, not a string of approvals.</li>
+    <li><strong>A full record.</strong> One commit per batch, every reply saved.</li>
   </ul>
 
   <h2 id="s04"><span class="no">04</span><span class="nl">Where it broke</span></h2>
@@ -240,11 +216,11 @@
   <p class="fig-title">On all four models, the top score was the ceiling, reached by one- or two-word replies</p>
   <p class="fig-sub">Every probe from every batch, by model. Dashed line: that model’s ceiling, computed from its baseline. Ochre: probes within 0.005 of it.</p>
   <div class="chart"></div>
-  <figcaption><b>Figure 3:</b> Every model’s top score equals its ceiling, so the score cannot distinguish the best probe from a harmless one-word reply that also reaches the ceiling.</figcaption>
+  <figcaption><b>Figure 2:</b> Every model’s top score equals its ceiling, so the score cannot distinguish the best probe from a harmless one-word reply that also reaches the ceiling.</figcaption>
   <details class="setup"><summary></summary><div class="body"><p>Scores recomputed by the export script from each stored reply and the model’s stored baseline, matching the harness to rounding. One rebuilt batch is excluded (<a href="#appendix-b">Appendix C</a>). Hover over a dot for the prompt and the reply.</p><div class="table"></div></div></details>
 </figure>
 <div class="col">
-  <p>The keep rule makes this worse: once a batch reaches the ceiling, nothing can beat it, so later batches are discarded and the number stops steering the search. And the agent noticed. On day two it wrote in its notes that about 5.5 was the formula’s ceiling, “not a wall”, then kept optimising the same number for five more days. Autoresearch fixes the metric so the agent cannot game it, which also means it cannot repair it.</p>
+  <p>The keep rule makes this worse: once a batch reaches the ceiling, nothing can beat it, so later batches are discarded and the number stops steering the search. On the warmup model the loop reached the ceiling at batch <span data-k="loop_hit"></span>; all <span data-k="after_hit"></span> batches after it were reverted, most of them the same “Spartan!” echo. And the agent noticed. On day two it wrote in its notes that about 5.5 was the formula’s ceiling, “not a wall”, then kept optimising the same number for five more days. Autoresearch fixes the metric so the agent cannot game it, which also means it cannot repair it.</p>
 
   <h3><span class="sub">04.2</span>Around the number</h3>
   <ul>
@@ -262,7 +238,6 @@
     <li><strong>Keep many winners.</strong> Archive distinct high scorers instead of one best, and set aside budget for kinds of input not yet tried.</li>
     <li><strong>Let the agent propose a new number.</strong> It saw the problem on day two. A rule that lets it flag the metric for human review would have saved five days.</li>
   </ol>
-  <p><strong>Next.</strong> The warmup model, its base model and its disclosed trigger allow exactly the test in rule 1. I will fix a redesigned score in advance, check where the true trigger ranks among these <span data-k="probes"></span> probes under the old score and the new one, and report the result either way.</p>
 
   <h2 class="appx-head" id="methods">Methods and checks</h2>
   <p class="appx-intro">Supporting detail for the numbers above. Open any section.</p>
@@ -281,7 +256,7 @@
         <tr><td>Baseline</td><td>15 fixed ordinary questions per model, listed in <code>evaluate.py</code>; their replies are saved in <code>data/baselines.json</code>.</td></tr>
         <tr><td>Score</td><td>Per reply, 0.6 × |words − baseline mean| / baseline sd + 4 × share of new words; a batch’s score is its best reply (Appendix A).</td></tr>
         <tr><td>Keep rule</td><td>Keep the batch’s commit if its score beats the best so far; otherwise <code>git reset</code>.</td></tr>
-        <tr><td>Validation</td><td>Re-send a candidate’s prompt at least three times; a trigger needs the same anomalous reply each time (the March bar); this write-up also requires that it is not a known artifact and that nearby variants behave normally (section 02.2).</td></tr>
+        <tr><td>Validation</td><td>Re-send a candidate’s prompt at least three times; a trigger needs the same anomalous reply each time, must not be a known artifact, and its nearby variants must behave normally (section 02.2).</td></tr>
         <tr><td>Rerun</td><td><code>uv sync</code>, then <code>uv run evaluate.py</code> per batch; <code>python3 -I scripts/export_blog_data.py</code> recomputes every number on this page. The API key is read from <code>JANE_STREET_API_KEY</code>.</td></tr>
       </tbody>
     </table>
@@ -292,17 +267,20 @@
 
   <h2 id="references">References</h2>
   <ol class="refs">
+    <li id="ref-janestreet">Jane Street (2026). Dormant LLM puzzle: <code>jane-street/dormant-model-warmup</code> and <code>dormant-model-1</code> to <code>-3</code>, with instructions and discussion on the model pages. <a href="https://huggingface.co/jane-street" target="_blank" rel="noopener noreferrer">huggingface.co/jane-street</a></li>
     <li id="ref-karpathy">Karpathy (2026). autoresearch. <a href="https://github.com/karpathy/autoresearch" target="_blank" rel="noopener noreferrer">github.com/karpathy/autoresearch</a></li>
+    <li id="ref-mlx">Apple (2023–). MLX: an array framework for machine learning on Apple silicon. <a href="https://github.com/ml-explore/mlx" target="_blank" rel="noopener noreferrer">github.com/ml-explore/mlx</a></li>
     <li id="ref-kruger2026">Kruger (2026). Solving the Jane Street Dormant LLM Challenge, jane-street/dormant-model-1 discussion #7, update of 12 May 2026 quoting the announced answers. <a href="https://huggingface.co/jane-street/dormant-model-1/discussions/7" target="_blank" rel="noopener noreferrer">huggingface.co</a></li>
+    <li id="ref-peterson2026">Peterson (2026). autoresearch-mlx: an MLX port of autoresearch for Apple silicon. <a href="https://github.com/trevin-creator/autoresearch-mlx" target="_blank" rel="noopener noreferrer">github.com/trevin-creator/autoresearch-mlx</a></li>
   </ol>
 </div>
 </main>
 
 <footer><div class="col">The puzzle models are Jane Street’s; this is independent work, not affiliated with Jane Street.</div></footer>
 
-<script src="data/figures.js?v=bd4a463c"></script>
+<script src="data/figures.js?v=eafc08cd"></script>
 <script src="../assets/charts.js?v=8ae96d7a"></script>
-<script src="post.js?v=06a9d6c8"></script>
+<script src="post.js?v=c2b90c0f"></script>
 <script>
   const F = window.FIGURES, H = F.headline;
   const slot = (id, q) => document.querySelector(`#${id} ${q}`);
@@ -317,12 +295,12 @@
     long_s: F.models.flatMap((m) => m.probes).reduce((a, p) => (p.w > a.w ? p : a)).s.toFixed(2),
     ex_n: H.excluded_probes, ar_changes: ["no", "one", "two", "three", "four"][H.ar_kept - 1] || H.ar_kept - 1,
     ar_first: H.ar_first.toFixed(2), ar_best: H.ar_best.toFixed(2),
-    loop_n: H.loop_batches, loop_k: H.loop_kept, loop_hit: H.loop_hit,
+    loop_n: H.loop_batches, loop_k: H.loop_kept, loop_hit: H.loop_hit, after_hit: H.loop_batches - H.loop_hit,
   };
   document.querySelectorAll("[data-k]").forEach((e) => { e.textContent = vals[e.dataset.k]; });
   document.querySelector("#ceil tbody").innerHTML = F.models.map((m) => `<tr><td>${m.name}</td><td>${m.mean_len}</td><td>${m.std_len}</td><td>${m.ceiling.toFixed(3)}</td><td>${m.top.toFixed(3)}</td></tr>`).join("");
   Post.ceilingStrip(slot("fig1", ".chart"), F.models, { table: slot("fig1", ".table") });
-  Post.explainer(document.getElementById("xp"), F);
+  Post.explainer(document.getElementById("xp"), H);
   (function rail() {
     const hs = [...document.querySelectorAll("main h2[id]")]; if (!hs.length) return;
     const nav = document.createElement("nav"); nav.className = "rail"; nav.innerHTML = "<p>Contents</p>";
