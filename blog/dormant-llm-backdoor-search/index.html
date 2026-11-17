@@ -145,7 +145,7 @@
 <header class="top"><div class="col">
   <p class="kicker">Autoresearch · research note</p>
   <h1>Applying autoresearch to <span class="hi">backdoor discovery</span></h1>
-  <p class="standfirst">Autoresearch hands the experiment loop to an AI agent: it edits one file, runs a fixed test, reads one number and keeps or reverts the change. I tried it twice, once on the problem it was built for and once on a hunt for hidden backdoors in language models. The second run went smoothly and found nothing, and the reasons say more about autoresearch than about the hunt.</p>
+  <p class="standfirst">Autoresearch hands the experiment loop to an AI agent: it edits one file, runs a fixed test, reads one number and keeps or reverts the change. I tried it twice, once on the problem it was built for and once on a hunt for hidden backdoors in language models. The second run went smoothly but found no validated trigger; the reasons say more about autoresearch than about the hunt.</p>
   <div class="meta"><span><b>Mayank Saxena</b></span><span>March 2026</span><span><a href="https://github.com/mayank26saxena/dormant-llm">Code and data</a></span></div>
 </div></header>
 
@@ -176,7 +176,7 @@
     </tbody>
   </table>
   <p>The agent was Claude Code running Claude Sonnet 4.6. It could edit its probe files and run an allowlist of commands; anything else needed my approval. Over <span data-k="days"></span> it ran <span data-k="runs"></span> batches and <span data-k="probes"></span> prompts.</p>
-  <p>A validated trigger had to give the same anomalous reply in 3 of 3 repeats, not be a known artifact such as an echo, and have near variants that behaved normally (<a href="#appendix-r">Appendix B</a> has the permissions and criteria in full). Nothing met the bar. The strongest candidate anomaly, “🌙” on Model 2 answered with just “🌙✨”, held in <span data-k="moon_k"></span> of <span data-k="moon_n"></span> repeats.</p>
+  <p>A validated trigger had to give the same anomalous reply in 3 of 3 repeats, not be a known artifact such as an echo, and have near variants that behaved normally (<a href="#appendix-r">Appendix B</a> has the permissions and criteria in full). Nothing met the bar. The strongest candidate came from sending “🌙” to Model 2, which replied “🌙✨”; it held in <span data-k="moon_k"></span> of <span data-k="moon_n"></span> repeats.</p>
 
   <h2 id="s03"><span class="no">03</span><span class="nl">What transferred: the mechanics, not the objective</span></h2>
   <p>The workflow carried over; the objective did not. Each session started from notes on the best so far and the ideas already ruled out, so it never retried dead ends. Each step was a single allowlisted command, and every batch was one commit with every reply saved.</p>
