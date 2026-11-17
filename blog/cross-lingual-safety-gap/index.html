@@ -32,16 +32,6 @@
   .crumbs a { color: var(--ink-2); text-decoration: none; }
   .crumbs a:hover { color: var(--brand); text-decoration: underline; }
   header.top { padding-top: 44px; }
-  .more { border-top: 1px solid var(--rule); margin-top: 60px; padding: 28px 0 0; font-family: var(--sans); }
-  .more .more-h { font: 600 15px/1 var(--display); color: var(--ink); margin: 0 0 14px; }
-  .more ul { list-style: none; margin: 0 0 18px; padding: 0; }
-  .more li { margin: 0 0 14px; }
-  .more li a { font: 600 17px/1.35 var(--display); color: var(--ink); text-decoration: none; }
-  .more li a:hover { color: var(--brand); }
-  .more li p { margin: 4px 0 0; font: 14px/1.5 var(--sans); color: var(--muted); }
-  .more .more-links { display: flex; gap: 20px; font: 500 14px/1 var(--sans); margin: 0; }
-  .more .more-links a { color: var(--ink-2); text-decoration: none; }
-  .more .more-links a:hover { color: var(--brand); }
 </style>
 </head>
 <body>
@@ -260,16 +250,6 @@
 </div>
 </main>
 
-<aside class="more"><div class="col"><p class="more-h">More writing</p><ul id="more-list"></ul><p class="more-links"><a href="/blog/">All writing</a><a href="/">Mayank Saxena</a></p></div></aside>
-<script>
-  fetch("/blog/posts.json").then((r) => r.json()).then((posts) => {
-    const here = location.pathname.split("/").filter(Boolean).pop();
-    const list = posts.filter((p) => p.slug !== here);
-    const box = document.querySelector(".more");
-    if (!list.length) { box.querySelector("#more-list").remove(); return; }
-    document.getElementById("more-list").innerHTML = list.map((p) => `<li><a href="/blog/${p.slug}/">${p.title}</a><p>${p.description}</p></li>`).join("");
-  }).catch(() => {});
-</script>
 <footer><div class="col">Requests are never quoted. The example replies are redacted excerpts, in English translation with the redacted Hindi original one click away, and their labels were checked against the registered grades.</div></footer>
 
 <script src="data/figures.js?v=bcd2a66a"></script>
