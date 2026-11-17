@@ -1,222 +1,273 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mayank Saxena</title>
+<meta name="description" content="Mayank Saxena builds authorization systems for AI agents at Amazon and does independent research on language model safety.">
+<meta name="author" content="Mayank Saxena">
+<link rel="canonical" href="https://mayank26saxena.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Mayank Saxena">
+<meta property="og:description" content="Software engineer at Amazon. Independent research on language model safety.">
+<meta property="og:url" content="https://mayank26saxena.github.io/">
+<meta property="og:image" content="https://mayank26saxena.github.io/assets/img/prof_pic_col.jpg">
+<link rel="icon" type="image/png" href="/assets/img/favicon-96x96.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Same house style as the blog (blog/assets/tokens.css): stone page, ink, moss links,
+     Space Grotesk headings, Literata reading text, and the two-tone split rule. */
+  :root {
+    --paper: #f2f3f3;
+    --card: #fafbfb;
+    --ink: #1b1f1d;
+    --ink-2: #4a524e;
+    --muted: #6c7470;
+    --rule: #d9dcdc;
+    --brand: #2f6b57;
+    --en: #4a524e;
+    --hi: #2563b0;
+    --split: linear-gradient(90deg, var(--en) 0 50%, var(--hi) 50% 100%);
+    --display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+    --serif: "Literata", Georgia, serif;
+    --sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17.5px/1.7 var(--serif); }
+  a { color: var(--brand); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: var(--ink); }
+  a:focus-visible { outline: 2px solid var(--hi); outline-offset: 3px; border-radius: 2px; }
+  p { margin: 0 0 16px; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px; }
 
-  <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width initial-scale=1">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  /* top bar */
+  .bar { display: flex; justify-content: space-between; align-items: baseline; padding: 26px 0 0; font: 500 15px/1 var(--sans); }
+  .bar .me { font: 600 16px/1 var(--display); color: var(--ink); text-decoration: none; letter-spacing: -.01em; }
+  .bar nav { display: flex; gap: 22px; }
+  .bar nav a { color: var(--ink-2); text-decoration: none; }
+  .bar nav a:hover { color: var(--brand); }
 
-  <title>Mayank Saxena</title>
-  <meta name="description" content="Personal website of Mayank Saxena">
+  /* intro */
+  .intro { display: grid; grid-template-columns: 1fr 220px; gap: 48px; align-items: start; padding: 72px 0 56px; }
+  h1 { font: 700 56px/1.02 var(--display); letter-spacing: -.035em; margin: 0 0 22px; }
+  h1::after { content: ""; display: block; width: 76px; height: 4px; background: var(--split); margin-top: 22px; }
+  .lead { font: 400 22px/1.5 var(--serif); color: var(--ink); margin: 0 0 20px; max-width: 30em; }
+  .intro p { max-width: 34em; color: var(--ink-2); }
+  .links { display: flex; flex-wrap: wrap; gap: 6px 20px; font: 500 15px/1.6 var(--sans); margin-top: 22px; }
+  .portrait { margin: 6px 0 0; }
+  .portrait img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 30%; border-radius: 4px; }
 
-  <link rel="stylesheet" href="/assets/css/main.css">
-  <link rel="canonical" href="/">
+  /* sections */
+  section { padding: 44px 0 8px; border-top: 2px solid var(--ink); }
+  h2 { font: 600 28px/1.1 var(--display); letter-spacing: -.025em; margin: 0 0 6px; scroll-margin-top: 20px; }
+  .section-note { font: 15px/1.5 var(--sans); color: var(--muted); margin: 0 0 26px; }
+
+  /* featured post: text on the left, the post's headline result on the right */
+  .feature { display: grid; grid-template-columns: 1fr 300px; gap: 36px; margin-bottom: 18px; background: var(--card); border: 1px solid var(--rule);
+    border-radius: 4px; padding: 28px 28px 24px; position: relative; margin: 0 0 18px; }
+  .feature::before { content: ""; position: absolute; left: -1px; right: -1px; top: -1px; height: 3px; background: var(--split); border-radius: 4px 4px 0 0; }
+  .feature h3 { font: 600 26px/1.15 var(--display); letter-spacing: -.02em; margin: 0 0 12px; }
+  .feature h3 a { color: var(--ink); text-decoration: none; }
+  .feature h3 a:hover { color: var(--brand); }
+  .feature .desc { font-size: 16.5px; line-height: 1.6; color: var(--ink-2); }
+  .date { font: 500 13px/1.4 var(--sans); color: var(--muted); margin: 0 0 10px; }
+  .read { font: 600 15px var(--sans); }
+
+  .result { font-family: var(--sans); align-self: center; }
+  .result-title { font: 600 14px/1.35 var(--sans); color: var(--ink); margin: 0 0 4px; }
+  .result-sub { font: 12.5px/1.4 var(--sans); color: var(--muted); margin: 0 0 14px; }
+  .key { display: flex; gap: 14px; font: 12.5px var(--sans); color: var(--ink-2); margin: 0 0 12px; }
+  .key span { display: inline-flex; align-items: center; gap: 6px; }
+  .key i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .model { margin: 0 0 14px; }
+  .model-name { font: 600 13px var(--sans); margin: 0 0 5px; }
+  .pair { display: grid; grid-template-columns: 1fr 40px; gap: 8px; align-items: center; margin: 0 0 4px; font: 500 12.5px var(--display); }
+  .track { height: 12px; background: #e6e9e8; border-radius: 2px; overflow: hidden; }
+  .fill { height: 100%; border-radius: 2px; }
+  .fill.en { background: var(--en); }
+  .fill.hi { background: var(--hi); }
+  .pair b { font-weight: 600; text-align: right; }
+  .pair.hi b { color: var(--hi); }
+
+  /* post and paper lists */
+  .list { list-style: none; padding: 0; margin: 0 0 36px; }
+  .list li { display: grid; grid-template-columns: 110px 1fr; gap: 20px; padding: 16px 0; border-top: 1px solid var(--rule); margin: 0; }
+  .list li:last-child { border-bottom: 1px solid var(--rule); }
+  .list .when { font: 500 14px/1.6 var(--sans); color: var(--muted); }
+  .list .t { font: 600 18px/1.35 var(--display); letter-spacing: -.01em; margin: 0 0 3px; color: var(--ink); }
+  .list .t a { color: inherit; text-decoration: none; }
+  .list .t a:hover { color: var(--brand); }
+  .list .by { font: 14.5px/1.5 var(--sans); color: var(--ink-2); margin: 0; }
+  .list .by strong { color: var(--ink); font-weight: 600; }
+  .list .venue { font: italic 15px/1.5 var(--serif); color: var(--muted); margin: 0; }
+  .more { font: 600 15px var(--sans); margin: 4px 0 44px; }
+  .list:not([hidden]) + .more { margin-top: -18px; }
+
+  /* background */
+  .cv { display: grid; grid-template-columns: 110px 1fr; gap: 6px 20px; margin: 0 0 36px; }
+  .cv dt { font: 500 14px/1.7 var(--sans); color: var(--muted); }
+  .cv dd { margin: 0 0 14px; }
+  .cv dd b { font: 600 17px var(--display); letter-spacing: -.01em; }
+  .cv dd span { display: block; font: 15px/1.5 var(--sans); color: var(--ink-2); }
+
+  footer { border-top: 1px solid var(--rule); padding: 22px 0 48px; font: 14px/1.6 var(--sans); color: var(--muted);
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; }
+  footer nav { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+  @media (max-width: 760px) {
+    .intro { grid-template-columns: 1fr; gap: 28px; padding: 48px 0 40px; }
+    .portrait { order: -1; width: 140px; }
+    .portrait img { aspect-ratio: 1; border-radius: 50%; object-position: 50% 18%; }
+    h1 { font-size: 44px; }
+    .lead { font-size: 20px; }
+    .feature { grid-template-columns: 1fr; gap: 24px; padding: 22px 20px 20px; }
+    .list li, .cv { grid-template-columns: 1fr; gap: 2px; }
+    .bar nav { gap: 16px; }
+  }
+</style>
 </head>
+<body>
+<div class="wrap">
 
-
-  <body>
-
-    <header class="site-header">
-
-  <div class="wrapper">
-
-
-
-    <nav class="site-nav">
-
-      <div class="trigger">
-        <!-- About -->
-        <a class="page-link" href="/">about</a>
-
-        <!-- CV -->
-        <!-- a class="page-link" target="_blank" href="/assets/documents/MayankSaxena-CV.pdf">cv</a -->
-
-        <!-- Resume -->
-        <a class="page-link" target="_blank" href="/assets/documents/MayankSaxena-Resume.pdf">resume</a>
-
-        <!-- Pages -->
-
-
-
-
-
-
-
-
-            <a class="page-link" href="/projects/">projects</a>
-
-
-
-            <a class="page-link" href="/publications/">publications</a>
-
-
-
-
-
-
-
-        <!-- CV link -->
-        <!-- <a class="page-link" href="/assets/pdf/CV.pdf">vitae</a> -->
-
-      </div>
-    </nav>
-
-  </div>
-
+<header class="bar">
+  <a class="me" href="/">Mayank Saxena</a>
+  <nav aria-label="Site">
+    <a href="/blog/">Writing</a>
+    <a href="#papers">Papers</a>
+    <a href="/assets/documents/MayankSaxena-Resume.pdf">Resume</a>
+  </nav>
 </header>
 
-
-
-    <div class="page-content">
-      <div class="wrapper">
-        <div class="post">
-
-  <header class="post-header">
-    <h1 class="post-title">
-<strong>Mayank</strong> Saxena</h1>
-    <h5 class="post-description">Software Engineer II at Amazon</h5>
-    <h6 class="post-description">New York City, New York</h6>
-  </header>
-
-  <article class="post-content &lt;strong&gt;Mayank&lt;/strong&gt; Saxena clearfix">
-
-  <div class="profile col one right">
-
-      <img class="one" src="/assets/img/prof_pic_col.jpg">
-
-
+<main>
+<div class="intro">
+  <div>
+    <h1>Mayank Saxena</h1>
+    <p class="lead">I build authorization systems for AI agents at Amazon, and I do independent research on language model safety.</p>
+    <p>I'm a Software Engineer II at Amazon, where I've spent 6+ years on security-critical distributed identity systems. My current work is on secure authorization for agent-to-agent and agent-to-service interactions.</p>
+    <p>Outside work, I study how safety behavior in language models holds up when the conditions change. My current focus is why refusals break down when the same request is asked in another language. I write up each project on this site.</p>
+    <div class="links">
+      <a href="mailto:mayank26saxena@gmail.com">Email</a>
+      <a href="https://github.com/mayank26saxena">GitHub</a>
+      <a href="https://www.linkedin.com/in/mayank26saxena">LinkedIn</a>
+      <a href="https://twitter.com/mayank_saxena96">Twitter</a>
     </div>
-
-<p>Software Engineer II at Amazon with 6+ years building security-critical distributed identity systems. Currently applying this systems expertise to research and engineering challenges in agentic AI, focusing on secure authorization for agent-to-agent and agent-to-service interactions. 
-  
-<p>I graduated with a Masters in Computer Science and Machine Learning from <a href="http://www.cs.columbia.edu/">Columbia University</a> in Dec 2019 and before that I completed my Bachelors in Mathematics and Computer Science from <a href="http://dtu.ac.in/">Delhi Technological University</a> in May 2018. 
-
-<p>Besides my professional engagements - I enjoy using technology to solve daily life problems, playing soccer and supporting Chelsea Football Club!</p>
-
-
-  </article>
-
-
-    <!--
-
-<div class="news">
-  <h2>news</h2>
-
-    <table>
-
-
-      <tr>
-        <td class="date">Jan 15, 2016</td>
-        <td class="announcement">
-
-            A simple inline announcement with Markdown emoji! :sparkles: :smile:
-
-
-        </td>
-      </tr>
-
-      <tr>
-        <td class="date">Nov 7, 2015</td>
-        <td class="announcement">
-
-            <a class="news-title" href="/news/announcement_2/">A long announcement with details</a>
-
-        </td>
-      </tr>
-
-      <tr>
-        <td class="date">Oct 22, 2015</td>
-        <td class="announcement">
-
-            A simple inline announcement.
-
-
-        </td>
-      </tr>
-
-    </table>
-
+  </div>
+  <figure class="portrait"><img src="/assets/img/prof_pic_crop.jpg" alt="Portrait of Mayank Saxena"></figure>
 </div>
 
-!-->
+<section id="writing" aria-labelledby="writing-h">
+  <h2 id="writing-h">Writing</h2>
+  <p class="section-note">Research notes on language models, safety and interpretability.</p>
 
-
-
-
-    <div class="social">
-  <span class="contacticon center">
-    <a href="mailto:mayank26saxena@gmail.com"><i class="fa fa-envelope-square"></i></a>
-    <!--a href="https://scholar.google.com/citations?authorid=" target="_blank" title="Google Scholar"><i class="ai ai-google-scholar-square"></i></a!-->
-    <a href="https://github.com/mayank26saxena" target="_blank" title="GitHub"><i class="fa fa-github-square"></i></a>
-    <a href="https://www.linkedin.com/in/mayank26saxena" target="_blank" title="LinkedIn"><i class="fa fa-linkedin-square"></i></a>
-    <a href="https://twitter.com/mayank_saxena96" target="_blank" title="Twitter"><i class="fa fa-twitter-square"></i></a>
-  </span>
-
-  <!--div class="col three caption">
-
-  </div!-->
-</div>
-
-
-
-</div>
-
+  <!-- Featured post: edit by hand when a new post should lead the page. -->
+  <article class="feature">
+    <div>
+      <p class="date">17 November 2026</p>
+      <h3><a href="/blog/cross-lingual-safety-gap/">Why two open chat models refuse less in Hindi</a></h3>
+      <p class="desc">Asked the same harmful requests in English and in Hindi, Qwen3-8B and Llama-3.1-8B-Instruct refuse far less often in Hindi. What they do instead, what changes inside them, and how far steering can bring the refusals back.</p>
+      <a class="read" href="/blog/cross-lingual-safety-gap/">Read the post</a>
+    </div>
+    <div class="result" role="img" aria-label="Explicit refusal rate on 404 harmful requests. Qwen3-8B: 51% in English, 19% in Hindi. Llama-3.1-8B: 89% in English, 47% in Hindi.">
+      <p class="result-title">Explicit refusal rate</p>
+      <p class="result-sub">The same 404 harmful requests in each language</p>
+      <div class="key"><span><i style="background:var(--en)"></i>English</span><span><i style="background:var(--hi)"></i>Hindi</span></div>
+      <div class="model">
+        <p class="model-name">Qwen3-8B</p>
+        <div class="pair"><div class="track"><div class="fill en" style="width:50.5%"></div></div><b>51%</b></div>
+        <div class="pair hi"><div class="track"><div class="fill hi" style="width:18.6%"></div></div><b>19%</b></div>
+      </div>
+      <div class="model">
+        <p class="model-name">Llama-3.1-8B-Instruct</p>
+        <div class="pair"><div class="track"><div class="fill en" style="width:88.9%"></div></div><b>89%</b></div>
+        <div class="pair hi"><div class="track"><div class="fill hi" style="width:46.5%"></div></div><b>47%</b></div>
       </div>
     </div>
+  </article>
 
-    <!--footer>
+  <!-- All posts except the featured one, filled from blog/posts.json. -->
+  <ul class="list" id="post-list" hidden></ul>
+  <p class="more"><a href="/blog/">All posts</a></p>
+</section>
 
-  <div class="wrapper">
-    &copy; Copyright 2018 Mayank Saxena.
-    Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>.
+<section id="papers" aria-labelledby="papers-h">
+  <h2 id="papers-h">Papers</h2>
+  <p class="section-note">Earlier peer-reviewed work and preprints.</p>
+  <ul class="list">
+    <li><span class="when">2024</span><div>
+      <p class="t">Deep Learning Ensemble Framework for Multiclass Diabetic Retinopathy Classification</p>
+      <p class="by">P. Narra, <strong>M. Saxena</strong>, R. Saxena</p>
+      <p class="venue">TELKOMNIKA</p></div></li>
+    <li><span class="when">2023</span><div>
+      <p class="t">Automatic Spoiler-Sensitive Video Preview Generation with Reinforcement Learning</p>
+      <p class="by"><strong>M. Saxena</strong></p>
+      <p class="venue">University of Bahrain</p></div></li>
+    <li><span class="when">2018</span><div>
+      <p class="t">Analyze, Detect and Remove Gender Stereotyping from Bollywood Movies</p>
+      <p class="by">N. Madaan, S. Mehta, T. Agrawaal, A. Aggarwal, Y. Gupta, <strong>M. Saxena</strong>, V. Malhotra</p>
+      <p class="venue">Conference on Fairness, Accountability and Transparency (FAT*)</p></div></li>
+    <li><span class="when">2018</span><div>
+      <p class="t">Relating Children’s Automatically Detected Facial Expressions to their Behavior in RoboTutor</p>
+      <p class="by"><strong>M. Saxena</strong>, R. Pillai, J. Mostow</p>
+      <p class="venue">AAAI Conference on Artificial Intelligence</p></div></li>
+    <li><span class="when">2017</span><div>
+      <p class="t">Analyzing Gender Stereotyping in Bollywood Movies</p>
+      <p class="by">N. Madaan, S. Mehta, T. Agrawaal, A. Aggarwal, <strong>M. Saxena</strong>, V. Malhotra</p>
+      <p class="venue">arXiv preprint</p></div></li>
+    <li><span class="when">2017</span><div>
+      <p class="t">Bollywood Movie Corpus for Text, Images and Videos</p>
+      <p class="by">N. Madaan, S. Mehta, <strong>M. Saxena</strong>, A. Aggarwal, T. Agrawaal, V. Malhotra</p>
+      <p class="venue">arXiv preprint</p></div></li>
+  </ul>
+</section>
 
+<section id="background" aria-labelledby="background-h">
+  <h2 id="background-h">Background</h2>
+  <p class="section-note">Work and education.</p>
+  <dl class="cv">
+    <dt>Now</dt>
+    <dd><b>Amazon</b><span>Software Engineer II. Distributed identity systems and authorization for AI agents.</span></dd>
+    <dt>2019</dt>
+    <dd><b><a href="http://www.cs.columbia.edu/">Columbia University</a></b><span>MS in Computer Science and Machine Learning</span></dd>
+    <dt>2018</dt>
+    <dd><b><a href="http://dtu.ac.in/">Delhi Technological University</a></b><span>Bachelor’s in Mathematics and Computer Science</span></dd>
+  </dl>
+  <p style="color:var(--ink-2); max-width:34em; margin-bottom:40px">Away from the keyboard I play soccer and support Chelsea.</p>
+</section>
+</main>
 
-  </div>
+<footer>
+  <span>Mayank Saxena, New York City</span>
+  <nav aria-label="Contact">
+    <a href="mailto:mayank26saxena@gmail.com">Email</a>
+    <a href="https://github.com/mayank26saxena">GitHub</a>
+    <a href="https://www.linkedin.com/in/mayank26saxena">LinkedIn</a>
+    <a href="https://twitter.com/mayank_saxena96">Twitter</a>
+  </nav>
+</footer>
 
-</footer!-->
-
-
-    <!-- Load jQuery -->
-<script src="//code.jquery.com/jquery-1.12.4.min.js"></script>
-
-<!-- Load Common JS -->
-<script src="/assets/js/common.js"></script>
-
-
-<!-- Load KaTeX -->
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css">
-<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js"></script>
-<script src="/assets/js/katex.js"></script>
-
-
-
-<!-- Load Anchor JS -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/3.2.2/anchor.min.js"></script>
+</div>
 <script>
-  anchors.options.visible = 'always';
-  anchors.add('article h2, article h3, article h4, article h5, article h6');
+  // Lists every post except the featured one, newest first. New posts only need an entry in blog/posts.json.
+  (function () {
+    var featured = 'cross-lingual-safety-gap';
+    var list = document.getElementById('post-list');
+    var esc = function (t) { var e = document.createElement('span'); e.textContent = t; return e.innerHTML; };
+    var fmt = function (d) { return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }); };
+    fetch('/blog/posts.json').then(function (r) { return r.json(); }).then(function (posts) {
+      posts = posts.filter(function (p) { return p.slug !== featured; })
+                   .sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      if (!posts.length) return;
+      list.innerHTML = posts.map(function (p) {
+        return '<li><span class="when">' + fmt(p.date) + '</span><div><p class="t"><a href="/blog/' + encodeURIComponent(p.slug) + '/">' +
+          esc(p.title) + '</a></p><p class="by">' + esc(p.description) + '</p></div></li>';
+      }).join('');
+      list.hidden = false;
+    }).catch(function () {});
+  })();
 </script>
-
-
-<!-- Include custom icon fonts -->
-<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
-<link rel="stylesheet" href="/assets/css/academicons.min.css">
-
-<!-- Google Analytics -->
-<script>
-(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-// ga('create', 'UA-766119790-1', 'auto');
-//Updated analytics code
-ga('create', 'UA-76611970-1', 'auto');
-
-ga('send', 'pageview');
-</script>
-
-  </body>
-
+</body>
 </html>
