@@ -65,8 +65,17 @@
     .loop-foot { grid-template-columns: 1fr; }
   }
 </style>
+<style>
+  .bar { display: flex; justify-content: space-between; align-items: baseline; padding-top: 26px; font: 500 15px/1 var(--sans); }
+  .bar .me { font: 600 16px/1 var(--display); color: var(--ink); text-decoration: none; }
+  .bar nav { display: flex; gap: 22px; }
+  .bar nav a { color: var(--ink-2); text-decoration: none; }
+  .bar nav a:hover { color: var(--brand); }
+  header.top { padding-top: 44px; }
+</style>
 </head>
 <body>
+<div class="col bar"><a class="me" href="/">Mayank Saxena</a><nav aria-label="Site"><a href="/blog/">Writing</a><a href="/#papers">Papers</a><a href="/assets/documents/MayankSaxena-Resume.pdf">Resume</a></nav></div>
 <header class="top"><div class="col">
   <p class="kicker">Autoresearch · research note</p>
   <h1>Applying autoresearch to <span class="hi">backdoor discovery</span></h1>

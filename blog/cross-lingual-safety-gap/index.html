@@ -27,8 +27,17 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Noto+Sans+Devanagari:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/tokens.css?v=344f4f1b">
+<style>
+  .bar { display: flex; justify-content: space-between; align-items: baseline; padding-top: 26px; font: 500 15px/1 var(--sans); }
+  .bar .me { font: 600 16px/1 var(--display); color: var(--ink); text-decoration: none; }
+  .bar nav { display: flex; gap: 22px; }
+  .bar nav a { color: var(--ink-2); text-decoration: none; }
+  .bar nav a:hover { color: var(--brand); }
+  header.top { padding-top: 44px; }
+</style>
 </head>
 <body>
+<div class="col bar"><a class="me" href="/">Mayank Saxena</a><nav aria-label="Site"><a href="/blog/">Writing</a><a href="/#papers">Papers</a><a href="/assets/documents/MayankSaxena-Resume.pdf">Resume</a></nav></div>
 <header class="top"><div class="col">
   <p class="kicker">Cross-lingual safety · research note</p>
   <h1>Why two open chat models refuse less in <span class="hi">Hindi</span></h1>
