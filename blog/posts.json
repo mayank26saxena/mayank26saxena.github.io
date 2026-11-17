@@ -3,7 +3,7 @@
     "slug": "test-mode-transfer",
     "title": "Can Test-Mode Caution Transfer to Ordinary Prompts?",
     "description": "Test-Mode Transfer tries to move privacy-protective behavior from benchmark-style prompts to ordinary ones. The results show why prompt controls, simple baselines, and judge checks matter.",
-    "date": "2026-11-17"
+    "date": "2026-10-01"
   },
   {
     "slug": "cross-lingual-safety-gap",
