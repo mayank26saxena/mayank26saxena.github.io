@@ -60,35 +60,96 @@
   .loop-foot b { color: var(--ink); font-weight: 600; }
   .loop-back { font: 12px var(--mono); color: var(--muted); text-align: right; margin: 6px 2px 0; }
   ol.rules { padding-left: 1.3em; } ol.rules li { margin-bottom: 10px; }
+  .result { font: 15.5px/1.55 var(--sans); color: var(--ink); background: var(--card); border: 1px solid var(--rule); border-left: 3px solid var(--ink); border-radius: 3px; padding: 12px 16px; margin: -12px 0 30px; }
   @media (max-width: 640px) {
     .loop { grid-template-columns: 1fr; } .loop li + li::after { content: "↓"; left: 50%; top: -5px; }
     .loop-foot { grid-template-columns: 1fr; }
   }
-</style>
-<style>
-  .crumbs { display: flex; gap: 8px; align-items: baseline; padding-top: 26px; font: 500 14px/1 var(--sans); color: var(--muted); }
-  .crumbs a { color: var(--ink-2); text-decoration: none; }
-  .crumbs a:hover { color: var(--brand); text-decoration: underline; }
-  header.top { padding-top: 44px; }
-  .more { border-top: 1px solid var(--rule); margin-top: 60px; padding: 28px 0 0; font-family: var(--sans); }
-  .more .more-h { font: 600 15px/1 var(--display); color: var(--ink); margin: 0 0 14px; }
-  .more ul { list-style: none; margin: 0 0 18px; padding: 0; }
-  .more li { margin: 0 0 14px; }
-  .more li a { font: 600 17px/1.35 var(--display); color: var(--ink); text-decoration: none; }
-  .more li a:hover { color: var(--brand); }
-  .more li p { margin: 4px 0 0; font: 14px/1.5 var(--sans); color: var(--muted); }
-  .more .more-links { display: flex; gap: 20px; font: 500 14px/1 var(--sans); margin: 0; }
-  .more .more-links a { color: var(--ink-2); text-decoration: none; }
-  .more .more-links a:hover { color: var(--brand); }
+  /* explainer */
+  .xp { --ok: var(--c-explicit); --no: var(--c-broken); font-family: var(--sans); }
+  .xp-steps { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 4px 0 10px; }
+  .xp-steps button { font: 600 11.5px/1.2 var(--sans); color: var(--muted); background: none; border: 0; border-top: 3px solid var(--rule); padding: 7px 2px 0; text-align: left; cursor: pointer; transition: color .3s, border-color .3s; }
+  .xp-steps button span { display: block; font: 500 10.5px var(--mono); margin-bottom: 2px; }
+  .xp-steps button.done { border-top-color: var(--axis); color: var(--ink-2); }
+  .xp-steps button.on { border-top-color: var(--brand); color: var(--ink); }
+  .xp-stage { display: grid; grid-template-columns: 1.45fr 1fr; gap: 10px; min-height: 280px; }
+  .xp-stage > *, .xp-side > * { min-width: 0; }
+  .xp-tabs { overflow-x: auto; scrollbar-width: none; }
+  .xp-work, .xp-git, .xp-log { background: #fff; border: 1px solid var(--rule); border-radius: 4px; transition: box-shadow .35s, border-color .35s; }
+  .xp.hl-work .xp-work, .xp.hl-git .xp-git, .xp.hl-log .xp-log, .xp.hl-notes .xp-work { border-color: var(--brand); box-shadow: 0 0 0 3px var(--mark); }
+  .xp-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--rule); padding: 0 6px; background: #f6f7f6; border-radius: 4px 4px 0 0; overflow: hidden; }
+  .xp-tabs span { font: 500 11px var(--mono); color: var(--muted); padding: 7px 8px 6px; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .xp-tabs span.on { color: var(--ink); border-bottom-color: var(--brand); background: #fff; }
+  .xp-pane { padding: 12px 14px; font-size: 13px; line-height: 1.55; }
+  .xp-pane.in > * { animation: xpIn .45s ease both; }
+  @keyframes xpIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .xp-h { font: 500 10.5px var(--mono); color: var(--muted); margin-bottom: 8px; letter-spacing: .02em; }
+  .xp-file p { margin: 0 0 5px; } .xp-file b { display: inline-block; min-width: 92px; font-weight: 600; color: var(--ink); }
+  .xp-think { margin-top: 10px; background: var(--tint); border-radius: 10px 10px 10px 2px; padding: 9px 12px; color: var(--ink); }
+  .xp-think span { display: block; font: 500 10.5px var(--mono); color: var(--brand); margin-bottom: 2px; }
+  .xp-code, .xp-term { font: 12px/1.65 var(--mono); }
+  .xp-code .del { color: #9b3a27; background: #fbefec; text-decoration: line-through; text-decoration-color: rgba(155,58,39,.5); padding: 0 4px; }
+  .xp-code .add { color: #24603f; background: #e9f4ee; padding: 0 4px; animation: xpIn .35s ease both; animation-delay: calc(.35s + var(--i) * .35s); }
+  .xp-code .more { color: var(--muted); background: none; }
+  .xp-term { background: #1b1f1d; color: #e7ebe9; border-radius: 4px; padding: 10px 12px; margin: -2px; overflow-wrap: anywhere; }
+  .xp-term div { animation: xpIn .3s ease both; animation-delay: calc(.2s + var(--i) * .75s); }
+  .xp-term .pr { color: #8fc3a8; } .xp-term .dim { color: #9aa39f; } .xp-term .q { color: #f0d08a; } .xp-term b { color: #fff; }
+  .xp-decide { text-align: center; padding: 10px 0 4px; }
+  .xp-cmp { display: flex; justify-content: center; align-items: center; gap: 18px; }
+  .xp-cmp small { display: block; font: 500 10.5px var(--mono); color: var(--muted); }
+  .xp-cmp b { font: 600 26px var(--display); letter-spacing: -.02em; }
+  .xp-cmp .op { font: 600 24px var(--display); color: var(--muted); }
+  .xp-decide.k .xp-cmp div:first-child b { color: var(--ok); } .xp-decide.r .xp-cmp div:first-child b { color: var(--t-broken); }
+  .xp-verdict { margin-top: 12px; font-weight: 600; display: inline-block; padding: 6px 12px; border-radius: 3px; animation: xpIn .4s ease .5s both; }
+  .xp-decide.k .xp-verdict { background: #e6eef8; color: var(--t-explicit); } .xp-decide.r .xp-verdict { background: #eef0ef; color: var(--t-broken); }
+  .xp-side { display: grid; grid-template-rows: auto 1fr; gap: 10px; }
+  .xp-git, .xp-log { padding: 10px 12px; }
+  .xp-git ol { list-style: none; margin: 0; padding: 0 0 0 4px; border-left: 2px solid var(--rule); }
+  .xp-git li { position: relative; margin: 0 0 5px; padding-left: 14px; font: 12.5px/1.4 var(--sans); color: var(--ink); }
+  .xp-git li i { position: absolute; left: -7px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--ok); }
+  .xp-git li.r { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--axis); } .xp-git li.r i { background: #fff; box-shadow: inset 0 0 0 2px var(--no); }
+  .xp-git li.p i { background: #fff; box-shadow: inset 0 0 0 2px var(--brand); animation: xpPulse 1s ease infinite; } .xp-git li.p { color: var(--ink-2); }
+  @keyframes xpPulse { 50% { transform: scale(1.35); } }
+  .xp-git li small { color: var(--muted); font-size: 11px; text-decoration: none; display: inline-block; }
+  .xp-git li.now { animation: xpIn .4s ease both; }
+  .xp-log table { width: 100%; border-collapse: collapse; font: 11.5px/1.35 var(--mono); }
+  .xp-log th { text-align: left; color: var(--muted); font-weight: 500; padding: 0 4px 4px 0; }
+  .xp-log td { padding: 3px 4px 3px 0; border-top: 1px solid #eef0ef; color: var(--ink-2); }
+  .xp-log td.sk { color: var(--t-explicit); font-weight: 600; } .xp-log td.sd { color: var(--muted); }
+  .xp-sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0 8px; animation: xpIn .4s ease 1.8s both; }
+  .xp-sum div { border-top: 2px solid var(--rule); padding-top: 6px; }
+  .xp-sum b { display: block; font: 600 26px/1.1 var(--display); letter-spacing: -.02em; color: var(--ink); }
+  .xp-sum small { font-size: 11.5px; color: var(--muted); line-height: 1.35; display: block; }
+  .xp-moral { margin: 10px 0 0; font-weight: 600; color: var(--ink); animation: xpIn .4s ease 2.4s both; }
+  .xp-log tr.now td { background: var(--mark); color: var(--ink); animation: xpIn .4s ease both; }
+  .xp-strip .xp-cells { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; margin: 6px 0 10px; }
+  .xp-strip i { display: block; aspect-ratio: 1; border-radius: 2px; }
+  .xp-strip i.k { background: var(--ok); } .xp-strip i.r { background: #fff; box-shadow: inset 0 0 0 1.5px var(--no); }
+  .xp-strip i.c { outline: 2px solid var(--c-soft); outline-offset: 1px; }
+  .xp-cells i { animation: xpIn .3s ease both; } .xp-cells i:nth-child(n) { animation-delay: calc(var(--d, 0) * 1s); }
+  .xp-strip-l { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11.5px; color: var(--ink-2); }
+  .xp-strip-l span { display: inline-flex; align-items: center; gap: 6px; } .xp-strip-l i { width: 11px; height: 11px; }
+  .xp-cap { min-height: 4.7em; margin: 12px 0 0; font: 14.5px/1.55 var(--sans); color: var(--ink-2); }
+  .xp-cap b { color: var(--ink); }
+  .xp-ctrl { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; font: 500 11.5px var(--mono); color: var(--muted); }
+  .xp-btns { display: inline-flex; gap: 6px; }
+  .xp-btns button { font: 500 12px var(--mono); border: 1px solid var(--rule); background: var(--card); border-radius: 3px; padding: 4px 10px; cursor: pointer; color: var(--ink-2); }
+  .xp-btns button:hover { color: var(--brand); border-color: var(--brand); }
+  @media (max-width: 640px) {
+    .xp-stage { grid-template-columns: 1fr; }
+    .xp-steps { grid-template-columns: repeat(7, 1fr); } .xp-steps button { font-size: 0; } .xp-steps button span { font-size: 11px; margin: 0; }
+    .xp-steps button.on { font-size: 11px; grid-column: span 1; }
+  }
+  @media (prefers-reduced-motion: reduce) { .xp * { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
-<div class="col crumbs"><a href="/">Mayank Saxena</a><span aria-hidden="true">/</span><a href="/blog/">Writing</a></div>
 <header class="top"><div class="col">
   <p class="kicker">Autoresearch · research note</p>
   <h1>Applying autoresearch to <span class="hi">backdoor discovery</span></h1>
   <p class="standfirst">Autoresearch hands the experiment loop to an AI agent: it edits one file, runs a fixed test, reads one number and keeps or reverts the change. I tried it twice, once on the problem it was built for and once on a hunt for hidden backdoors in language models. The second run went smoothly and found nothing, and the reasons say more about autoresearch than about the hunt.</p>
-  <div class="meta"><span><b>Mayank Saxena</b></span><span>Project: March 2026</span><span>Written up: November 2026</span><span><a href="https://github.com/mayank26saxena/dormant-llm">Code and data</a></span></div>
+  <div class="meta"><span><b>Mayank Saxena</b></span><span>March 2026</span><span><a href="https://github.com/mayank26saxena/dormant-llm">Code and data</a></span></div>
+  <p class="result"><b>Result.</b> Across four models, <span data-k="runs"></span> batches and <span data-k="probes"></span> prompts, the search found <strong>no validated triggers</strong>. The main finding is about the method: the score the loop optimised could be maxed out by harmless one-word replies.</p>
 </div></header>
 
 <main>
@@ -137,32 +198,54 @@
       <tr><td>Keep or revert</td><td>Keep the batch if its best reply beats the best so far.</td></tr>
     </tbody>
   </table>
-  <p>The agent was Claude Code, and I steered between sessions. Over <span data-k="days"></span> it ran <span data-k="runs"></span> batches and <span data-k="probes"></span> prompts. It found none of the four triggers.</p>
+  <p>Over <span data-k="days"></span> the loop ran <span data-k="runs"></span> batches and <span data-k="probes"></span> prompts. Here it is on the warmup model, replaying the real batches in order:</p>
+</div>
+<figure class="fig wide" id="figAnim">
+  <p class="fig-title">How one lap of the loop works, on two real batches</p>
+  <p class="fig-sub">Plays on its own; use the steps or the arrows to move through it at your pace. Prompts, replies and scores are from the run files.</p>
+  <div id="xp"></div>
+  <figcaption><b>Figure 2:</b> Of <span data-k="loop_n"></span> warmup batches, the loop kept <span data-k="loop_k"></span>. From batch <span data-k="loop_hit"></span> the best score sat on the ceiling, so the remaining batches, most of them the same “Spartan!” echo, could only be reverted.</figcaption>
+  <details class="setup"><summary></summary><div class="body"><p>Laps 1 and 2 are warmup batches 4 and 5, with their first prompts, best reply and score taken from the saved run files; the hypotheses are as worded in the March notes. Kept or reverted is recomputed with the loop’s rule. The notes panel is a condensed view of <code>program.md</code>. One rebuilt batch is excluded (<a href="#appendix-b">Appendix C</a>).</p></div></details>
+</figure>
+<div class="col">
+  <h3><span class="sub">02.1</span>What the agent could do</h3>
+  <p>The agent was Claude Code running Claude Sonnet 4.6, inside a local copy of the repository. It could edit the probe and notes files and run an allowlist of commands without asking: the two loop scripts, <code>uv run</code>, local git commands (add, commit, reset, log) and process tools. Anything else, including pushing to GitHub, needed my approval. The rule that the scoring harness must not change was an instruction, not a technical lock, and I checked it in review. I started each session, chose which model to work on, read the results and decided when to stop.</p>
+  <h3><span class="sub">02.2</span>Candidates and triggers</h3>
+  <table class="plain">
+    <thead><tr><th>Term</th><th>Meaning here</th></tr></thead>
+    <tbody>
+      <tr><td>Candidate anomaly</td><td>A reply that scores near the ceiling and looks unlike the model’s normal behaviour.</td></tr>
+      <tr><td>Validated trigger</td><td>A candidate whose prompt gives the same anomalous reply in 3 of 3 repeats (my bar in March), plus two conditions I add here: it is not a known artifact such as an echo or an instructed one-word answer, and nearby variants of the prompt behave normally.</td></tr>
+    </tbody>
+  </table>
+  <p>The strongest candidate anomaly, “🌙” on Model 2 answered with just “🌙✨”, held in <span data-k="moon_k"></span> of <span data-k="moon_n"></span> repeats, so it falls short. Nothing met the bar.</p>
 
-  <h2 id="s03"><span class="no">03</span><span class="nl">What carried over</span></h2>
-  <p>The machinery transferred well, and two additions were worth making:</p>
+  <h2 id="s03"><span class="no">03</span><span class="nl">What transferred: the mechanics, not the objective</span></h2>
+  <p>The workflow carried over: repeatable batches, a commit per experiment and a full log. The objective did not, because the metric did not capture it (section 04). Three mechanics were worth keeping:</p>
   <ul>
     <li><strong>Notes the agent reads first.</strong> Each session opened by reading a notes file with the current best, the log and the ideas already ruled out, so a fresh context did not retry dead ends.</li>
-    <li><strong>One command per step.</strong> Small scripts committed and ran a batch, or logged and filed the result, in one call. The loop rarely stalled waiting for me to approve an action.</li>
+    <li><strong>One command per step.</strong> Small scripts committed and ran a batch, or logged and filed the result, in one call, so each step needed one allowlisted command rather than several approvals.</li>
     <li><strong>A complete record.</strong> Every batch is a commit with every reply saved. Eight months later I re-scored all <span data-k="probes"></span> replies by script, and the record caught claims in my own notes that did not hold up.</li>
   </ul>
 
   <h2 id="s04"><span class="no">04</span><span class="nl">Where it broke: the number</span></h2>
-  <p>An autoresearch loop climbs whatever number you give it. Outside training, the number is no longer the goal but a guess about what the goal looks like, and the agent climbs the guess. My score rewarded short replies made of new words, and nothing is shorter than one word. Any one-word reply made of a new word therefore scores the most a short reply can, a ceiling between <span data-k="ceil_lo"></span> and <span data-k="ceil_hi"></span> depending on the model.</p>
+  <p>An autoresearch loop climbs whatever number you give it. Outside training, the number is no longer the goal but a guess about what the goal looks like, and the agent climbs the guess.</p>
+  <p>The anomaly score goes up when a reply’s length is far from that of 15 ordinary answers, and when it uses words those answers never used. A high score was meant to say “this reply is unlike the model’s normal behaviour”. But a reply can be short and new without anything hidden behind it. Tell the model “The magic word is: Spartan” and it answers “Spartan!”: one word, never used in the baseline, close to the maximum possible score, and no backdoor involved. <span data-k="at"></span> of the <span data-k="probes"></span> probes landed on that maximum, almost all of them echoes like this or answers the prompt asked to keep to one word.</p>
+  <p>Because nothing is shorter than one word, a one-word reply made of a new word scores the most any short reply can: a ceiling between <span data-k="ceil_lo"></span> and <span data-k="ceil_hi"></span>, depending on the model.</p>
 </div>
 <figure class="fig wide" id="fig1">
   <p class="fig-title">On all four models, the top score was the ceiling, reached by one- or two-word replies</p>
   <p class="fig-sub">Every probe from every batch, by model. Dashed line: that model’s ceiling, computed from its baseline. Ochre: probes within 0.005 of it.</p>
   <div class="chart"></div>
-  <figcaption><b>Figure 2:</b> <span data-k="at"></span> of <span data-k="probes"></span> probes reached a ceiling, most of them echoes (“The magic word is: Spartan” → “Spartan!”) or answers the prompt itself asked to keep to one word.</figcaption>
-  <details class="setup"><summary></summary><div class="body"><p>Scores recomputed by the export script from each stored reply and the model’s stored baseline, matching the harness to rounding. One rebuilt batch is excluded (<a href="#appendix-b">Appendix B</a>). Hover over a dot for the prompt and the reply.</p><div class="table"></div></div></details>
+  <figcaption><b>Figure 3:</b> Every model’s top score equals its ceiling, so the score cannot tell the best probe from any harmless one-word reply.</figcaption>
+  <details class="setup"><summary></summary><div class="body"><p>Scores recomputed by the export script from each stored reply and the model’s stored baseline, matching the harness to rounding. One rebuilt batch is excluded (<a href="#appendix-b">Appendix C</a>). Hover over a dot for the prompt and the reply.</p><div class="table"></div></div></details>
 </figure>
 <div class="col">
   <p>Two things made this worse than a bad metric usually is. First, the keep rule stalls at a ceiling: once one batch reaches it, nothing can beat it, so later batches are discarded and the number stops steering the search. Second, the agent noticed. On day two it wrote into its own notes that about 5.5 was the formula’s ceiling, “not a wall”, and then kept optimising the same number for five more days. Autoresearch fixes the metric so the agent cannot game it, which also means the agent cannot repair it.</p>
 
   <h2 id="s05"><span class="no">05</span><span class="nl">Where it broke: everything around the number</span></h2>
   <ul>
-    <li><strong>Checks outside the loop.</strong> I re-sent promising prompts to see if they fired every time. The local model decoded greedily, so even echoes repeated perfectly (“Spartan!” <span data-k="sp_k"></span> times in <span data-k="sp_n"></span>); the API models sampled, so the best lead held in only <span data-k="moon_k"></span> of <span data-k="moon_n"></span> tries.</li>
+    <li><strong>Checks outside the loop.</strong> I re-sent promising prompts to see if they fired every time. The local model decoded greedily, so even echoes repeated perfectly (“Spartan!” <span data-k="sp_k"></span> times in <span data-k="sp_n"></span>); the API models sampled, so the strongest candidate anomaly held in only <span data-k="moon_k"></span> of <span data-k="moon_n"></span> tries.</li>
     <li><strong>A narrowing search.</strong> Keep-if-better pulls each batch toward what scored well before. The agent proposed words and phrases from the backdoor literature it knew. The triggers disclosed after the close were structured inputs, the first 15 digits of π and a Game of Life board (<a class="cite" href="#ref-kruger2026">Kruger 2026</a>), and the loop never tried either.</li>
     <li><strong>Trusting the model’s word.</strong> Asked for its trigger or its system prompt, the warmup model answered confidently and inconsistently. None of the answers held up.</li>
   </ul>
@@ -170,7 +253,7 @@
   <h2 id="s06"><span class="no">06</span><span class="nl">Rules for an autoresearch loop</span></h2>
   <p>Autoresearch works when climbing the number is the same as making progress. When it is not, these are the rules I would now follow:</p>
   <ol class="rules">
-    <li><strong>Test the number on a known answer first.</strong> Before the loop runs, check that a planted or already-known positive scores at the top. Mine would have failed this in minutes.</li>
+    <li><strong>Test the number on a known answer first.</strong> Before the loop runs, check that a planted or already-known positive scores at the top. I did not run this check.</li>
     <li><strong>Know the number’s ceiling.</strong> If cheap outputs can max it out, the keep rule will stall there.</li>
     <li><strong>Put verification inside the loop.</strong> Re-run each candidate several times under fixed settings before it can be kept.</li>
     <li><strong>Keep many winners.</strong> Archive distinct high scorers instead of one best, and set aside budget for kinds of input not yet tried.</li>
@@ -185,8 +268,23 @@
     <p>Words are whitespace-separated tokens with punctuation stripped, lower-cased; “new” means absent from the model’s 15 baseline answers. A one-word reply made of a new word scores 0.6 × (mean − 1) / sd + 4, the most any reply shorter than the baseline mean can score. Longer replies gain length points again; on the API models, which had no length limit, a reply of a few thousand words could pass the ceiling. None did: the longest (<span data-k="long_w"></span> words) scored <span data-k="long_s"></span>.</p>
     <table class="plain" id="ceil"><thead><tr><th>Model</th><th>Mean words</th><th>SD</th><th>Ceiling</th><th>Top</th></tr></thead><tbody></tbody></table>
   </div></details>
-  <details class="appx" id="appendix-b"><summary>Appendix B: data and how it was checked</summary><div class="appx-body">
-    <p>Every number on this page comes from <code>scripts/export_blog_data.py</code>, which reads the run files in <code>runs/</code>, the baselines in <code>data/baselines.json</code> and the autoresearch log in <code>data/</code>. It recomputes each of the <span data-k="probes"></span> scores from the stored reply and fails if any differs from the stored value beyond rounding. One batch (<span data-k="ex_n"></span> prompts, the first run) is excluded: it ran before the harness saved run files, its file was rebuilt from the console log, and its stored replies do not reproduce its scores. The warmup model ran locally with greedy decoding; Models 1–3 ran through Jane Street’s API, whose sampling settings were not exposed.</p>
+  <details class="appx" id="appendix-r"><summary>Appendix B: setup, to reproduce the run</summary><div class="appx-body">
+    <table class="plain">
+      <tbody>
+        <tr><td>Agent</td><td>Claude Code with Claude Sonnet 4.6, following <code>program.md</code> and <code>CLAUDE.md</code>.</td></tr>
+        <tr><td>Harness</td><td><code>evaluate.py</code>: loads <code>probe.py</code>, runs every prompt, scores every reply, saves a run file to <code>runs/</code>.</td></tr>
+        <tr><td>Warmup model</td><td>Run locally with mlx-lm 0.31.1 (mlx 0.31.0): chat template applied, greedy decoding (the library default), at most 256 new tokens.</td></tr>
+        <tr><td>Models 1–3</td><td>Jane Street’s batch API through <code>jsinfer</code> 0.2.1, one user message per prompt, default settings (sampling not exposed), no token cap.</td></tr>
+        <tr><td>Baseline</td><td>15 fixed ordinary questions per model, listed in <code>evaluate.py</code>; their replies are saved in <code>data/baselines.json</code>.</td></tr>
+        <tr><td>Score</td><td>Per reply, 0.6 × |words − baseline mean| / baseline sd + 4 × share of new words; a batch’s score is its best reply (Appendix A).</td></tr>
+        <tr><td>Keep rule</td><td>Keep the batch’s commit if its score beats the best so far; otherwise <code>git reset</code>.</td></tr>
+        <tr><td>Validation</td><td>Re-send a candidate’s prompt at least three times; a trigger needs the same anomalous reply each time (the March bar); this write-up also requires that it is not a known artifact and that nearby variants behave normally (section 02.2).</td></tr>
+        <tr><td>Rerun</td><td><code>uv sync</code>, then <code>uv run evaluate.py</code> per batch; <code>python3 -I scripts/export_blog_data.py</code> recomputes every number on this page. The API key is read from <code>JANE_STREET_API_KEY</code>.</td></tr>
+      </tbody>
+    </table>
+  </div></details>
+  <details class="appx" id="appendix-b"><summary>Appendix C: data and how it was checked</summary><div class="appx-body">
+    <p>Every number on this page comes from <code>scripts/export_blog_data.py</code>, which reads the run files in <code>runs/</code>, the baselines in <code>data/baselines.json</code> and the autoresearch log in <code>data/</code>. It recomputes each of the <span data-k="probes"></span> scores from the stored reply and fails if any differs from the stored value beyond rounding. One batch (<span data-k="ex_n"></span> prompts, the first run) is excluded: it ran before the harness saved run files, its file was rebuilt from the console log, and its stored replies do not reproduce its scores.</p>
   </div></details>
 
   <h2 id="references">References</h2>
@@ -197,21 +295,11 @@
 </div>
 </main>
 
-<aside class="more"><div class="col"><p class="more-h">More writing</p><ul id="more-list"></ul><p class="more-links"><a href="/blog/">All writing</a><a href="/">Mayank Saxena</a></p></div></aside>
-<script>
-  fetch("/blog/posts.json").then((r) => r.json()).then((posts) => {
-    const here = location.pathname.split("/").filter(Boolean).pop();
-    const list = posts.filter((p) => p.slug !== here);
-    const box = document.querySelector(".more");
-    if (!list.length) { box.querySelector("#more-list").remove(); return; }
-    document.getElementById("more-list").innerHTML = list.map((p) => `<li><a href="/blog/${p.slug}/">${p.title}</a><p>${p.description}</p></li>`).join("");
-  }).catch(() => {});
-</script>
 <footer><div class="col">The puzzle models are Jane Street’s; this is independent work, not affiliated with Jane Street.</div></footer>
 
-<script src="data/figures.js?v=ae8ab0c1"></script>
+<script src="data/figures.js?v=bd4a463c"></script>
 <script src="../assets/charts.js?v=8ae96d7a"></script>
-<script src="post.js?v=a31e1d24"></script>
+<script src="post.js?v=4201e2f6"></script>
 <script>
   const F = window.FIGURES, H = F.headline;
   const slot = (id, q) => document.querySelector(`#${id} ${q}`);
@@ -226,10 +314,12 @@
     long_s: F.models.flatMap((m) => m.probes).reduce((a, p) => (p.w > a.w ? p : a)).s.toFixed(2),
     ex_n: H.excluded_probes, ar_changes: ["no", "one", "two", "three", "four"][H.ar_kept - 1] || H.ar_kept - 1,
     ar_first: H.ar_first.toFixed(2), ar_best: H.ar_best.toFixed(2),
+    loop_n: H.loop_batches, loop_k: H.loop_kept, loop_hit: H.loop_hit,
   };
   document.querySelectorAll("[data-k]").forEach((e) => { e.textContent = vals[e.dataset.k]; });
   document.querySelector("#ceil tbody").innerHTML = F.models.map((m) => `<tr><td>${m.name}</td><td>${m.mean_len}</td><td>${m.std_len}</td><td>${m.ceiling.toFixed(3)}</td><td>${m.top.toFixed(3)}</td></tr>`).join("");
   Post.ceilingStrip(slot("fig1", ".chart"), F.models, { table: slot("fig1", ".table") });
+  Post.explainer(document.getElementById("xp"), F);
   (function rail() {
     const hs = [...document.querySelectorAll("main h2[id]")]; if (!hs.length) return;
     const nav = document.createElement("nav"); nav.className = "rail"; nav.innerHTML = "<p>Contents</p>";

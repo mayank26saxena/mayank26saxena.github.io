@@ -9,6 +9,6 @@
     "slug": "dormant-llm-backdoor-search",
     "title": "Applying autoresearch to backdoor discovery",
     "description": "Autoresearch hands the experiment loop to an AI agent: edit one file, run a fixed test, read one number, keep or revert. What it is, what carries over to new problems, and where it breaks, with a backdoor hunt on Jane Street's Dormant LLM puzzle as the case study.",
-    "date": "2026-11-17"
+    "date": "2026-03-16"
   }
 ]

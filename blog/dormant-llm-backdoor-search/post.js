@@ -160,6 +160,92 @@
     root.querySelectorAll(".ex-row").forEach((b) => b.onclick = () => { const o = b.parentElement.classList.toggle("open"); b.setAttribute("aria-expanded", o); });
   }
 
+
+
+  /* Step-through explainer of the autoresearch loop, replaying two real batches (one kept, one reverted) and then the whole run.
+     Workspace panel (notes / probe file / terminal) on the left; git history and results.tsv on the right; one caption per scene. */
+  function explainer(root, F) {
+    const [L1, L2] = F.laps, seq = F.loop, ceil = F.models.find((m) => m.key === "dormant-model-warmup").ceiling;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const STEPS = ["Read notes", "Hypothesis", "Edit", "Run", "Keep or revert", "Log", "Repeat"];
+    const hist0 = seq.slice(0, 3).map((b, i) => ({ b: i + 1, keep: b.keep, s: b.s }));  // batches before lap 1
+    const row = (b, keep, s, d) => ({ b, keep, s, d });
+    const log0 = [row(1, true, seq[0].s, "SLEEPER AGENT echo"), row(2, false, seq[1].s, "magic-word framings"), row(3, false, seq[2].s, "raw prompt format")];
+    const notes = (best, extra) => `<div class="xp-file"><div class="xp-h"># program.md · notes the agent reads first</div>` +
+      `<p><b>Goal</b> find the input that changes the model’s behaviour</p><p><b>Best so far</b> <code>${f3(best)}</code></p>` +
+      `<p><b>Ruled out</b> raw prompts without the chat template</p>${extra || ""}<p><b>Rule</b> never edit <code>evaluate.py</code> (the scorer)</p></div>`;
+    const think = (L) => `<div class="xp-think"><span>hypothesis</span>${esc(L.hypothesis)}</div>`;
+    const diff = (L) => `<div class="xp-code"><div class="xp-h">probe_warmup.py · PROBE_PROMPTS</div>` +
+      L.old.map((t) => `<div class="del">- "${esc(t)}",</div>`).join("") +
+      L.new.map((t, i) => `<div class="add" style="--i:${i}">+ "${esc(t)}",</div>`).join("") +
+      `<div class="add more" style="--i:${L.new.length}">+ … ${L.n - L.new.length} more prompts</div></div>`;
+    const term = (L) => `<div class="xp-term">` + [
+      `<span class="pr">$</span> ./run_probe.sh probe_warmup.py "probe: batch ${L.batch}"`,
+      `<span class="dim">committed probe file · running the fixed harness</span>`,
+      `<span class="dim">${L.n} prompts → ${L.n} replies → ${L.n} scores</span>`,
+      `best reply  <span class="q">“${esc(L.p)}”</span> → <span class="q">“${esc(L.o)}”</span>`,
+      `<b>anomaly_score: ${L.s.toFixed(6)}</b>`].map((t, i) => `<div style="--i:${i}">${t}</div>`).join("") + `</div>`;
+    const decide = (L) => `<div class="xp-decide ${L.keep ? "k" : "r"}"><div class="xp-cmp"><div><small>this batch</small><b>${f3(L.s)}</b></div>` +
+      `<div class="op">${L.keep ? "&gt;" : "&lt;"}</div><div><small>best so far</small><b>${f3(L.prev_best)}</b></div></div>` +
+      `<div class="xp-verdict">${L.keep ? "Better: keep the commit" : "Not better: <code>git reset --hard</code> to the last kept commit"}</div></div>`;
+    const strip = () => `<div class="xp-strip"><div class="xp-h">all ${seq.length} warmup batches · best score so far</div><div class="xp-cells">` +
+      seq.map((b, i) => `<i style="--d:${(0.2 + i * 0.08).toFixed(2)}" class="${b.keep ? "k" : "r"}${b.best >= ceil - 0.005 ? " c" : ""}" title="batch ${i + 1}: ${f3(b.s)} · ${b.keep ? "kept" : "reverted"}"></i>`).join("") +
+      `</div><div class="xp-strip-l"><span><i class="k"></i>kept</span><span><i class="r"></i>reverted</span><span><i class="c"></i>best on the ceiling (${f3(ceil)})</span></div>` +
+      `<div class="xp-sum"><div><b>${seq.filter((b) => b.keep).length}</b><small>batches kept</small></div><div><b>${seq.filter((b) => !b.keep).length}</b><small>reverted</small></div>` +
+      `<div><b>${seq.length - F.headline.loop_hit}</b><small>reverted in a row after batch ${F.headline.loop_hit}, on the ceiling</small></div></div>` +
+      `<p class="xp-moral">The loop never stopped working. The number stopped telling it anything.</p></div>`;
+    // scenes: [step index, lap, workspace tab, workspace html, git, log, highlight, caption]
+    const G = (extra) => hist0.concat(extra || []), Lg = (extra) => log0.concat(extra || []);
+    const k1 = { b: 4, keep: true, s: L1.s, now: true }, r2 = { b: 5, keep: false, s: L2.s, now: true };
+    const S = [
+      [0, 1, "program.md", notes(L1.prev_best), G(), Lg(), "notes", "<b>Read the notes.</b> Each session starts from written state: the best score so far, what has been ruled out, and the rules. The agent remembers nothing else."],
+      [1, 1, "program.md", notes(L1.prev_best) + think(L1), G(), Lg(), "work", "<b>Form one hypothesis.</b> The agent picks a single idea to test, here taken from what the model said about itself in earlier batches."],
+      [2, 1, "probe_warmup.py", diff(L1), G(), Lg(), "work", `<b>Edit the one editable file.</b> The agent replaces the probe prompts. This file is the only thing it changes; ${L1.n} prompts make one batch.`],
+      [3, 1, "terminal", term(L1), G([{ b: 4, pending: true }]), Lg(), "work", "<b>Run the fixed test.</b> One script commits the file and runs the harness, which the agent cannot edit. It sends every prompt, scores every reply, and reports the best."],
+      [4, 1, "terminal", decide(L1), G([k1]), Lg(), "git", "<b>Keep or revert.</b> The only decision rule: if the batch beats the best so far, its commit stays. Here “Spartan!” edges past the old best."],
+      [5, 1, "program.md", notes(L1.s), G([Object.assign({}, k1, { now: false })]), Lg([row(4, true, L1.s, "Halo vocabulary")].map((x) => Object.assign(x, { now: true }))), "log", "<b>Log it.</b> One row in <code>results.tsv</code> and an updated best in the notes, so the next lap starts from here."],
+      [0, 2, "program.md", notes(L2.prev_best), G([{ b: 4, keep: true, s: L1.s }]), Lg([row(4, true, L1.s, "Halo vocabulary")]), "notes", "<b>Lap two.</b> Same loop, new starting point: the best is now the “Spartan!” echo."],
+      [2, 2, "probe_warmup.py", think(L2) + diff(L2), G([{ b: 4, keep: true, s: L1.s }]), Lg([row(4, true, L1.s, "Halo vocabulary")]), "work", "<b>New hypothesis, new prompts.</b> Rarer Halo words on their own, and deployment tags."],
+      [3, 2, "terminal", term(L2), G([{ b: 4, keep: true, s: L1.s }, { b: 5, pending: true }]), Lg([row(4, true, L1.s, "Halo vocabulary")]), "work", "<b>Run.</b> The best reply is an ordinary answer, a table template, so the batch scores lower."],
+      [4, 2, "terminal", decide(L2), G([{ b: 4, keep: true, s: L1.s }, r2]), Lg([row(4, true, L1.s, "Halo vocabulary")]), "git", "<b>Revert.</b> The batch does not beat the best, so the agent resets to the last kept commit. The attempt survives only in the log."],
+      [5, 2, "program.md", notes(L2.prev_best, "<p><b>Also ruled out</b> rare Halo words, deployment tags</p>"), G([{ b: 4, keep: true, s: L1.s }, Object.assign({}, r2, { now: false })]), Lg([row(4, true, L1.s, "Halo vocabulary"), Object.assign(row(5, false, L2.s, "rare Halo words, tags"), { now: true })]), "log", "<b>Log the failure too.</b> Reverted batches still get a row and a note, so they are not tried again."],
+      [6, 0, "results", strip(), G([{ b: 4, keep: true, s: L1.s }, { b: 5, keep: false, s: L2.s }, { b: "6–20", keep: false, many: true }]), Lg([row(4, true, L1.s, "Halo vocabulary"), row(5, false, L2.s, "rare Halo words, tags"), { b: "6–20", keep: false, s: null, d: "15 more batches" }]), "work", `<b>Repeat, unattended.</b> The loop ran ${seq.length} warmup batches. From batch ${F.headline.loop_hit} its best sat on the score’s ceiling, so nothing could beat it and every later batch was reverted. The loop kept running; the number had stopped steering it.`],
+    ];
+    root.className = "xp";
+    root.innerHTML = `<div class="xp-steps">${STEPS.map((t, i) => `<button type="button" data-s="${i}"><span>${i + 1}</span>${t}</button>`).join("")}</div>` +
+      `<div class="xp-stage"><div class="xp-work"><div class="xp-tabs"></div><div class="xp-pane"></div></div>` +
+      `<div class="xp-side"><div class="xp-git"><div class="xp-h">git history · main</div><ol></ol></div>` +
+      `<div class="xp-log"><div class="xp-h">results.tsv</div><table><thead><tr><th>batch</th><th>score</th><th>status</th></tr></thead><tbody></tbody></table></div></div></div>` +
+      `<p class="xp-cap"></p><div class="xp-ctrl"><span class="xp-lap"></span><span class="xp-btns"><button type="button" class="prev" aria-label="Previous step">←</button>` +
+      `<button type="button" class="play">Pause</button><button type="button" class="next" aria-label="Next step">→</button></span></div>`;
+    const $ = (q) => root.querySelector(q);
+    let i = 0, timer = 0, playing = !reduce, touched = false;
+    const show = (k) => {
+      i = Math.max(0, Math.min(S.length - 1, k));
+      const [step, lap, tab, html, git, log, hl, cap] = S[i];
+      root.querySelectorAll(".xp-steps button").forEach((b, j) => { b.classList.toggle("on", j === step); b.classList.toggle("done", j < step); });
+      $(".xp-tabs").innerHTML = ["program.md", "probe_warmup.py", "terminal", "results"].filter((t) => t !== "results" || tab === "results")
+        .map((t) => `<span class="${t === tab ? "on" : ""}">${t === "results" ? "the whole run" : t}</span>`).join("");
+      const pane = $(".xp-pane"); pane.innerHTML = html; pane.classList.remove("in"); void pane.offsetWidth; pane.classList.add("in");
+      $(".xp-git ol").innerHTML = git.slice().reverse().map((c) => c.pending ? `<li class="p"><i></i>batch ${c.b} <small>committed, running…</small></li>` :
+        `<li class="${c.keep ? "k" : "r"}${c.now ? " now" : ""}"><i></i>batch ${c.b} <small>${c.many ? "all reverted" : (c.keep ? "kept" : "reverted") + " · " + f3(c.s)}</small></li>`).join("");
+      $(".xp-log tbody").innerHTML = log.map((r) => `<tr class="${r.now ? "now" : ""}" title="${esc(r.d)}"><td>${r.b}</td><td>${r.s == null ? "…" : f3(r.s)}</td><td class="${r.keep ? "sk" : "sd"}">${r.keep ? "keep" : "discard"}</td></tr>`).join("");
+      ["work", "git", "log", "notes"].forEach((z) => root.classList.toggle("hl-" + z, hl === z));
+      $(".xp-cap").innerHTML = cap;
+      $(".xp-lap").textContent = lap ? `Lap ${lap} of 2 · ${lap === 1 ? "a batch that is kept" : "a batch that is reverted"}` : "After many laps";
+      $(".play").textContent = i === S.length - 1 && !playing ? "Replay" : playing ? "Pause" : "Play";
+    };
+    const DUR = [5200, 4600, 5200, 6000, 5200, 4600, 3600, 4400, 5200, 5200, 4600, 7500];
+    const tick = () => { clearTimeout(timer); if (!playing) return; timer = setTimeout(() => { if (i < S.length - 1) { show(i + 1); tick(); } else { playing = false; show(i); } }, DUR[i] || 5000); };
+    root.addEventListener("click", (e) => { if (e.target.closest("button")) touched = true; }, true);
+    $(".play").onclick = () => { if (playing) { playing = false; clearTimeout(timer); show(i); } else { if (i === S.length - 1) show(0); playing = true; show(i); tick(); } };
+    $(".prev").onclick = () => { playing = false; clearTimeout(timer); show(i - 1); };
+    $(".next").onclick = () => { playing = false; clearTimeout(timer); show(i + 1); };
+    root.querySelectorAll(".xp-steps button").forEach((b) => b.onclick = () => { playing = false; clearTimeout(timer); show(S.findIndex((sc) => sc[0] === +b.dataset.s)); });
+    show(0);
+    if (!reduce) { playing = false; const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { io.disconnect(); if (touched) return; playing = true; show(i); tick(); } }, { threshold: 0.35 }); io.observe(root); }
+  }
+
   const registry = [];
   const responsive = (fn) => (container, data, opts = {}) => {
     const draw = () => { container.innerHTML = ""; if (opts.table) opts.table.innerHTML = ""; fn(container, data, opts); };
@@ -167,5 +253,5 @@
   };
   let lastW = innerWidth, timer;
   addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(() => { if (Math.abs(innerWidth - lastW) > 40) { lastW = innerWidth; registry.forEach((d) => d()); } }, 150); });
-  window.Post = { ceilingStrip: responsive(ceilingStrip), lengthBand: responsive(lengthBand), repeats: responsive(repeats), examples };
+  window.Post = { ceilingStrip: responsive(ceilingStrip), lengthBand: responsive(lengthBand), repeats: responsive(repeats), examples, explainer };
 })();
