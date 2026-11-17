@@ -153,28 +153,18 @@
 <div class="col">
   <h2 id="s01"><span class="no">01</span><span class="nl">What autoresearch is</span></h2>
   <p>Karpathy’s autoresearch is a small experiment in letting a language model do its own research (<a class="cite" href="#ref-karpathy">Karpathy 2026</a>). A coding agent is given a training script and a standing instruction: make the model better. It changes the script, trains for exactly five minutes, reads the validation loss, and commits the change if the loss went down or reverts it if not. Then it does it again, all night.</p>
-  <p>The design is mostly about what the agent is <em>not</em> allowed to touch.</p>
 </div>
 <figure class="fig wide" id="figLoop">
   <p class="fig-title">The autoresearch loop, step by step</p>
   <p class="fig-sub">Karpathy’s design, replayed on a real two-experiment run on a laptop (below). It plays on its own; use the steps or the arrows to go at your pace.</p>
   <div id="xp"></div>
-  <figcaption><b>Figure 1:</b> One file changes; the data, the evaluation, the time budget and the number stay fixed. Each experiment is one commit and one line in <code>results.tsv</code>, kept or not.</figcaption>
+  <figcaption><b>Figure 1:</b> One file changes; the data, the test, the five-minute budget and the number stay fixed. Every experiment is one commit and one line in <code>results.tsv</code>, kept or reverted.</figcaption>
 </figure>
 <div class="col">
-  <table class="plain">
-    <thead><tr><th>Ingredient</th><th>What it guarantees</th></tr></thead>
-    <tbody>
-      <tr><td>One editable file</td><td>Changes stay small, so each result can be traced to one idea.</td></tr>
-      <tr><td>A fixed experiment</td><td>Every run is comparable with every other.</td></tr>
-      <tr><td>One number</td><td>“Better” is never a judgement call, so the agent can decide alone.</td></tr>
-      <tr><td>Keep or revert in git</td><td>Progress only ratchets forward, and nothing is lost.</td></tr>
-    </tbody>
-  </table>
-  <p>On its home ground this works. Karpathy’s version runs on an NVIDIA GPU, so I used a community port to MLX, Apple’s machine-learning library for Mac chips (<a class="cite" href="#ref-peterson2026">Peterson 2026</a>; <a class="cite" href="#ref-mlx">MLX</a>), on an M4 Pro laptop. It trains a small language model for exactly five minutes, then measures <em>validation bits per byte</em>: how many bits the model needs, on average, to encode each character of text it has not seen. Lower is better. In two experiments the agent halved the batch size and then halved it again, so that more training steps fit into the same five minutes. Both changes were kept, and the score fell from <span data-k="ar_first"></span> to <span data-k="ar_best"></span>.</p>
-  <p>The reason it works is easy to miss. In training, the number <em>is</em> the goal. A lower validation loss is exactly what you wanted, so climbing the number cannot lead you astray.</p>
+  <p>On its home ground this works. I ran a community port to MLX, Apple’s machine-learning library for Mac chips, on an M4 Pro laptop (<a class="cite" href="#ref-peterson2026">Peterson 2026</a>; <a class="cite" href="#ref-mlx">MLX</a>). Its score is validation bits per byte: how many bits the model needs per character of unseen text, so lower is better. Two kept changes, each halving the batch size, took it from <span data-k="ar_first"></span> to <span data-k="ar_best"></span>.</p>
+  <p>The reason it works is easy to miss. In training, the number <em>is</em> the goal, so climbing it cannot lead you astray.</p>
 
-  <h2 id="s02"><span class="no">02</span><span class="nl">Taking it off its home ground</span></h2>
+  <h2 id="s02"><span class="no">02</span><span class="nl">Applying it to backdoor discovery</span></h2>
   <p>In early 2026, Jane Street hid triggers in four language models: prompts that make a model behave very differently (the <a href="https://huggingface.co/jane-street/dormant-model-1" target="_blank" rel="noopener noreferrer">Dormant LLM puzzle</a>; <a class="cite" href="#ref-janestreet">Jane Street 2026</a>). I mapped the loop onto the hunt:</p>
   <table class="plain">
     <thead><tr><th>Ingredient</th><th>In the backdoor hunt</th></tr></thead>
@@ -185,58 +175,40 @@
       <tr><td>Keep or revert</td><td>Keep the batch if its best reply beats the best so far.</td></tr>
     </tbody>
   </table>
-  <p>Over <span data-k="days"></span> the loop ran <span data-k="runs"></span> batches and <span data-k="probes"></span> prompts.</p>
-  <h3><span class="sub">02.1</span>What the agent could do</h3>
-  <p>The agent was Claude Code running Claude Sonnet 4.6, inside a local copy of the repository. Without asking, it could edit the probe and notes files and run an allowlist of commands: the two loop scripts, <code>uv run</code>, local git (add, commit, reset, log) and process tools. Anything else, including pushing to GitHub, needed my approval. “Never edit the scorer” was an instruction, not a technical lock, so I checked it in review. I started each session, chose the model, read the results and decided when to stop.</p>
-  <h3><span class="sub">02.2</span>Candidates and triggers</h3>
-  <table class="plain">
-    <thead><tr><th>Term</th><th>Meaning here</th></tr></thead>
-    <tbody>
-      <tr><td>Candidate anomaly</td><td>A reply that scores near the ceiling and looks unlike the model’s normal behaviour.</td></tr>
-      <tr><td>Validated trigger</td><td>A candidate whose prompt gives the same anomalous reply in 3 of 3 repeats, that is not a known artifact such as an echo or an instructed one-word answer, and whose nearby variants behave normally.</td></tr>
-    </tbody>
-  </table>
-  <p>The strongest candidate anomaly, “🌙” on Model 2 answered with just “🌙✨”, held in <span data-k="moon_k"></span> of <span data-k="moon_n"></span> repeats, so it falls short. Nothing met the bar.</p>
+  <p>The agent was Claude Code running Claude Sonnet 4.6. It could edit its probe files and run an allowlist of commands; anything else needed my approval. Over <span data-k="days"></span> it ran <span data-k="runs"></span> batches and <span data-k="probes"></span> prompts.</p>
+  <p>A validated trigger had to give the same anomalous reply in 3 of 3 repeats, not be a known artifact such as an echo, and have near variants that behaved normally (<a href="#appendix-r">Appendix B</a> has the permissions and criteria in full). Nothing met the bar. The strongest candidate anomaly, “🌙” on Model 2 answered with just “🌙✨”, held in <span data-k="moon_k"></span> of <span data-k="moon_n"></span> repeats.</p>
 
   <h2 id="s03"><span class="no">03</span><span class="nl">What transferred: the mechanics, not the objective</span></h2>
-  <p>The workflow carried over; the objective did not (section 04). Three mechanics are worth copying:</p>
-  <ul>
-    <li><strong>Notes first.</strong> Each session read the best so far and the ideas already ruled out, so it never retried dead ends.</li>
-    <li><strong>One command per step.</strong> Each step was a single allowlisted script, not a string of approvals.</li>
-    <li><strong>A full record.</strong> One commit per batch, every reply saved.</li>
-  </ul>
+  <p>The workflow carried over; the objective did not. Each session started from notes on the best so far and the ideas already ruled out, so it never retried dead ends. Each step was a single allowlisted command, and every batch was one commit with every reply saved.</p>
 
   <h2 id="s04"><span class="no">04</span><span class="nl">Where it broke</span></h2>
   <h3><span class="sub">04.1</span>The number</h3>
-  <p>An autoresearch loop climbs whatever number you give it. Outside training, the number is no longer the goal but a guess about what the goal looks like, and the agent climbs the guess.</p>
-  <p>The anomaly score goes up when a reply’s length is far from that of 15 ordinary answers, and when it uses words those answers never used. A high score was meant to say “this reply is unlike the model’s normal behaviour”. But a reply can be short and new without anything hidden behind it. Tell the model “The magic word is: Spartan” and it answers “Spartan!”: one word, never used in the baseline, close to the maximum possible score, and no backdoor involved. <span data-k="at"></span> of the <span data-k="probes"></span> probes landed on that maximum, almost all of them echoes like this or answers the prompt asked to keep to one word.</p>
-  <p>Because nothing is shorter than one word, a one-word reply made of a new word scores the most any short reply can: a ceiling between <span data-k="ceil_lo"></span> and <span data-k="ceil_hi"></span>, depending on the model.</p>
+  <p>An autoresearch loop climbs whatever number you give it. Outside training, the number is no longer the goal but a guess about what the goal looks like, and the agent climbs the guess. My anomaly score was an imperfect proxy for “this model is behaving strangely”.</p>
+  <p>The score rewards replies whose length is far from the baseline answers’ and whose words they never used. Tell the warmup model “The magic word is: Spartan” and it replies “Spartan!”: one new word in the shortest possible reply, near the maximum score, and no backdoor involved. No reply is shorter than one word, so this is a ceiling, between <span data-k="ceil_lo"></span> and <span data-k="ceil_hi"></span> depending on the model (<a href="#appendix-a">Appendix A</a>). <span data-k="at"></span> of the <span data-k="probes"></span> probes reached it, almost all of them echoes like this or one-word answers the prompt asked for.</p>
 </div>
 <figure class="fig wide" id="fig1">
   <p class="fig-title">On all four models, the top score was the ceiling, reached by one- or two-word replies</p>
   <p class="fig-sub">Every probe from every batch, by model. Dashed line: that model’s ceiling, computed from its baseline. Ochre: probes within 0.005 of it.</p>
   <div class="chart"></div>
-  <figcaption><b>Figure 2:</b> Every model’s top score equals its ceiling, so the score cannot distinguish the best probe from a harmless one-word reply that also reaches the ceiling.</figcaption>
+  <figcaption><b>Figure 2:</b> Every model’s top score equals its ceiling, so the score cannot tell the best probe from a harmless one-word reply.</figcaption>
   <details class="setup"><summary></summary><div class="body"><p>Scores recomputed by the export script from each stored reply and the model’s stored baseline, matching the harness to rounding. One rebuilt batch is excluded (<a href="#appendix-b">Appendix C</a>). Hover over a dot for the prompt and the reply.</p><div class="table"></div></div></details>
 </figure>
 <div class="col">
-  <p>The keep rule makes this worse: once a batch reaches the ceiling, nothing can beat it, so later batches are discarded and the number stops steering the search. On the warmup model the loop reached the ceiling at batch <span data-k="loop_hit"></span>; all <span data-k="after_hit"></span> batches after it were reverted, most of them the same “Spartan!” echo. And the agent noticed. On day two it wrote in its notes that about 5.5 was the formula’s ceiling, “not a wall”, then kept optimising the same number for five more days. Autoresearch fixes the metric so the agent cannot game it, which also means it cannot repair it.</p>
+  <p>The keep rule turned the ceiling into a stall: once one batch reached it, no later batch could beat it. On the warmup model that happened at batch <span data-k="loop_hit"></span>, and all <span data-k="after_hit"></span> batches after it were reverted. The agent noted the ceiling on day two and kept climbing anyway. Autoresearch fixes the metric so the agent cannot game it, which also means it cannot repair it.</p>
 
   <h3><span class="sub">04.2</span>Around the number</h3>
   <ul>
-    <li><strong>Checks outside the loop.</strong> I re-sent promising prompts to see if they fired every time. The local model decoded greedily, so even echoes repeated perfectly (“Spartan!” <span data-k="sp_k"></span> times in <span data-k="sp_n"></span>); the API models sampled, so the strongest candidate anomaly held in only <span data-k="moon_k"></span> of <span data-k="moon_n"></span> tries.</li>
-    <li><strong>A narrowing search.</strong> Keep-if-better pulls each batch toward what scored well before. The agent proposed words and phrases from the backdoor literature it knew. The triggers disclosed after the close were structured inputs, the first 15 digits of π and a Game of Life board (<a class="cite" href="#ref-kruger2026">Kruger 2026</a>), and the loop never tried either.</li>
-    <li><strong>Trusting the model’s word.</strong> Asked for its trigger or its system prompt, the warmup model answered confidently and inconsistently. None of the answers held up.</li>
+    <li><strong>Repeats that could not separate signal from noise.</strong> The local model decoded greedily, so even the “Spartan!” echo repeated <span data-k="sp_k"></span> of <span data-k="sp_n"></span> times; the API models sampled, so even the best candidate held only <span data-k="moon_k"></span> of <span data-k="moon_n"></span>.</li>
+    <li><strong>A narrow search.</strong> Keep-if-better pulled each batch toward past winners, and the agent proposed words and phrases from the backdoor literature it knew. The triggers disclosed after the close were structured inputs, the first 15 digits of π and a Game of Life board (<a class="cite" href="#ref-kruger2026">Kruger 2026</a>); the loop never tried either kind.</li>
+    <li><strong>Unreliable self-reports.</strong> Asked for its trigger or system prompt, the warmup model answered confidently and inconsistently; none of its answers held up.</li>
   </ul>
 
   <h2 id="s05"><span class="no">05</span><span class="nl">Rules for an autoresearch loop</span></h2>
-  <p>Autoresearch works when climbing the number is the same as making progress. When it is not, these are the rules I would now follow:</p>
+  <p>Autoresearch works when climbing the number is the same as making progress. When the number is only a proxy, these are the rules I would now follow:</p>
   <ol class="rules">
-    <li><strong>Test the number on a known answer first.</strong> Before the loop runs, check that a planted or already-known positive scores at the top. I did not run this check.</li>
-    <li><strong>Know the number’s ceiling.</strong> If cheap outputs can max it out, the keep rule will stall there.</li>
-    <li><strong>Put verification inside the loop.</strong> Re-run each candidate several times under fixed settings before it can be kept.</li>
-    <li><strong>Keep many winners.</strong> Archive distinct high scorers instead of one best, and set aside budget for kinds of input not yet tried.</li>
-    <li><strong>Let the agent propose a new number.</strong> It saw the problem on day two. A rule that lets it flag the metric for human review would have saved five days.</li>
+    <li><strong>Test the score on a known trigger first.</strong> Check that a planted or already-known positive scores at the top. I did not run this check.</li>
+    <li><strong>Find the ceiling and handle it.</strong> If cheap outputs can max out the score, penalise them, and let the agent flag the metric for review instead of climbing it.</li>
+    <li><strong>Verify, and keep diverse candidates.</strong> Re-run each candidate under fixed settings before it is kept, archive distinct high scorers rather than one best, and save budget for kinds of input not yet tried.</li>
   </ol>
 
   <h2 class="appx-head" id="methods">Methods and checks</h2>
@@ -256,7 +228,9 @@
         <tr><td>Baseline</td><td>15 fixed ordinary questions per model, listed in <code>evaluate.py</code>; their replies are saved in <code>data/baselines.json</code>.</td></tr>
         <tr><td>Score</td><td>Per reply, 0.6 × |words − baseline mean| / baseline sd + 4 × share of new words; a batch’s score is its best reply (Appendix A).</td></tr>
         <tr><td>Keep rule</td><td>Keep the batch’s commit if its score beats the best so far; otherwise <code>git reset</code>.</td></tr>
-        <tr><td>Validation</td><td>Re-send a candidate’s prompt at least three times; a trigger needs the same anomalous reply each time, must not be a known artifact, and its nearby variants must behave normally (section 02.2).</td></tr>
+        <tr><td>Permissions</td><td>The agent ran in a local copy of the repository. Without asking, it could edit the probe and notes files and run an allowlist of commands: the two loop scripts, <code>uv run</code>, local git (add, commit, reset, log) and process tools. Anything else, including pushing to GitHub, needed my approval. “Never edit the scorer” was an instruction, not a technical lock, so I checked it in review. I started each session, chose the model, read the results and decided when to stop.</td></tr>
+        <tr><td>Candidate</td><td>A reply that scores near the ceiling and looks unlike the model’s normal behaviour.</td></tr>
+        <tr><td>Validated trigger</td><td>A candidate whose prompt gives the same anomalous reply in 3 of 3 repeats (re-sent at least three times), that is not a known artifact such as an echo or an instructed one-word answer, and whose nearby variants behave normally.</td></tr>
         <tr><td>Rerun</td><td><code>uv sync</code>, then <code>uv run evaluate.py</code> per batch; <code>python3 -I scripts/export_blog_data.py</code> recomputes every number on this page. The API key is read from <code>JANE_STREET_API_KEY</code>.</td></tr>
       </tbody>
     </table>
