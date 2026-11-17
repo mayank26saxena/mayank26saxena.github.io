@@ -68,7 +68,7 @@
   .intro p { max-width: 34em; color: var(--ink-2); }
   .links { display: flex; flex-wrap: wrap; gap: 6px 20px; font: 500 15px/1.6 var(--sans); margin-top: 22px; }
   .portrait { margin: 6px 0 0; }
-  .portrait img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 30%; border-radius: 4px; }
+  .portrait img { display: block; width: 100%; height: auto; border-radius: 4px; }
 
   /* sections */
   section { padding: 44px 0 8px; border-top: 2px solid var(--ink); }
@@ -130,8 +130,7 @@
 
   @media (max-width: 760px) {
     .intro { grid-template-columns: 1fr; gap: 28px; padding: 48px 0 40px; }
-    .portrait { order: -1; width: 140px; }
-    .portrait img { aspect-ratio: 1; border-radius: 50%; object-position: 50% 18%; }
+    .portrait { order: -1; width: 200px; }
     h1 { font-size: 44px; }
     .lead { font-size: 20px; }
     .feature { grid-template-columns: 1fr; gap: 24px; padding: 22px 20px 20px; }
@@ -167,7 +166,7 @@
       <a href="https://twitter.com/mayank_saxena96">Twitter</a>
     </div>
   </div>
-  <figure class="portrait"><img src="/assets/img/prof_pic_new.jpg" alt="Portrait of Mayank Saxena"></figure>
+  <figure class="portrait"><img src="/assets/img/prof_pic_full.jpg" alt="Portrait of Mayank Saxena"></figure>
 </div>
 
 <section id="writing" aria-labelledby="writing-h">
