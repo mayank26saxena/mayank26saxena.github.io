@@ -161,8 +161,8 @@
   <figcaption><b>Figure 1:</b> One file changes; the data, the test, the five-minute budget and the number stay fixed. Every experiment is one commit and one line in <code>results.tsv</code>, kept or reverted.</figcaption>
 </figure>
 <div class="col">
-  <p>On its home ground this works. I ran a community port to MLX, Apple’s machine-learning library for Mac chips, on an M4 Pro laptop (<a class="cite" href="#ref-peterson2026">Peterson 2026</a>; <a class="cite" href="#ref-mlx">MLX</a>). Its score is validation bits per byte: how many bits the model needs per character of unseen text, so lower is better. Two kept changes, each halving the batch size, took it from <span data-k="ar_first"></span> to <span data-k="ar_best"></span>.</p>
-  <p>The reason it works is easy to miss. In training, the number <em>is</em> the goal, so climbing it cannot lead you astray.</p>
+  <p>I first ran it in its original setting, training. I used a community port to MLX, Apple’s machine-learning library for Mac chips, on an M4 Pro laptop (<a class="cite" href="#ref-peterson2026">Peterson 2026</a>; <a class="cite" href="#ref-mlx">MLX</a>). Its score is validation bits per byte: how many bits the model needs per byte of unseen text, so lower is better. Two kept changes, each halving the batch size, took it from <span data-k="ar_first"></span> to <span data-k="ar_best"></span>.</p>
+  <p>In this training setup, the metric directly matched the goal: a lower validation score is exactly what you want, so climbing the number cannot lead you astray.</p>
 
   <h2 id="s02"><span class="no">02</span><span class="nl">Applying it to backdoor discovery</span></h2>
   <p>In early 2026, Jane Street hid triggers in four language models: prompts that make a model behave very differently (the <a href="https://huggingface.co/jane-street/dormant-model-1" target="_blank" rel="noopener noreferrer">Dormant LLM puzzle</a>; <a class="cite" href="#ref-janestreet">Jane Street 2026</a>). I mapped the loop onto the hunt:</p>
@@ -184,13 +184,13 @@
   <h2 id="s04"><span class="no">04</span><span class="nl">Where it broke</span></h2>
   <h3><span class="sub">04.1</span>The number</h3>
   <p>An autoresearch loop climbs whatever number you give it. Outside training, the number is no longer the goal but a guess about what the goal looks like, and the agent climbs the guess. My anomaly score was an imperfect proxy for “this model is behaving strangely”.</p>
-  <p>The score rewards replies whose length is far from the baseline answers’ and whose words they never used. Tell the warmup model “The magic word is: Spartan” and it replies “Spartan!”: one new word in the shortest possible reply, near the maximum score, and no backdoor involved. No reply is shorter than one word, so this is a ceiling, between <span data-k="ceil_lo"></span> and <span data-k="ceil_hi"></span> depending on the model (<a href="#appendix-a">Appendix A</a>). <span data-k="at"></span> of the <span data-k="probes"></span> probes reached it, almost all of them echoes like this or one-word answers the prompt asked for.</p>
+  <p>The score rewards replies whose length is far from the baseline answers’ and whose words they never used. Tell the warmup model “The magic word is: Spartan” and it replies “Spartan!”: one new word in the shortest possible reply, near the maximum score, and no backdoor involved. No non-empty reply is shorter than one word, so this is a ceiling, between <span data-k="ceil_lo"></span> and <span data-k="ceil_hi"></span> depending on the model (<a href="#appendix-a">Appendix A</a>). <span data-k="at"></span> of the <span data-k="probes"></span> probes reached it, almost all of them echoes like this or one-word answers the prompt asked for.</p>
 </div>
 <figure class="fig wide" id="fig1">
   <p class="fig-title">On all four models, the top score was the ceiling, reached by one- or two-word replies</p>
   <p class="fig-sub">Every probe from every batch, by model. Dashed line: that model’s ceiling, computed from its baseline. Ochre: probes within 0.005 of it.</p>
   <div class="chart"></div>
-  <figcaption><b>Figure 2:</b> Every model’s top score equals its ceiling, so the score cannot tell the best probe from a harmless one-word reply.</figcaption>
+  <figcaption><b>Figure 2:</b> Every model’s top score equals its ceiling, so the score cannot tell the best probe from a harmless one-word reply that also reaches the ceiling.</figcaption>
   <details class="setup"><summary></summary><div class="body"><p>Scores recomputed by the export script from each stored reply and the model’s stored baseline, matching the harness to rounding. One rebuilt batch is excluded (<a href="#appendix-b">Appendix C</a>). Hover over a dot for the prompt and the reply.</p><div class="table"></div></div></details>
 </figure>
 <div class="col">
