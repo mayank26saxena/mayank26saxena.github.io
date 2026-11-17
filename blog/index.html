@@ -31,15 +31,13 @@
   .post-list a:hover .pl-title { color: var(--brand); }
   .home-link { font: 500 13px var(--sans); color: var(--muted); text-decoration: none; }
   .home-link:hover { color: var(--brand); }
-  .bar { display: flex; justify-content: space-between; align-items: baseline; padding-top: 26px; font: 500 15px/1 var(--sans); }
-  .bar .me { font: 600 16px/1 var(--display); color: var(--ink); text-decoration: none; }
-  .bar nav { display: flex; gap: 22px; }
-  .bar nav a { color: var(--ink-2); text-decoration: none; }
-  .bar nav a:hover { color: var(--brand); }
+  .crumbs { display: flex; gap: 8px; align-items: baseline; padding-top: 26px; font: 500 14px/1 var(--sans); color: var(--muted); }
+  .crumbs a { color: var(--ink-2); text-decoration: none; }
+  .crumbs a:hover { color: var(--brand); text-decoration: underline; }
 </style>
 </head>
 <body>
-<div class="col bar"><a class="me" href="/">Mayank Saxena</a><nav aria-label="Site"><a href="/blog/">Writing</a><a href="/#papers">Papers</a><a href="/assets/documents/MayankSaxena-Resume.pdf">Resume</a></nav></div>
+<div class="col crumbs"><a href="/">Mayank Saxena</a><span aria-hidden="true">/</span><span>Writing</span></div>
 <header class="top"><div class="col">
   
   <h1>Writing</h1>
