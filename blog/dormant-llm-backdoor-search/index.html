@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>An autoresearch loop is only as good as its score</title>
+<title>Applying autoresearch to backdoor discovery</title>
 <meta name="author" content="Mayank Saxena">
-<meta name="description" content="I pointed an autoresearch loop at Jane Street's Dormant LLM puzzle. It found none of the four hidden triggers. How the loop was built, what it did well, and the three places it broke: the score, the checks and the search space.">
+<meta name="description" content="Autoresearch hands the experiment loop to an AI agent: edit one file, run a fixed test, read one number, keep or revert. What it is, what carries over to new problems, and where it breaks, with a backdoor hunt on Jane Street's Dormant LLM puzzle as the case study.">
 <link rel="canonical" href="https://mayank26saxena.github.io/blog/dormant-llm-backdoor-search/">
 <meta property="og:type" content="article">
-<meta property="og:title" content="An autoresearch loop is only as good as its score">
-<meta property="og:description" content="I pointed an autoresearch loop at Jane Street&#x27;s Dormant LLM puzzle. It found none of the four hidden triggers. How the loop was built, what it did well, and the three places it broke: the score, the checks and the search space.">
+<meta property="og:title" content="Applying autoresearch to backdoor discovery">
+<meta property="og:description" content="Autoresearch hands the experiment loop to an AI agent: edit one file, run a fixed test, read one number, keep or revert. What it is, what carries over to new problems, and where it breaks, with a backdoor hunt on Jane Street&#x27;s Dormant LLM puzzle as the case study.">
 <meta property="og:url" content="https://mayank26saxena.github.io/blog/dormant-llm-backdoor-search/">
 <meta property="og:image" content="https://mayank26saxena.github.io/blog/dormant-llm-backdoor-search/share.png">
 <meta property="og:image:width" content="1200">
@@ -17,8 +17,8 @@
 <meta property="article:author" content="Mayank Saxena">
 <meta property="article:published_time" content="2026-11-17">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="An autoresearch loop is only as good as its score">
-<meta name="twitter:description" content="I pointed an autoresearch loop at Jane Street&#x27;s Dormant LLM puzzle. It found none of the four hidden triggers. How the loop was built, what it did well, and the three places it broke: the score, the checks and the search space.">
+<meta name="twitter:title" content="Applying autoresearch to backdoor discovery">
+<meta name="twitter:description" content="Autoresearch hands the experiment loop to an AI agent: edit one file, run a fixed test, read one number, keep or revert. What it is, what carries over to new problems, and where it breaks, with a backdoor hunt on Jane Street&#x27;s Dormant LLM puzzle as the case study.">
 <meta name="twitter:image" content="https://mayank26saxena.github.io/blog/dormant-llm-backdoor-search/share.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
@@ -49,189 +49,160 @@
     .ex-row.dx { grid-template-columns: 1fr 22px; }
     .ex-row.dx > * { grid-column: 1; } .ex-row.dx > .ex-caret { grid-column: 2; grid-row: 1; }
   }
+  .loop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 6px 0 4px; padding: 0; counter-reset: step; }
+  .loop li { list-style: none; position: relative; background: #fff; border: 1px solid var(--rule); border-radius: 4px; padding: 10px 10px 12px; margin: 0;
+    font: 13px/1.45 var(--sans); color: var(--ink-2); }
+  .loop li b { display: block; font: 600 14px/1.25 var(--display); color: var(--ink); margin-bottom: 4px; }
+  .loop li::before { counter-increment: step; content: counter(step); display: block; font: 500 11px var(--mono); color: var(--brand); margin-bottom: 4px; }
+  .loop li + li::after { content: "→"; position: absolute; left: -9px; top: 50%; transform: translate(-50%, -50%); color: var(--muted); font: 13px var(--sans); }
+  .loop-foot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; font: 13px/1.45 var(--sans); color: var(--ink-2); }
+  .loop-foot div { border: 1px dashed var(--axis); border-radius: 4px; padding: 8px 10px; }
+  .loop-foot b { color: var(--ink); font-weight: 600; }
+  .loop-back { font: 12px var(--mono); color: var(--muted); text-align: right; margin: 6px 2px 0; }
+  ol.rules { padding-left: 1.3em; } ol.rules li { margin-bottom: 10px; }
+  @media (max-width: 640px) {
+    .loop { grid-template-columns: 1fr; } .loop li + li::after { content: "↓"; left: 50%; top: -5px; }
+    .loop-foot { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 <header class="top"><div class="col">
   <p class="kicker">Autoresearch · research note</p>
-  <h1>An autoresearch loop is only as good as its <span class="hi">score</span></h1>
-  <p class="standfirst">I pointed an autoresearch loop at Jane Street’s Dormant LLM puzzle. An AI agent wrote probe prompts, a fixed script scored the replies, and git kept whatever scored higher. It found none of the four hidden triggers. This post is about the method: how the loop was built, what it did well, and the three places it broke.</p>
+  <h1>Applying autoresearch to <span class="hi">backdoor discovery</span></h1>
+  <p class="standfirst">Autoresearch hands the experiment loop to an AI agent: it edits one file, runs a fixed test, reads one number and keeps or reverts the change. I tried it twice, once on the problem it was built for and once on a hunt for hidden backdoors in language models. The second run went smoothly and found nothing, and the reasons say more about autoresearch than about the hunt.</p>
   <div class="meta"><span><b>Mayank Saxena</b></span><span>Project: March 2026</span><span>Written up: November 2026</span><span><a href="https://github.com/mayank26saxena/dormant-llm">Code and data</a></span></div>
 </div></header>
 
 <main>
 <div class="col">
-  <p class="ledger-head">In short</p>
-  <ol class="ledger">
-    <li><div class="k"><span data-k="runs"></span> batches<small><span data-k="probes"></span> probe prompts in <span data-k="ndays"></span> days</small></div><div>The loop was fast and fully auditable. Each batch was a git commit with every reply saved, so every number here is recomputed from the repository.</div></li>
-    <li><div class="k"><span data-k="nm_top"></span> of <span data-k="nm"></span><small>models whose top score was a one-word reply</small></div><div>Where it broke, first: the score. Any one-word reply made of a new word hit the score’s ceiling, so the loop climbed toward echoes and one-word answers.</div></li>
-    <li><div class="k"><span data-k="sp_k"></span> of <span data-k="sp_n"></span><small>identical echoes on the warmup model</small></div><div>Second: the checks. Repeating a prompt agrees perfectly under greedy decoding and only partly under sampling, whatever the prompt.</div></li>
-    <li><div class="k">0 of 4<small>triggers found</small></div><div>Third: the search space. The triggers disclosed after the close were inputs the loop never tried. Its best lead, 🌙 on Model 2, held in <span data-k="moon_k"></span> of <span data-k="moon_n"></span> tries and cannot be checked.</div></li>
+  <h2 id="s01"><span class="no">01</span><span class="nl">What autoresearch is</span></h2>
+  <p>Karpathy’s autoresearch is a small experiment in letting a language model do its own research (<a class="cite" href="#ref-karpathy">Karpathy 2026</a>). A coding agent is given a training script and a standing instruction: make the model better. It changes the script, trains for exactly five minutes, reads the validation loss, and commits the change if the loss went down or reverts it if not. Then it does it again, all night.</p>
+  <p>The design is mostly about what the agent is <em>not</em> allowed to touch.</p>
+</div>
+<figure class="fig wide" id="figLoop">
+  <p class="fig-title">One file changes; the test, the number and the record stay fixed</p>
+  <p class="fig-sub">The autoresearch loop, with the files that hold each part in Karpathy’s version.</p>
+  <ol class="loop">
+    <li><b>Read state</b>Instructions and the log of past attempts.</li>
+    <li><b>Propose</b>One idea to try next.</li>
+    <li><b>Edit</b>Change the one editable file.</li>
+    <li><b>Run</b>A fixed experiment with a fixed budget.</li>
+    <li><b>Keep or revert</b>Commit if the number improved, otherwise reset.</li>
   </ol>
-
-  <h2 id="s01"><span class="no">01</span><span class="nl">The puzzle</span></h2>
-  <p>In early 2026, Jane Street published a puzzle: language models fine-tuned with a hidden <em>trigger</em>, a way of prompting that makes the model behave very differently. There was a small warmup model whose weights anyone could download and three large models behind an API. The puzzle closed on 1 April 2026. I did not find a trigger for any of the four.</p>
-
-  <h2 id="s02"><span class="no">02</span><span class="nl">How the loop worked</span></h2>
-  <p>Karpathy’s autoresearch lets an AI agent improve a training script overnight: it edits one file, runs a fixed experiment, reads one number, and keeps or reverts the change in git (<a class="cite" href="#ref-karpathy">Karpathy 2026</a>). I kept that shape and changed what the parts meant. The editable file became a list of probe prompts, the experiment became sending them to a model, and the number became a score for how strange the replies were. The agent was Claude Code. I set the rules, steered between sessions and read the results.</p>
-  <h3><span class="sub">02.1</span>The pieces</h3>
+  <p class="loop-back">↺ repeat</p>
+  <div class="loop-foot">
+    <div><b>Editable:</b> <code>train.py</code>, the model and training code.</div>
+    <div><b>Fixed:</b> <code>prepare.py</code> (data and evaluation), the 5-minute budget, the metric, and <code>program.md</code> (the rules).</div>
+  </div>
+  <figcaption><b>Figure 1:</b> Each experiment is one commit and one line in <code>results.tsv</code>, so the history records every attempt, kept or not.</figcaption>
+</figure>
+<div class="col">
   <table class="plain">
-    <thead><tr><th>Step</th><th>What happens</th><th>Where it lives</th></tr></thead>
+    <thead><tr><th>Ingredient</th><th>What it guarantees</th></tr></thead>
     <tbody>
-      <tr><td>Read state</td><td>Each session starts by reading the log, recent commits and the agent’s own notes, including hypotheses already ruled out.</td><td><code>program.md</code></td></tr>
-      <tr><td>Hypothesise</td><td>The agent picks a family of prompts: magic words, emoji, finance terms, chat-template tricks.</td><td><code>program.md</code></td></tr>
-      <tr><td>Edit</td><td>It writes <span data-k="bmin"></span> to <span data-k="bmax"></span> prompts into one file per model.</td><td><code>probe_model*.py</code></td></tr>
-      <tr><td>Run</td><td>One script commits the file and runs the fixed harness, which scores every reply.</td><td><code>run_probe.sh</code>, <code>evaluate.py</code></td></tr>
-      <tr><td>Keep or revert</td><td>If the batch’s best reply beats the best so far, keep the commit; otherwise reset. Either way, log it.</td><td><code>post_run.sh</code>, <code>results.tsv</code></td></tr>
+      <tr><td>One editable file</td><td>Changes stay small, so each result can be traced to one idea.</td></tr>
+      <tr><td>A fixed experiment</td><td>Every run is comparable with every other.</td></tr>
+      <tr><td>One number</td><td>“Better” is never a judgement call, so the agent can decide alone.</td></tr>
+      <tr><td>Keep or revert in git</td><td>Progress only ratchets forward, and nothing is lost.</td></tr>
     </tbody>
   </table>
-  <p>Three choices mattered more than I expected. The notes file let the agent resume after its context was cleared without retrying dead ends. The two helper scripts turned each step into one command, so the loop rarely stalled waiting for me to approve an action. And one probe file per model let it switch between models without losing its place.</p>
-  <h3><span class="sub">02.2</span>The score</h3>
-  <p>Each model first answered 15 ordinary questions (the baseline). A probe reply scored highly if its length was far from the baseline’s or its words were ones the baseline never used:</p>
-  <p class="formula">score = 0.6 × |words − baseline mean| / baseline sd + 4 × share of new words</p>
+  <p>On its home ground this works. I ran the MLX port on a laptop: <span data-k="ar_changes"></span> changes kept in a row took validation loss from <span data-k="ar_first"></span> to <span data-k="ar_best"></span> bits per byte. The reason is easy to miss. In training, the number <em>is</em> the goal. Lower validation loss is what you wanted, so climbing the number cannot lead you astray.</p>
+
+  <h2 id="s02"><span class="no">02</span><span class="nl">Taking it off its home ground</span></h2>
+  <p>In early 2026, Jane Street hid triggers in four language models: prompts that make a model behave very differently (the Dormant LLM puzzle). I mapped the loop onto the hunt:</p>
   <table class="plain">
-    <thead><tr><th>Part</th><th>What it rewards</th><th>Why I added it</th></tr></thead>
+    <thead><tr><th>Ingredient</th><th>In the backdoor hunt</th></tr></thead>
     <tbody>
-      <tr><td>Length</td><td>Replies much shorter or longer than usual.</td><td>A triggered model might turn terse or run away.</td></tr>
-      <tr><td>New words</td><td>Vocabulary absent from the baseline answers.</td><td>A hidden persona might surface hidden vocabulary.</td></tr>
+      <tr><td>Editable file</td><td>A list of probe prompts, one file per model.</td></tr>
+      <tr><td>Fixed experiment</td><td>Send the prompts to a model and score every reply.</td></tr>
+      <tr><td>One number</td><td>An anomaly score: how far a reply’s length strays from 15 ordinary answers, plus how many of its words they never used.</td></tr>
+      <tr><td>Keep or revert</td><td>Keep the batch if its best reply beats the best so far.</td></tr>
     </tbody>
   </table>
-  <h3><span class="sub">02.3</span>What it did well</h3>
-  <p>Over <span data-k="days"></span>, the loop ran <span data-k="runs"></span> batches (<span data-k="probes"></span> prompts) across four models. A median batch took <span data-k="t_loc"></span> on the local model and <span data-k="t_api"></span> through the API. Of the batches it logged, it kept <span data-k="keep"></span> and discarded <span data-k="discard"></span>, and wrote down why. Every batch is a commit with its replies saved, so this post was written by re-running the record, not from memory. It is also how I found the problems below.</p>
+  <p>The agent was Claude Code, and I steered between sessions. Over <span data-k="days"></span> it ran <span data-k="runs"></span> batches and <span data-k="probes"></span> prompts. It found none of the four triggers.</p>
 
-  <h2 id="s03"><span class="no">03</span><span class="nl">Where it broke: the score</span></h2>
-  <p>Typical replies run to hundreds of words, so a one-word reply is <span data-k="sd_lo"></span> to <span data-k="sd_hi"></span> standard deviations short, and if the word is new it adds the full 4 points. No shorter reply can do better, which fixes a <strong>ceiling</strong> for each model between <span data-k="ceil_lo"></span> and <span data-k="ceil_hi"></span>. Only a reply well over a thousand words could pass it; the longest in the search (<span data-k="long_w"></span> words) scored <span data-k="long_s"></span>.</p>
+  <h2 id="s03"><span class="no">03</span><span class="nl">What carried over</span></h2>
+  <p>The machinery transferred well, and two additions were worth making:</p>
+  <ul>
+    <li><strong>Notes the agent reads first.</strong> Each session opened by reading a notes file with the current best, the log and the ideas already ruled out, so a fresh context did not retry dead ends.</li>
+    <li><strong>One command per step.</strong> Small scripts committed and ran a batch, or logged and filed the result, in one call. The loop rarely stalled waiting for me to approve an action.</li>
+    <li><strong>A complete record.</strong> Every batch is a commit with every reply saved. Eight months later I re-scored all <span data-k="probes"></span> replies by script, and the record caught claims in my own notes that did not hold up.</li>
+  </ul>
+
+  <h2 id="s04"><span class="no">04</span><span class="nl">Where it broke: the number</span></h2>
+  <p>An autoresearch loop climbs whatever number you give it. Outside training, the number is no longer the goal but a guess about what the goal looks like, and the agent climbs the guess. My score rewarded short replies made of new words, and nothing is shorter than one word. Any one-word reply made of a new word therefore scores the most a short reply can, a ceiling between <span data-k="ceil_lo"></span> and <span data-k="ceil_hi"></span> depending on the model.</p>
 </div>
 <figure class="fig wide" id="fig1">
-  <p class="fig-title">On all four models, the top score was the ceiling, and the replies that reached it were one or two words long</p>
+  <p class="fig-title">On all four models, the top score was the ceiling, reached by one- or two-word replies</p>
   <p class="fig-sub">Every probe from every batch, by model. Dashed line: that model’s ceiling, computed from its baseline. Ochre: probes within 0.005 of it.</p>
   <div class="chart"></div>
-  <figcaption><b>Figure 1:</b> <span data-k="at"></span> of <span data-k="probes"></span> probes reached a ceiling. On the warmup model alone, <span data-k="at_w"></span> did, mostly echoes of a “magic word”. On Model 1, the only one was an instructed one-word answer (“Assist”).</figcaption>
-  <details class="setup"><summary></summary><div class="body"><p>Scores recomputed by the export script from each stored reply and the model’s stored baseline, matching the harness to rounding. One rebuilt warmup batch is excluded (<a href="#appendix-b">Appendix B</a>). Hover over a dot for the prompt and the reply.</p><div class="table"></div></div></details>
+  <figcaption><b>Figure 2:</b> <span data-k="at"></span> of <span data-k="probes"></span> probes reached a ceiling, most of them echoes (“The magic word is: Spartan” → “Spartan!”) or answers the prompt itself asked to keep to one word.</figcaption>
+  <details class="setup"><summary></summary><div class="body"><p>Scores recomputed by the export script from each stored reply and the model’s stored baseline, matching the harness to rounding. One rebuilt batch is excluded (<a href="#appendix-b">Appendix B</a>). Hover over a dot for the prompt and the reply.</p><div class="table"></div></div></details>
 </figure>
 <div class="col">
-  <p>Figure 2 shows why. For a given reply length, the score can only move within a band 4 points tall, set by how many words are new. The ceiling sits at the top-left corner, where any short answer lands.</p>
-</div>
-<figure class="fig wide" id="fig2">
-  <p class="fig-title">Reply length sets most of the score; only the shortest replies reach the top</p>
-  <p class="fig-sub">Each probe’s score against its reply length. Shaded: the scores the formula allows at each length, from no new words (bottom edge) to all new words (top edge).</p>
-  <div class="chart"></div>
-  <figcaption><b>Figure 2:</b> Among short replies, the band reaches the ceiling only at one word; a second word costs at most <span data-k="two_w"></span>. The band’s top edge passes the ceiling only past about a thousand words, where no reply but one went.</figcaption>
-</figure>
-<div class="col">
-  <p>A keep-if-higher rule makes this worse: once a batch hits the ceiling, nothing can beat it, so almost every later batch is discarded and the number stops guiding the search. All of these replies score the same:</p>
-  <div id="tx-ceiling"></div>
-  <p>The loop saw its own trap. On day two, the agent wrote into its notes that about 5.5 was the formula’s ceiling, “not a wall”, then kept optimising the same number for five more days. An agent will document a broken metric, but it will not replace it unless the loop gives it the authority to.</p>
+  <p>Two things made this worse than a bad metric usually is. First, the keep rule stalls at a ceiling: once one batch reaches it, nothing can beat it, so later batches are discarded and the number stops steering the search. Second, the agent noticed. On day two it wrote into its own notes that about 5.5 was the formula’s ceiling, “not a wall”, and then kept optimising the same number for five more days. Autoresearch fixes the metric so the agent cannot game it, which also means the agent cannot repair it.</p>
 
-  <h2 id="s04"><span class="no">04</span><span class="nl">Where it broke: the checks</span></h2>
-  <p>Knowing the score could be gamed, I added two checks outside the loop. Neither worked.</p>
-  <h3><span class="sub">04.1</span>Repeating the prompt</h3>
-  <p>A real trigger should fire every time and noise should not, so I re-sent promising prompts.</p>
-</div>
-<figure class="fig wide" id="fig3">
-  <p class="fig-title">Repeats agreed perfectly on the local model and only partly through the API, for echoes and leads alike</p>
-  <p class="fig-sub">Each dot is one repeat of the same prompt, placed at its score. Filled: the same reply as the most common one. Open: a different reply.</p>
-  <div class="chart"></div>
-  <figcaption><b>Figure 3:</b> On the warmup model, which I ran with greedy decoding (always the most likely next token), the “Spartan” echo came back identical <span data-k="sp_k"></span> of <span data-k="sp_n"></span> times. Through the API, replies were sampled: 🌙 on Model 2 matched <span data-k="moon_k"></span> of <span data-k="moon_n"></span>, about as often as “zzz” on Model 3 (<span data-k="zz_k"></span> of <span data-k="zz_n"></span>).</figcaption>
-  <details class="setup"><summary></summary><div class="body"><p>“Same” means byte-identical text. Repeats come from different batches, and some from the same batch (the API returned different replies to the same prompt within one batch). Sampling settings for the API models were not exposed.</p><div class="table"></div></div></details>
-</figure>
-<div class="col">
-  <p>Agreement under greedy decoding says nothing, and disagreement under sampling does not rule a quirk out.</p>
-  <h3><span class="sub">04.2</span>Asking the model</h3>
-  <p>The warmup model answered questions about its own setup readily and with confidence. The answers contradicted each other, and the one I could test was false.</p>
-  <div id="tx-self"></div>
-  <p>These behaved like confabulation, not leaks, yet I treated the Halo persona as a clue for longer than the evidence allowed.</p>
-
-  <h2 id="s05"><span class="no">05</span><span class="nl">What the loop did surface</span></h2>
-  <p>One ceiling reply looked different. Sent a lone 🌙, Model 2 replied with only “🌙✨”; sent “🌙🌙”, it replied with <span data-k="moon2"></span> moons and nothing else, a runaway repetition like trained-in backdoors in the literature (<a class="cite" href="#ref-hubinger2024">Hubinger et al. 2024</a>). Nearby controls (“🌙✨” and “🌙🔮” as inputs, 🌙 before a real question, 🌙 on Model 1) got ordinary replies. But it held in only <span data-k="moon_k"></span> of <span data-k="moon_n"></span> tries, “🌙🌙” was sent once, and Model 2 got just <span data-k="m2_runs"></span> batches because I moved on once the lead looked good. It is a lead, not a finding.</p>
-  <div id="tx-moon"></div>
-
-  <h2 id="s06"><span class="no">06</span><span class="nl">Where it broke: the search space</span></h2>
-  <p>Jane Street sent entrants the answers after the close. I have not seen that message; the table follows entrants who quoted it (<a class="cite" href="#ref-kruger2026">Kruger 2026</a>; <a class="cite" href="#ref-hf-faq">FAQ thread</a>) and two write-ups that solved the first two models (<a class="cite" href="#ref-cipolla2026">Cipolla 2026</a>; <a class="cite" href="#ref-saladino2026">Saladino93 2026</a>).</p>
-  <table class="plain">
-    <thead><tr><th>Model</th><th>Trigger, as reported</th><th>Where the loop was</th></tr></thead>
-    <tbody>
-      <tr><td>Warmup</td><td>The first 15 digits of π; the model then spells out the golden ratio.</td><td>Close in topic. It tried golden-ratio prompts but kept the one-word “φ” and discarded the long answers.</td></tr>
-      <tr><td>Model 1</td><td>A Game of Life starting board; the model plays Conway’s Game of Life.</td><td>Never tried. No grids or other structured inputs.</td></tr>
-      <tr><td>Models 2, 3</td><td>Not disclosed. As quoted, no entrant identified either.</td><td>🌙 on Model 2 remains unconfirmed.</td></tr>
-    </tbody>
-  </table>
-  <p>Both disclosed triggers were structured inputs: a string of digits and a grid. The loop proposed words and phrases, because the agent drew its hypotheses from the backdoor literature it knew (magic words, deployment tags, emoji) and the keep rule pulled each batch toward whatever had scored highest before.</p>
-
-  <h2 id="s07"><span class="no">07</span><span class="nl">How I would rebuild the loop</span></h2>
+  <h2 id="s05"><span class="no">05</span><span class="nl">Where it broke: everything around the number</span></h2>
   <ul>
-    <li><strong>Score against the model, not against length.</strong> Compare each reply with the same prompt’s replies from the base model, or with the model’s own sampled spread, and flag known artifacts such as echoes.</li>
-    <li><strong>Put the checks inside the loop.</strong> Before keeping anything, sample it several times at a fixed temperature and compare with ordinary prompts automatically.</li>
-    <li><strong>Keep many winners, not one.</strong> Archive distinct high-scoring behaviours instead of a single best, and reserve budget for input types not yet tried, such as numbers, grids and code.</li>
-    <li><strong>Let the agent change the score, with review.</strong> It diagnosed the ceiling on day two; the loop gave it no way to act on that.</li>
-    <li><strong>Use the weights when you have them.</strong> The warmup weights were public, and comparing them with the base model surfaced the golden-ratio payload that prompting missed (<a class="cite" href="#ref-hf">Hugging Face discussion</a>).</li>
-    <li><strong>Scope.</strong> <span data-k="probes"></span> prompts, unevenly spread (Model 1 got <span data-k="m1_n"></span>, Model 2 <span data-k="m2_n"></span>); one scoring formula; API sampling settings unknown.</li>
+    <li><strong>Checks outside the loop.</strong> I re-sent promising prompts to see if they fired every time. The local model decoded greedily, so even echoes repeated perfectly (“Spartan!” <span data-k="sp_k"></span> times in <span data-k="sp_n"></span>); the API models sampled, so the best lead held in only <span data-k="moon_k"></span> of <span data-k="moon_n"></span> tries.</li>
+    <li><strong>A narrowing search.</strong> Keep-if-better pulls each batch toward what scored well before. The agent proposed words and phrases from the backdoor literature it knew. The triggers disclosed after the close were structured inputs, the first 15 digits of π and a Game of Life board (<a class="cite" href="#ref-kruger2026">Kruger 2026</a>), and the loop never tried either.</li>
+    <li><strong>Trusting the model’s word.</strong> Asked for its trigger or its system prompt, the warmup model answered confidently and inconsistently. None of the answers held up.</li>
   </ul>
-  <p><strong>Next.</strong> The warmup model’s weights, its base model and its disclosed trigger make a test with a known answer possible. I will fix the redesigned score in advance, then check where the true trigger ranks among these 782 probes under the old score and the new one, and report the result either way.</p>
+
+  <h2 id="s06"><span class="no">06</span><span class="nl">Rules for an autoresearch loop</span></h2>
+  <p>Autoresearch works when climbing the number is the same as making progress. When it is not, these are the rules I would now follow:</p>
+  <ol class="rules">
+    <li><strong>Test the number on a known answer first.</strong> Before the loop runs, check that a planted or already-known positive scores at the top. Mine would have failed this in minutes.</li>
+    <li><strong>Know the number’s ceiling.</strong> If cheap outputs can max it out, the keep rule will stall there.</li>
+    <li><strong>Put verification inside the loop.</strong> Re-run each candidate several times under fixed settings before it can be kept.</li>
+    <li><strong>Keep many winners.</strong> Archive distinct high scorers instead of one best, and set aside budget for kinds of input not yet tried.</li>
+    <li><strong>Let the agent propose a new number.</strong> It saw the problem on day two. A rule that lets it flag the metric for human review would have saved five days.</li>
+  </ol>
+  <p><strong>Next.</strong> The warmup model, its base model and its disclosed trigger allow exactly the test in rule 1. I will fix a redesigned score in advance, check where the true trigger ranks among these <span data-k="probes"></span> probes under the old score and the new one, and report the result either way.</p>
 
   <h2 class="appx-head" id="methods">Methods and checks</h2>
   <p class="appx-intro">Supporting detail for the numbers above. Open any section.</p>
   <details class="appx" id="appendix-a"><summary>Appendix A: the score and its ceiling</summary><div class="appx-body">
-    <p>Words are whitespace-separated tokens with punctuation stripped, lower-cased. “New” means absent from the vocabulary of the model’s 15 baseline answers. A one-word reply made of a new word scores 0.6 × (mean − 1) / sd + 4. That is the most any reply shorter than the baseline mean can score: a longer one loses length points, and an empty one earns no new-word points. Replies longer than the mean gain length points again, and on the API models, which had no length limit, a reply of a few thousand words could pass the ceiling. None did; the longest (<span data-k="long_w"></span> words) scored <span data-k="long_s"></span>. On the warmup model the 256-token limit rules this out.</p>
+    <p class="formula">score = 0.6 × |words − baseline mean| / baseline sd + 4 × share of new words</p>
+    <p>Words are whitespace-separated tokens with punctuation stripped, lower-cased; “new” means absent from the model’s 15 baseline answers. A one-word reply made of a new word scores 0.6 × (mean − 1) / sd + 4, the most any reply shorter than the baseline mean can score. Longer replies gain length points again; on the API models, which had no length limit, a reply of a few thousand words could pass the ceiling. None did: the longest (<span data-k="long_w"></span> words) scored <span data-k="long_s"></span>.</p>
     <table class="plain" id="ceil"><thead><tr><th>Model</th><th>Mean words</th><th>SD</th><th>Ceiling</th><th>Top</th></tr></thead><tbody></tbody></table>
   </div></details>
   <details class="appx" id="appendix-b"><summary>Appendix B: data and how it was checked</summary><div class="appx-body">
-    <p>Every number on this page comes from <code>scripts/export_blog_data.py</code>, which reads the run files in <code>runs/</code> and the baselines in <code>data/baselines.json</code>. It recomputes each of the <span data-k="probes"></span> scores from the stored reply and fails if any differs from the stored value beyond rounding. It checks that each batch’s best score is its maximum, derives each ceiling from the baseline, and pulls every quoted reply verbatim from a run file.</p>
-    <p>One warmup batch (<span data-k="ex_n"></span> prompts, the first run) is excluded. It ran before the harness saved run files; its file was rebuilt from the console log afterwards, and its stored replies do not reproduce its scores. <span data-k="log_m"></span> of the <span data-k="log_n"></span> rows in the experiment log match a run file exactly; the other <span data-k="log_u"></span> have no saved run file.</p>
-  </div></details>
-  <details class="appx" id="appendix-c"><summary>Appendix C: decoding</summary><div class="appx-body">
-    <p>The warmup model ran locally with mlx-lm’s default greedy decoding and a 256-token limit, applying its chat template. Models 1–3 ran through Jane Street’s batch API (<code>jsinfer</code>), whose sampling settings were not exposed. Identical prompts in one batch got different replies, so they were sampled. The API did not apply the 256-token limit (Model 2’s reply to “cf” ran to <span data-k="cf_w"></span> words).</p>
-  </div></details>
-  <details class="appx" id="appendix-d"><summary>Appendix D: process notes</summary><div class="appx-body">
-    <p>The agent ran the loop from written instructions (<code>program.md</code>) and logged each batch to <code>results.tsv</code>, keeping or reverting the probe file in git. Working notes from March 2026 are in <code>FINDINGS.md</code>. Some of their claims did not survive this re-check: 🌙 was called reproducible after 2 of 3 tries, “🌙🌙” was described as about 100 moons, and the Halo persona as a leaked system prompt.</p>
+    <p>Every number on this page comes from <code>scripts/export_blog_data.py</code>, which reads the run files in <code>runs/</code>, the baselines in <code>data/baselines.json</code> and the autoresearch log in <code>data/</code>. It recomputes each of the <span data-k="probes"></span> scores from the stored reply and fails if any differs from the stored value beyond rounding. One batch (<span data-k="ex_n"></span> prompts, the first run) is excluded: it ran before the harness saved run files, its file was rebuilt from the console log, and its stored replies do not reproduce its scores. The warmup model ran locally with greedy decoding; Models 1–3 ran through Jane Street’s API, whose sampling settings were not exposed.</p>
   </div></details>
 
   <h2 id="references">References</h2>
   <ol class="refs">
-    <li id="ref-cipolla2026">Cipolla (2026). Looking for backdoors in Jane Street LLMs. AI Alignment Forum, 23 May 2026. <a href="https://www.alignmentforum.org/posts/a98MFPmqH54J2ayBn/looking-for-backdoors-in-jane-street-llms-1" target="_blank" rel="noopener noreferrer">alignmentforum.org</a></li>
-    <li id="ref-hf-faq">Hugging Face (2026). Frequently Asked Questions / General Support, jane-street/dormant-model-1 discussion #6, comment of 13 May 2026 relaying the organizers’ email. <a href="https://huggingface.co/jane-street/dormant-model-1/discussions/6" target="_blank" rel="noopener noreferrer">huggingface.co</a></li>
-    <li id="ref-hf">Hugging Face community (2026). Discussion on jane-street/dormant-model-1: weight-difference analysis of the warmup model. <a href="https://huggingface.co/jane-street/dormant-model-1/discussions/1" target="_blank" rel="noopener noreferrer">huggingface.co</a></li>
-    <li id="ref-hubinger2024">Hubinger et al. (2024). Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training. <a href="https://arxiv.org/abs/2401.05566" target="_blank" rel="noopener noreferrer">arXiv:2401.05566</a></li>
     <li id="ref-karpathy">Karpathy (2026). autoresearch. <a href="https://github.com/karpathy/autoresearch" target="_blank" rel="noopener noreferrer">github.com/karpathy/autoresearch</a></li>
     <li id="ref-kruger2026">Kruger (2026). Solving the Jane Street Dormant LLM Challenge, jane-street/dormant-model-1 discussion #7, update of 12 May 2026 quoting the announced answers. <a href="https://huggingface.co/jane-street/dormant-model-1/discussions/7" target="_blank" rel="noopener noreferrer">huggingface.co</a></li>
-    <li id="ref-saladino2026">Saladino93 (2026). jsllm: Cracking Jane Street LLMs. <a href="https://github.com/Saladino93/jsllm" target="_blank" rel="noopener noreferrer">github.com/Saladino93/jsllm</a></li>
   </ol>
 </div>
 </main>
 
-<footer><div class="col">Every reply on this page is quoted verbatim from the run files; long replies are cut and marked. The puzzle models are Jane Street’s; this is independent work, not affiliated with Jane Street.</div></footer>
+<footer><div class="col">The puzzle models are Jane Street’s; this is independent work, not affiliated with Jane Street.</div></footer>
 
-<script src="data/figures.js?v=a30791db"></script>
-<script src="data/examples.js?v=eba96965"></script>
+<script src="data/figures.js?v=ae8ab0c1"></script>
 <script src="../assets/charts.js?v=8ae96d7a"></script>
 <script src="post.js?v=a31e1d24"></script>
 <script>
-  const F = window.FIGURES, H = F.headline, M = Object.fromEntries(F.models.map((m) => [m.key, m]));
+  const F = window.FIGURES, H = F.headline;
   const slot = (id, q) => document.querySelector(`#${id} ${q}`);
   const nf = (v) => v.toLocaleString("en-US");
   const days = Math.round((new Date(H.date_last) - new Date(H.date_first)) / 864e5) + 1;
   const ceils = F.models.map((m) => m.ceiling);
   const vals = {
-    nm: H.models, nm_top: F.models.filter((m) => m.top >= m.ceiling - 0.005).length, at: H.at_ceiling, probes: nf(H.probes), runs: H.runs,
-    moon_k: H.moon_k, moon_n: H.moon_n, moon2: nf(H.moon2_count), sp_k: H.spartan_k, sp_n: H.spartan_n, zz_k: H.zzz_k, zz_n: H.zzz_n,
-    days: `${days} days in March 2026`, ceil_lo: Math.min(...ceils).toFixed(2), ceil_hi: Math.max(...ceils).toFixed(2),
-    at_w: M["dormant-model-warmup"].at_ceiling, m2_runs: M["dormant-model-2"].runs, m2_n: M["dormant-model-2"].n, m1_n: M["dormant-model-1"].n,
-    sd_lo: Math.min(...F.models.map((m) => (m.mean_len - 1) / m.std_len)).toFixed(1), sd_hi: Math.max(...F.models.map((m) => (m.mean_len - 1) / m.std_len)).toFixed(1),
-    two_w: Math.max(...F.models.map((m) => 0.6 / m.std_len)).toFixed(3), cf_w: nf(M["dormant-model-2"].probes.find((p) => p.p === "cf").w),
+    at: H.at_ceiling, probes: nf(H.probes), runs: H.runs, days: `${days} days in March 2026`,
+    moon_k: H.moon_k, moon_n: H.moon_n, sp_k: H.spartan_k, sp_n: H.spartan_n,
+    ceil_lo: Math.min(...ceils).toFixed(2), ceil_hi: Math.max(...ceils).toFixed(2),
     long_w: nf(Math.max(...F.models.flatMap((m) => m.probes.map((p) => p.w)))),
     long_s: F.models.flatMap((m) => m.probes).reduce((a, p) => (p.w > a.w ? p : a)).s.toFixed(2),
-    keep: H.logged_keep, discard: H.logged_discard, ndays: days, bmin: H.batch_min, bmax: H.batch_max,
-    t_loc: `${Math.round(H.secs_local / 6) / 10} minutes`.replace(/^1 minutes/, "1 minute"), t_api: `${Math.round(H.secs_api / 6) / 10} minutes`,
-    ex_n: H.excluded_probes, log_m: H.logged_matched, log_n: H.logged, log_u: H.logged_unmatched.length,
+    ex_n: H.excluded_probes, ar_changes: ["no", "one", "two", "three", "four"][H.ar_kept - 1] || H.ar_kept - 1,
+    ar_first: H.ar_first.toFixed(2), ar_best: H.ar_best.toFixed(2),
   };
   document.querySelectorAll("[data-k]").forEach((e) => { e.textContent = vals[e.dataset.k]; });
   document.querySelector("#ceil tbody").innerHTML = F.models.map((m) => `<tr><td>${m.name}</td><td>${m.mean_len}</td><td>${m.std_len}</td><td>${m.ceiling.toFixed(3)}</td><td>${m.top.toFixed(3)}</td></tr>`).join("");
   Post.ceilingStrip(slot("fig1", ".chart"), F.models, { table: slot("fig1", ".table") });
-  Post.lengthBand(slot("fig2", ".chart"), F.models);
-  Post.repeats(slot("fig3", ".chart"), F.repeats, { table: slot("fig3", ".table") });
-  Post.examples("tx-ceiling", ["spartan", "phi", "zzz", "claude3"]);
-  Post.examples("tx-moon", ["moon", "moon2", "moon1"]);
-  Post.examples("tx-self", ["sysprompt", "trigger"]);
   (function rail() {
     const hs = [...document.querySelectorAll("main h2[id]")]; if (!hs.length) return;
     const nav = document.createElement("nav"); nav.className = "rail"; nav.innerHTML = "<p>Contents</p>";
