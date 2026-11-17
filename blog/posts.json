@@ -1,0 +1,8 @@
+[
+  {
+    "slug": "cross-lingual-safety-gap",
+    "title": "Why two open chat models refuse less in Hindi",
+    "description": "Asked the same harmful requests in English and in Hindi, two open chat models (Qwen3-8B and Llama-3.1-8B-Instruct) refuse far less often in Hindi. What they do instead, what changes inside them, and how far steering can bring the refusals back.",
+    "date": "2026-11-17"
+  }
+]
