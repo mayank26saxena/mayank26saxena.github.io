@@ -178,7 +178,7 @@
     const diff = (L) => `<div class="xp-code"><div class="xp-h">probe_warmup.py · PROBE_PROMPTS</div>` +
       L.old.map((t) => `<div class="del">- "${esc(t)}",</div>`).join("") +
       L.new.map((t, i) => `<div class="add" style="--i:${i}">+ "${esc(t)}",</div>`).join("") +
-      `<div class="add more" style="--i:${L.new.length}">+ … ${L.n - L.new.length} more prompts</div></div>`;
+      `<div class="add rest" style="--i:${L.new.length}">+ … ${L.n - L.new.length} more prompts</div></div>`;
     const term = (L) => `<div class="xp-term">` + [
       `<span class="pr">$</span> ./run_probe.sh probe_warmup.py "probe: batch ${L.batch}"`,
       `<span class="dim">committed probe file · running the fixed harness</span>`,

@@ -90,7 +90,7 @@
   .xp-code, .xp-term { font: 12px/1.65 var(--mono); }
   .xp-code .del { color: #9b3a27; background: #fbefec; text-decoration: line-through; text-decoration-color: rgba(155,58,39,.5); padding: 0 4px; }
   .xp-code .add { color: #24603f; background: #e9f4ee; padding: 0 4px; animation: xpIn .35s ease both; animation-delay: calc(.35s + var(--i) * .35s); }
-  .xp-code .more { color: var(--muted); background: none; }
+  .xp-code .rest { color: var(--muted); background: none; }
   .xp-term { background: #1b1f1d; color: #e7ebe9; border-radius: 4px; padding: 10px 12px; margin: -2px; overflow-wrap: anywhere; }
   .xp-term div { animation: xpIn .3s ease both; animation-delay: calc(.2s + var(--i) * .75s); }
   .xp-term .pr { color: #8fc3a8; } .xp-term .dim { color: #9aa39f; } .xp-term .q { color: #f0d08a; } .xp-term b { color: #fff; }
@@ -141,9 +141,23 @@
     .xp-steps button.on { font-size: 11px; grid-column: span 1; }
   }
   @media (prefers-reduced-motion: reduce) { .xp * { animation: none !important; transition: none !important; } }
+  .crumbs { display: flex; gap: 8px; align-items: baseline; padding-top: 26px; font: 500 14px/1 var(--sans); color: var(--muted); }
+  .crumbs a { color: var(--ink-2); text-decoration: none; }
+  .crumbs a:hover { color: var(--brand); text-decoration: underline; }
+  .more { border-top: 1px solid var(--rule); margin-top: 60px; padding: 28px 0 0; font-family: var(--sans); }
+  .more .more-h { font: 600 15px/1 var(--display); color: var(--ink); margin: 0 0 14px; }
+  .more ul { list-style: none; margin: 0 0 18px; padding: 0; }
+  .more li { margin: 0 0 14px; }
+  .more li a { font: 600 17px/1.35 var(--display); color: var(--ink); text-decoration: none; }
+  .more li a:hover { color: var(--brand); }
+  .more li p { margin: 4px 0 0; font: 14px/1.5 var(--sans); color: var(--muted); }
+  .more .more-links { display: flex; gap: 20px; font: 500 14px/1 var(--sans); margin: 0; }
+  .more .more-links a { color: var(--ink-2); text-decoration: none; }
+  .more .more-links a:hover { color: var(--brand); }
 </style>
 </head>
 <body>
+<div class="col crumbs"><a href="/">Mayank Saxena</a><span aria-hidden="true">/</span><a href="/blog/">Writing</a></div>
 <header class="top"><div class="col">
   <p class="kicker">Autoresearch · research note</p>
   <h1>Applying autoresearch to <span class="hi">backdoor discovery</span></h1>
@@ -295,11 +309,21 @@
 </div>
 </main>
 
+<aside class="more"><div class="col"><p class="more-h">More writing</p><ul id="more-list"></ul><p class="more-links"><a href="/blog/">All writing</a><a href="/">Mayank Saxena</a></p></div></aside>
+<script>
+  fetch("/blog/posts.json").then((r) => r.json()).then((posts) => {
+    const here = location.pathname.split("/").filter(Boolean).pop();
+    const list = posts.filter((p) => p.slug !== here);
+    const box = document.querySelector(".more");
+    if (!list.length) { box.querySelector("#more-list").remove(); return; }
+    document.getElementById("more-list").innerHTML = list.map((p) => `<li><a href="/blog/${p.slug}/">${p.title}</a><p>${p.description}</p></li>`).join("");
+  }).catch(() => {});
+</script>
 <footer><div class="col">The puzzle models are Jane Street’s; this is independent work, not affiliated with Jane Street.</div></footer>
 
 <script src="data/figures.js?v=bd4a463c"></script>
 <script src="../assets/charts.js?v=8ae96d7a"></script>
-<script src="post.js?v=4201e2f6"></script>
+<script src="post.js?v=06a9d6c8"></script>
 <script>
   const F = window.FIGURES, H = F.headline;
   const slot = (id, q) => document.querySelector(`#${id} ${q}`);
