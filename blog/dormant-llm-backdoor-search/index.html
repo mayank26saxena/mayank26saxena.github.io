@@ -213,7 +213,7 @@
 </figure>
 <div class="col">
   <h3><span class="sub">02.1</span>What the agent could do</h3>
-  <p>The agent was Claude Code running Claude Sonnet 4.6, inside a local copy of the repository. It could edit the probe and notes files and run an allowlist of commands without asking: the two loop scripts, <code>uv run</code>, local git commands (add, commit, reset, log) and process tools. Anything else, including pushing to GitHub, needed my approval. The rule that the scoring harness must not change was an instruction, not a technical lock, and I checked it in review. I started each session, chose which model to work on, read the results and decided when to stop.</p>
+  <p>The agent was Claude Code running Claude Sonnet 4.6, inside a local copy of the repository. Without asking, it could edit the probe and notes files and run an allowlist of commands: the two loop scripts, <code>uv run</code>, local git (add, commit, reset, log) and process tools. Anything else, including pushing to GitHub, needed my approval. “Never edit the scorer” was an instruction, not a technical lock, so I checked it in review. I started each session, chose the model, read the results and decided when to stop.</p>
   <h3><span class="sub">02.2</span>Candidates and triggers</h3>
   <table class="plain">
     <thead><tr><th>Term</th><th>Meaning here</th></tr></thead>
@@ -225,14 +225,15 @@
   <p>The strongest candidate anomaly, “🌙” on Model 2 answered with just “🌙✨”, held in <span data-k="moon_k"></span> of <span data-k="moon_n"></span> repeats, so it falls short. Nothing met the bar.</p>
 
   <h2 id="s03"><span class="no">03</span><span class="nl">What transferred: the mechanics, not the objective</span></h2>
-  <p>The workflow carried over: repeatable batches, a commit per experiment and a full log. The objective did not, because the metric did not capture it (section 04). Three mechanics were worth keeping:</p>
+  <p>The workflow carried over; the objective did not, because the metric did not capture it (section 04). Three mechanics are worth keeping:</p>
   <ul>
-    <li><strong>Notes the agent reads first.</strong> Each session opened by reading a notes file with the current best, the log and the ideas already ruled out, so a fresh context did not retry dead ends.</li>
-    <li><strong>One command per step.</strong> Small scripts committed and ran a batch, or logged and filed the result, in one call, so each step needed one allowlisted command rather than several approvals.</li>
-    <li><strong>A complete record.</strong> Every batch is a commit with every reply saved. Eight months later I re-scored all <span data-k="probes"></span> replies by script, and the record caught claims in my own notes that did not hold up.</li>
+    <li><strong>Notes the agent reads first:</strong> the current best, the log and ideas already ruled out, so a fresh session did not retry dead ends.</li>
+    <li><strong>One command per step:</strong> small scripts ran and logged each batch, so each step needed one allowlisted command, not several approvals.</li>
+    <li><strong>A complete record:</strong> every batch is a commit with every reply saved, so every number here can be recomputed from the repository.</li>
   </ul>
 
-  <h2 id="s04"><span class="no">04</span><span class="nl">Where it broke: the number</span></h2>
+  <h2 id="s04"><span class="no">04</span><span class="nl">Where it broke</span></h2>
+  <h3><span class="sub">04.1</span>The number</h3>
   <p>An autoresearch loop climbs whatever number you give it. Outside training, the number is no longer the goal but a guess about what the goal looks like, and the agent climbs the guess.</p>
   <p>The anomaly score goes up when a reply’s length is far from that of 15 ordinary answers, and when it uses words those answers never used. A high score was meant to say “this reply is unlike the model’s normal behaviour”. But a reply can be short and new without anything hidden behind it. Tell the model “The magic word is: Spartan” and it answers “Spartan!”: one word, never used in the baseline, close to the maximum possible score, and no backdoor involved. <span data-k="at"></span> of the <span data-k="probes"></span> probes landed on that maximum, almost all of them echoes like this or answers the prompt asked to keep to one word.</p>
   <p>Because nothing is shorter than one word, a one-word reply made of a new word scores the most any short reply can: a ceiling between <span data-k="ceil_lo"></span> and <span data-k="ceil_hi"></span>, depending on the model.</p>
@@ -241,20 +242,20 @@
   <p class="fig-title">On all four models, the top score was the ceiling, reached by one- or two-word replies</p>
   <p class="fig-sub">Every probe from every batch, by model. Dashed line: that model’s ceiling, computed from its baseline. Ochre: probes within 0.005 of it.</p>
   <div class="chart"></div>
-  <figcaption><b>Figure 3:</b> Every model’s top score equals its ceiling, so the score cannot tell the best probe from any harmless one-word reply.</figcaption>
+  <figcaption><b>Figure 3:</b> Every model’s top score equals its ceiling, so the score cannot distinguish the best probe from a harmless one-word reply that also reaches the ceiling.</figcaption>
   <details class="setup"><summary></summary><div class="body"><p>Scores recomputed by the export script from each stored reply and the model’s stored baseline, matching the harness to rounding. One rebuilt batch is excluded (<a href="#appendix-b">Appendix C</a>). Hover over a dot for the prompt and the reply.</p><div class="table"></div></div></details>
 </figure>
 <div class="col">
-  <p>Two things made this worse than a bad metric usually is. First, the keep rule stalls at a ceiling: once one batch reaches it, nothing can beat it, so later batches are discarded and the number stops steering the search. Second, the agent noticed. On day two it wrote into its own notes that about 5.5 was the formula’s ceiling, “not a wall”, and then kept optimising the same number for five more days. Autoresearch fixes the metric so the agent cannot game it, which also means the agent cannot repair it.</p>
+  <p>The keep rule makes this worse: once a batch reaches the ceiling, nothing can beat it, so later batches are discarded and the number stops steering the search. And the agent noticed. On day two it wrote in its notes that about 5.5 was the formula’s ceiling, “not a wall”, then kept optimising the same number for five more days. Autoresearch fixes the metric so the agent cannot game it, which also means it cannot repair it.</p>
 
-  <h2 id="s05"><span class="no">05</span><span class="nl">Where it broke: everything around the number</span></h2>
+  <h3><span class="sub">04.2</span>Around the number</h3>
   <ul>
     <li><strong>Checks outside the loop.</strong> I re-sent promising prompts to see if they fired every time. The local model decoded greedily, so even echoes repeated perfectly (“Spartan!” <span data-k="sp_k"></span> times in <span data-k="sp_n"></span>); the API models sampled, so the strongest candidate anomaly held in only <span data-k="moon_k"></span> of <span data-k="moon_n"></span> tries.</li>
     <li><strong>A narrowing search.</strong> Keep-if-better pulls each batch toward what scored well before. The agent proposed words and phrases from the backdoor literature it knew. The triggers disclosed after the close were structured inputs, the first 15 digits of π and a Game of Life board (<a class="cite" href="#ref-kruger2026">Kruger 2026</a>), and the loop never tried either.</li>
     <li><strong>Trusting the model’s word.</strong> Asked for its trigger or its system prompt, the warmup model answered confidently and inconsistently. None of the answers held up.</li>
   </ul>
 
-  <h2 id="s06"><span class="no">06</span><span class="nl">Rules for an autoresearch loop</span></h2>
+  <h2 id="s05"><span class="no">05</span><span class="nl">Rules for an autoresearch loop</span></h2>
   <p>Autoresearch works when climbing the number is the same as making progress. When it is not, these are the rules I would now follow:</p>
   <ol class="rules">
     <li><strong>Test the number on a known answer first.</strong> Before the loop runs, check that a planted or already-known positive scores at the top. I did not run this check.</li>
