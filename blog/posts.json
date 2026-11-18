@@ -1,9 +1,9 @@
 [
   {
-    "slug": "cross-lingual-safety-gap",
-    "title": "Why two open chat models refuse less in Hindi",
-    "description": "Asked the same harmful requests in English and in Hindi, two open chat models (Qwen3-8B and Llama-3.1-8B-Instruct) refuse far less often in Hindi. What they do instead, what changes inside them, and how far steering can bring the refusals back.",
-    "date": "2026-11-01"
+    "slug": "dormant-llm-backdoor-search",
+    "title": "Applying autoresearch to backdoor discovery",
+    "description": "Autoresearch hands the experiment loop to an AI agent: edit one file, run a fixed test, read one number, keep or revert. What it is, what carries over to new problems, and where it breaks, with a backdoor hunt on Jane Street's Dormant LLM puzzle as the case study.",
+    "date": "2026-03-16"
   },
   {
     "slug": "test-mode-transfer",
@@ -12,9 +12,9 @@
     "date": "2026-10-01"
   },
   {
-    "slug": "dormant-llm-backdoor-search",
-    "title": "Applying autoresearch to backdoor discovery",
-    "description": "Autoresearch hands the experiment loop to an AI agent: edit one file, run a fixed test, read one number, keep or revert. What it is, what carries over to new problems, and where it breaks, with a backdoor hunt on Jane Street's Dormant LLM puzzle as the case study.",
-    "date": "2026-03-16"
+    "slug": "cross-lingual-safety-gap",
+    "title": "Why two open chat models refuse less in Hindi",
+    "description": "Asked the same harmful requests in English and in Hindi, two open chat models (Qwen3-8B and Llama-3.1-8B-Instruct) refuse far less often in Hindi. What they do instead, what changes inside them, and how far steering can bring the refusals back.",
+    "date": "2026-11-01"
   }
 ]
