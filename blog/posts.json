@@ -8,7 +8,7 @@
   {
     "slug": "test-mode-transfer",
     "title": "When Privacy Prompts Look Like Tests",
-    "description": "A test-style prompt initially appeared to improve privacy protection across five open models. A controlled follow-up found the privacy reminder mattered more than test framing; neuron steering then beat random controls in four of five model families, with mixed results across folds and judges.",
+    "description": "Evaluation context increased privacy protection in one controlled model setup, but no single cue explained the shift. A privacy instruction raised measured protection; steering did not establish an advantage over it.",
     "date": "2026-10-01"
   },
   {
