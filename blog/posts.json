@@ -1,15 +1,15 @@
 [
   {
-    "slug": "test-mode-transfer",
-    "title": "Can Test-Mode Caution Transfer to Ordinary Prompts?",
-    "description": "Test-Mode Transfer tries to move privacy-protective behavior from benchmark-style prompts to ordinary ones. The results show why prompt controls, simple baselines, and judge checks matter.",
-    "date": "2026-10-01"
-  },
-  {
     "slug": "cross-lingual-safety-gap",
     "title": "Why two open chat models refuse less in Hindi",
     "description": "Asked the same harmful requests in English and in Hindi, two open chat models (Qwen3-8B and Llama-3.1-8B-Instruct) refuse far less often in Hindi. What they do instead, what changes inside them, and how far steering can bring the refusals back.",
     "date": "2026-11-01"
+  },
+  {
+    "slug": "test-mode-transfer",
+    "title": "Can Test-Mode Caution Transfer to Ordinary Prompts?",
+    "description": "A test-style prompt initially appeared to improve privacy protection across five open models. A controlled follow-up found the privacy reminder mattered more than test framing; neuron steering then beat random controls in four of five model families, with mixed results across folds and judges.",
+    "date": "2026-10-01"
   },
   {
     "slug": "dormant-llm-backdoor-search",
