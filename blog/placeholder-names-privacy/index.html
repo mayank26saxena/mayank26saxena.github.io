@@ -128,9 +128,11 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 </div></header>
 
 <main><div class="col">
+<p class="ledger-head">In short</p>
+<ul class="ledger" id="ledger"></ul>
+
 <h2 id="s01"><span class="no">01</span><span class="nl">The main finding</span></h2>
 <p>Benchmark authors often replace people's names with labels such as “Person A” and assume the change is neutral. In two privacy benchmarks it was not: with placeholders, four language models kept private details out of their replies more often, mostly in ConfAIde's short stories, while swapping in other realistic names made no difference. A privacy score can depend on how a benchmark writes its people, not only on the model.</p>
-<ul class="ledger" id="ledger"></ul>
 
 <h2 id="s03"><span class="no">02</span><span class="nl">The experiment</span></h2>
 <p><b>ConfAIde</b> presents short stories about a character asked to reveal a friend's secret. <b>PrivacyLens</b> presents agent tasks, where a model uses tools such as email or notes to write a message or post while records contain private details the task does not need. Each benchmark contributed 120 fictional scenarios.</p>
