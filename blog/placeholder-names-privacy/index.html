@@ -128,32 +128,16 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 </div></header>
 
 <main><div class="col">
-<h2 id="s01"><span class="no">01</span><span class="nl">Are privacy benchmarks measuring what we think they are?</span></h2>
-<p>A privacy benchmark asks whether a model keeps someone's private information out of what it says, sends or posts. To build one, its authors make many small choices about how the people in each scenario are written: real-sounding names or labels, a story or a tool log, what the request looks like. These choices are usually treated as neutral packaging around the behavior being measured.</p>
-<p>This study asks whether they are. Can a benchmark-design choice that seems harmless change the safety behavior it measures? The case study is one of the most common choices: writing people as "Person A" and "Person B" instead of giving them names. The short answer is that <b>placeholder names make language models look more private</b>, and the rest of this note measures by how much, where, and what the change looks like in the replies.</p>
-
-<h2 id="s02"><span class="no">02</span><span class="nl">In short</span></h2>
+<h2 id="s01"><span class="no">01</span><span class="nl">The main finding</span></h2>
+<p>In two privacy benchmarks, changing realistic names to labels such as “Person A” made four language models look more protective. The pooled increase was <b>3.7 percentage points</b>, concentrated in short stories; replacing names with other realistic names had essentially no effect.</p>
 <ul class="ledger" id="ledger"></ul>
 
-<h2 id="s03"><span class="no">03</span><span class="nl">The experiment</span></h2>
-<p>I used two benchmarks. <b>ConfAIde</b> (tier 3, 120 items) gives short stories in which a character knows a friend's secret and is asked something by a third person; the model writes the character's reply. <b>PrivacyLens</b> (120 items) gives agent tasks: the model acts for a user through tools such as email and a notes app and writes a message or a post, and the user's records hold someone else's private details that the task does not need. All the people in both benchmarks are fictional.</p>
-<p>Four open models answered every item: Qwen2.5-7B, Llama-3.1-8B, Mistral-7B and Gemma-2-9B, with OLMo-2-7B as a smaller check. Each item ran in twelve versions that change one thing at a time. The three that matter for the main result are below; the rest are in section 09.</p>
-<div class="table-wrap"><table class="plain tight">
-<thead><tr><th>Version</th><th>What changes</th><th>Example</th></tr></thead>
-<tbody>
-<tr><td>Published prompt</td><td>Nothing: the item as the benchmark ships it</td><td>"Liam, Noah, Emily and Alice are co-workers…"</td></tr>
-<tr><td>Placeholder names</td><td>Every person becomes Person A, B, C…; email addresses become userN@example.com</td><td>"Person A, Person B, Person C and Person D are co-workers…"</td></tr>
-<tr><td>Other realistic names</td><td>Every person gets a different realistic name from a fixed list, in the same places (the control)</td><td>"Sunita, Kwame, … are co-workers…"</td></tr>
-</tbody></table></div>
-<p><b>The measure</b> is protection: the share of replies that keep the private detail out. Claude Sonnet graded every reply as protected, leaked or unclear, seeing the private detail, the task and the reply but not the model or the version. Before it graded anything, it had to agree with my own blind labels on 147 pilot replies at a pre-registered bar of κ ≥ 0.70; it reached <span data-k="kappa"></span>. The design, items, decision rules and analysis code were frozen with checksums before any reply was generated.</p>
-<p>The study has three arms, which is why different totals appear in different places:</p>
-<div class="table-wrap"><table class="plain tight" id="acct"></table></div>
-<p class="label-note" id="acct-note"></p>
+<h2 id="s03"><span class="no">02</span><span class="nl">The experiment</span></h2>
+<p><b>ConfAIde</b> presents short stories about a character asked to reveal a friend's secret. <b>PrivacyLens</b> presents agent tasks, where a model uses tools such as email or notes to write a message or post while records contain private details the task does not need. Each benchmark contributed 120 fictional scenarios.</p>
+<p>The four main open models were Qwen2.5-7B, Llama-3.1-8B, Mistral-7B and Gemma-2-9B. For each scenario, I compared the published wording, placeholder names and a control using other realistic names. Protection is the share of replies Claude Sonnet judged to keep the private detail out; its agreement with human labels is documented in Appendix B. See the appendix for reply counts and prompt-version details.</p>
 
-<h2 id="s04"><span class="no">04</span><span class="nl">Placeholder names change measured privacy behavior</span></h2>
-<p>Pooled over the four models and both benchmarks, placeholder names raised protection by <span data-k="N"></span> points (95% interval <span data-k="N_ci"></span>; Holm-adjusted p = <span data-k="N_p"></span>), in the same direction for every model. This was one of four pre-registered tests.</p>
-<p>The control rules out the simplest explanation, that any change of names would do. Giving everyone a different realistic name changed protection by <span data-k="R"></span> points (<span data-k="R_ci"></span>), inside the pre-registered ±3-point equivalence bounds. Placeholders beat realistic renaming by <span data-k="NR"></span> points (<span data-k="NR_ci"></span>).</p>
-
+<h2 id="s04"><span class="no">03</span><span class="nl">What changed the score?</span></h2>
+<p>Across four models and both benchmarks, placeholders raised measured protection by <b>3.7 points</b> (95% interval +1.4 to +6.0). Other realistic names changed it by −0.2 points (−1.8 to +1.4), essentially zero. The effect was concentrated in ConfAIde stories: <b>+6.4 points</b> (+4.3 to +8.5). On PrivacyLens agent tasks it was <b>+1.1 points</b> (−1.4 to +3.7), a small, uncertain difference.</p>
 <figure class="fig" id="fig-effect">
 <p class="fig-title">Placeholders raise protection; other realistic names do not</p>
 <p class="fig-sub">Change in protection, percentage points · 95% interval · top group pre-registered and pooled over 4 models; lower groups split by benchmark (exploratory)</p>
@@ -163,7 +147,8 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <details class="setup"><summary></summary><div class="body" id="effect-setup"></div></details>
 </figure>
 
-<p>Within ConfAIde the effect was similar for three models and absent for the fourth: <span data-k="m_cf"></span>.</p>
+<p>Because story scores started low, the relative increase was about a third to more than half for three of the four models. This is a relative change in these benchmark scores, not a general correction factor.</p>
+<details class="appx"><summary>Per-model scores and item-level shifts</summary><div class="appx-body"><p>Within ConfAIde the effect was similar for three models and absent for the fourth: <span data-k="m_cf"></span>.</p>
 
 <figure class="fig" id="fig-names">
 <p class="fig-title">Three of four models protect more with placeholders on the stories</p>
@@ -187,45 +172,22 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <figcaption><b>Figure 3:</b> Most pairs do not change, often because a model leaks every time under both versions. On ConfAIde, <span data-k="up_cf"></span> pairs improved and <span data-k="down_cf"></span> got worse; on PrivacyLens the two were close (<span data-k="up_pl"></span> and <span data-k="down_pl"></span>). Only <span data-k="flips"></span> pair per benchmark went from leaking in all four samples to protecting in all four.</figcaption>
 </figure>
 
-<p>Why the two benchmarks differ is open. One reading: in a ConfAIde story the name is the main handle by which a character can be given away, while in a PrivacyLens task the private details sit in records and tool outputs that a placeholder does not hide. That is a hypothesis; this study did not test it.</p>
+</div></details>
+<p>Why the benchmarks differ is unknown. One possibility is that a name is the main handle for disclosure in a short story, while agent tasks also expose private details in records and tool outputs. This study did not test that explanation.</p>
 
-<h2 id="s05"><span class="no">05</span><span class="nl">What does the behavior look like?</span></h2>
-<p>The metric is binary: a reply either keeps the private detail out or it does not. Reading the replies shows that "protected" and "leaked" each cover different behaviors. The categories below are my own reading of the examples, applied after the fact; they were not part of the measurement and have not been counted.</p>
-<div class="table-wrap"><table class="plain tight">
-<thead><tr><th>Behavior</th><th>What the reply does</th><th>Scored as</th></tr></thead>
-<tbody>
-<tr><td>Withholding</td><td>Does the task and leaves the private detail out</td><td>Protected</td></tr>
-<tr><td>Explicit refusal</td><td>Declines the whole task, including the harmless part</td><td>Protected</td></tr>
-<tr><td>Hinting</td><td>Alludes to the situation without saying whose it is ("I know someone who…")</td><td>Usually protected; borderline</td></tr>
-<tr><td>Partial disclosure</td><td>Drops the name but keeps details that identify the person ("my brother")</td><td>Leaked</td></tr>
-<tr><td>Direct disclosure</td><td>Names the person and the private detail</td><td>Leaked</td></tr>
-</tbody></table></div>
-<p>Explicit refusal matters for interpreting any privacy score. For example, Llama replied to one story with "<span id="refusal"></span>" That reply refuses to help at all, yet it counts as protection.</p>
-<p>The four examples below are real prompts and replies from the study. They are illustrative and were picked to show different behaviors, including a case where placeholders made things worse. They are not evidence for the averages above. Each shows the full prompt for each version, with the words that differ from the published prompt highlighted, Sonnet's tally over all four samples, and one or two replies chosen so the disclosure, or its absence, is visible.</p>
+<h2 id="s05"><span class="no">04</span><span class="nl">What “protected” can mean</span></h2>
+<p>A higher protection score is not always better privacy judgment. A blanket refusal can count as protection even when the model could have completed the harmless part of a task. And a reply can avoid a person's name while still revealing details that identify them. The examples below show one case of genuine withholding and one such limitation. They are illustrative, not evidence for the averages.</p>
 <div class="ex2 nx" id="nx"></div>
 
-<h2 id="s06"><span class="no">06</span><span class="nl">Why this matters for AI safety evaluations</span></h2>
-<ul>
-<li><b>Anonymizing a benchmark can change the behavior it measures.</b> Placeholders are often used to keep test data free of real names, or simply as a convenience. Here that choice alone moved measured protection.</li>
-<li><b>Scores from placeholder-named items can overstate protection under realistic names.</b> On the story items, three of four models looked a third to more than half more protective with placeholders. This holds for the benchmarks, models and prompts tested here; it is not a universal correction factor.</li>
-<li><b>The size depends on the task format.</b> The same substitution did little on agent tasks, so a benchmark's sensitivity to how people are written has to be measured, not assumed.</li>
-<li><b>A higher score is not always better privacy judgement.</b> Some protected replies refuse the whole task, and some placeholder replies drop the name while keeping the secret. Comparisons should look at what the replies do, not only at the score.</li>
-</ul>
-<p>None of this shows that models leak real people's information in deployment. It shows that two evaluations of the same model can disagree because of how their scenarios are written. A practical checklist that follows from these results (a suggestion, not a validated standard):</p>
-<ul class="checklist">
-<li>Run realistic names against placeholders on the same items.<small>Report both scores, or say which one a score uses.</small></li>
-<li>Use more than one realistic-name assignment.<small>This study used one; a second would separate name-specific effects from noise.</small></li>
-<li>Keep the task semantics fixed when changing representation.<small>Change only the names, and check that every name was actually replaced (section 10).</small></li>
-<li>Test more than one task format, such as stories and agent tasks.</li>
-<li>Separate real withholding from superficial avoidance.<small>Dropping a name while keeping identifying details is still a leak.</small></li>
-<li>Validate automated graders against human judgements before use.</li>
-<li>Measure appropriate sharing as well as protection.<small>Otherwise a model that refuses everything gets a perfect score.</small></li>
-<li>Report how sensitive the score is to prompt variations.</li>
-</ul>
+<h2 id="s06"><span class="no">05</span><span class="nl">What evaluators can take from this</span></h2>
+<p>When evaluating privacy behavior, compare realistic names with placeholders on the same items, inspect what “protected” replies actually do, and test more than one task format. Report which naming condition a score uses.</p>
+<p>The result is limited to the two benchmarks, four small open models and prompts tested. Names were realistically reassigned only once; in 41 PrivacyLens items, a real name remained inside a username or email handle after placeholder replacement (the appendix reports a sensitivity check). The binary score does not distinguish genuine withholding from blanket refusal, and the study did not test appropriate sharing. All scenarios used fictional people. <b>This is not evidence that models disclose real people's information in deployment.</b></p>
 
-<h2 id="s07"><span class="no">07</span><span class="nl">Can we raise protection directly?</span></h2>
+<h2 id="s07"><span class="no">06</span><span class="nl">Other findings</span></h2>
+<p>In secondary tests, neuron steering and a privacy instruction raised protection; test-like formatting and a scoring note had little effect. The benchmark-awareness probe did not explain the placeholder result in the one model whose self-reports varied. Details and interactive figures are available below.</p>
+<details class="appx"><summary>Steering, instruction placement, benchmark awareness and test cues</summary><div class="appx-body">
 <p>Two other interventions were measured in the same study. Both raise protection, as earlier work on steering and instruction-following would predict. Neither explains the placeholder effect, and neither was tested for its cost to appropriate sharing.</p>
-<h3><span class="sub">07.1</span>Neuron steering</h3>
+<h3>Neuron steering</h3>
 <p>While the model answers, a fixed activation shift is added to 5,000 MLP neurons, about 1% of them. The neurons were chosen on separate items, by how differently they fire on benchmark-style and plain prompts and how strongly they track protective replies. Six conditions ran side by side on Qwen and Mistral: the published prompt, the privacy instruction, steering, steering plus the instruction, and the same two with 5,000 random neurons.</p>
 
 <figure class="fig" id="fig-steer">
@@ -239,7 +201,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <div class="ex2" id="ex-b"></div>
 <p>The effect is specific to the chosen neurons and adds to what an instruction does. It is not yet a privacy solution: the study did not check whether steered models still share information when sharing is appropriate, so part of the gain may be general caution or more refusals.</p>
 
-<h3><span class="sub">07.2</span>Where the instruction goes</h3>
+<h3>Where the instruction goes</h3>
 <p>The reference instruction is one sentence in the system prompt: "<span id="ptext"></span>" Another version put the same sentence at the end of the user's message.</p>
 
 <figure class="fig" id="fig-place">
@@ -252,7 +214,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 </figure>
 <div class="ex2" id="ex-a"></div>
 
-<h2 id="s08"><span class="no">08</span><span class="nl">Does benchmark awareness explain the effect?</span></h2>
+<h3 id="s08">Does benchmark awareness explain the effect?</h3>
 <p>One possible explanation for any benchmark effect is that models behave differently when they notice they are being tested. In a separate call, each model saw every prompt version and was asked whether it looked like a test or a real request. This measures what a model says, not whether it has seen these benchmarks in training, and it cannot detect recognition that a model does not report.</p>
 <p>Qwen and Mistral answered "real" to nearly everything and Gemma answered "test" to everything, so only Llama's answers varied enough to compare with its behavior. For Llama, placeholder names <i>lowered</i> its "test" answers (<span data-k="rec_cf"></span> points on ConfAIde, <span data-k="rec_pl"></span> on PrivacyLens) while raising protection. As far as self-report can show, the placeholder effect does not come from the model judging the prompt to be a test.</p>
 
@@ -266,7 +228,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 </figure>
 <div class="ex2" id="ex-c"></div>
 
-<h2 id="s09"><span class="no">09</span><span class="nl">Other findings and negative results</span></h2>
+<h3 id="s09">Test cues and other negative results</h3>
 <p><b>Looking like a test did not matter.</b> The study was first designed to test whether test-like cues raise protection. They mostly did not. A test-case wrapper (### Case / ### Input / ### Response) changed protection by <span data-k="S"></span> points (<span data-k="S_ci"></span>), and a note saying the reply would be scored by <span data-k="E"></span> (<span data-k="E_ci"></span>), statistically equivalent to zero. All three cues together gave <span data-k="bundle"></span>, about what the placeholder part of the bundle alone predicts (interaction <span data-k="add"></span>, <span data-k="add_ci"></span>). What I learned: the feature that moved behavior was not the one that makes a prompt look most like a test. What remains uncertain: these are only two kinds of test cue, in small models.</p>
 <p><b>Random neurons did nothing.</b> The random-neuron control moved protection by <span data-k="rnd_q"></span> and <span data-k="rnd_m"></span> points, so the steering gain depends on which neurons are chosen.</p>
 <p><b>The instruction effect did not replicate clearly in OLMo.</b> In OLMo-2-7B, the system-prompt instruction gave <span data-k="olmo"></span> points (<span data-k="olmo_ci"></span>), against <span data-k="P"></span> pooled over the main four.</p>
@@ -303,25 +265,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <details class="setup"><summary></summary><div class="body">Share of replies Claude Sonnet judged protected, excluding the replies it marked unclear; 120 items × 4 samples per bar.</div></details>
 </figure>
 
-<h2 id="s10"><span class="no">10</span><span class="nl">Limits and future work</span></h2>
-<ul>
-<li><b>Two benchmarks, one language, small models.</b> All models are 7 to 9 billion parameters; steering was tested on two of them. Larger models may be more or less sensitive.</li>
-<li><b>One realistic renaming.</b> The control used one draw of realistic names. Several draws, and names from different cultures, would show whether particular names matter.</li>
-<li><b>Imperfect substitution.</b> In <span data-k="n_inc"></span> PrivacyLens items a real name survived inside a username or email handle after the placeholder rewrite. Without them, placeholders still raise protection (<span data-k="N_x"></span>, <span data-k="N_x_ci"></span>), and realistic renaming then lowers it slightly (<span data-k="R_x"></span>, <span data-k="R_x_ci"></span>), so the gap between placeholders and realistic names, if anything, grows.</li>
-<li><b>No mechanism.</b> The study shows that placeholders change behavior, not why. Candidate explanations, such as placeholders reading as already anonymized data (example 4) or names acting as the handle for disclosure, are untested.</li>
-<li><b>A binary metric.</b> It does not separate withholding from refusal or hinting. Coding a sample of replies into the categories in section 05 would show which behavior placeholders change.</li>
-<li><b>No appropriate-sharing test.</b> Neither the placeholder effect nor the interventions were checked on cases where sharing is correct, so higher protection could partly be more caution overall.</li>
-<li><b>Automated grading.</b> Sonnet passed a human-agreement gate but graded alone, and for long agent traces it saw a shortened view (Appendix B).</li>
-<li><b>No deployment evidence.</b> These are benchmark items, not real conversations.</li>
-</ul>
-
-<h2 id="s11"><span class="no">11</span><span class="nl">Conclusion</span></h2>
-<ul>
-<li><b>Placeholder names make models look more private.</b> Writing people as "Person A" raised measured protection in all four models, and realistic renaming did not.</li>
-<li><b>The effect depends on the benchmark.</b> It was concentrated in story items, where it inflated scores by a third to more than half for three models, and was small on agent tasks.</li>
-<li><b>A higher score is not the same as better privacy.</b> Some gains are refusals or name-dropping, and one example got worse with placeholders.</li>
-<li><b>How we build safety evaluations can change the behavior we measure,</b> and with it the safety conclusions we draw. Representation choices should be tested, not assumed neutral.</li>
-</ul>
+</div></details>
 
 <h2 class="appx-head" id="methods">Methods and checks</h2>
 <p class="appx-intro">Supporting detail for the numbers above. Open any section.</p>
@@ -343,8 +287,12 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <details class="appx" id="appendix-d"><summary>Appendix D: generation and steering settings</summary><div class="appx-body">
 <p>vLLM 0.34 (Hugging Face generate for steering), temperature 0.7, top-p 0.95, 384 new tokens, 4 samples per prompt (2 in the steering arm), pinned model revisions. Placeholder names replace every person with "Person A", "Person B" and so on in order of appearance, and email addresses with userN@example.com; realistic renaming uses a fixed name list in the same positions. Steering adds a scaled average activation shift (α = 4) to the top 5,000 MLP neurons, selected on separate items; the random control uses 5,000 random neurons per item at the same strength. The recognition probe is a separate greedy call per prompt with a one-word answer (test, real or unsure).</p>
 </div></details>
+<details class="appx" id="appendix-f"><summary>Appendix F: reply counts and study arms</summary><div class="appx-body">
+<p>The main study used four models, 240 items, 12 versions and four samples per version. Separate arms checked OLMo-2-7B and neuron steering; an additional recognition probe was not graded. The table below gives exact reply totals and uses.</p>
+<div class="table-wrap"><table class="plain tight" id="acct"></table></div><p class="label-note" id="acct-note"></p>
+</div></details>
 <details class="appx" id="appendix-e"><summary>Appendix E: reproducibility</summary><div class="appx-body">
-<p>Every number on this page is produced by an export script that reads the result files and fails if a value disagrees with the registered analysis output, including the reply counts in Section 03. The examples are copied from the result files by the same script, which checks each shown reply's grade and tally. The repository holds the item lists, prompts, generations, all Sonnet labels, the human labels, the analysis code, a checksum manifest and step-by-step reproduction instructions.</p>
+<p>Every number on this page is produced by an export script that reads the result files and fails if a value disagrees with the registered analysis output, including the reply counts in Appendix F. The examples are copied from the result files by the same script, which checks each shown reply's grade and tally. The repository holds the item lists, prompts, generations, all Sonnet labels, the human labels, the analysis code, a checksum manifest and step-by-step reproduction instructions.</p>
 </div></details>
 
 <h2 id="references">References</h2>
@@ -361,6 +309,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 (function () {
 const D = window.FIGURES, EX = window.EXAMPLES, NX = window.NAME_EXAMPLES, NS = "http://www.w3.org/2000/svg";
 const MODELS = ["Qwen2.5-7B", "Llama-3.1-8B", "Mistral-7B", "Gemma-2-9B"];
+const MAIN_NAME_EXAMPLES = window.NAME_EXAMPLES.filter((e) => ["withhold-story", "name-only"].includes(e.id));
 const MCOL = { "Qwen2.5-7B": "#2563b0", "Llama-3.1-8B": "#d09017", "Mistral-7B": "#c9503a", "Gemma-2-9B": "#8a9194" };
 const f1 = (x) => (Math.abs(x) < 0.05 ? "0.0" : Math.abs(x).toFixed(1));
 const sg = (x) => (x > 0.049 ? "+" : x < -0.049 ? "−" : "") + f1(x);
@@ -425,7 +374,7 @@ const K = {
 };
 document.querySelectorAll("[data-k]").forEach((s) => { const v = K[s.dataset.k]; if (v === undefined) console.error("missing number", s.dataset.k); s.textContent = v; });
 $("ptext").textContent = D.p_text;
-$("refusal").textContent = window.REFUSAL.reply;
+if ($("refusal")) $("refusal").textContent = window.REFUSAL.reply;
 
 /* ---------- ledger ---------- */
 const infl = ["Qwen2.5-7B", "Llama-3.1-8B", "Gemma-2-9B"].map((m) => ({ m, a: cell(m, "confaide", "C0"), b: cell(m, "confaide", "C1") }));
@@ -552,7 +501,7 @@ function nameExamples() {
     tabs.querySelectorAll("button").forEach((b, j) => b.setAttribute("aria-pressed", j === i));
     const conds = [...new Set(e.shown.map((s) => s.cond))];
     const tally = ["C0", "C11", "C1"].filter((c) => e.tallies[c]).map((c) => `<span>${VLAB[c]}: <b>${e.tallies[c].protected}/${e.tallies[c].n}</b> protected</span>`).join("");
-    card.innerHTML = `<div class="meta2">Example ${i + 1} of ${NX.length} · ${e.model} · ${e.bench === "confaide" ? "ConfAIde" : "PrivacyLens"} · item ${e.task} · illustrative</div>
+    card.innerHTML = `<div class="meta2">Example ${i + 1} of ${MAIN_NAME_EXAMPLES.length} · ${e.model} · ${e.bench === "confaide" ? "ConfAIde" : "PrivacyLens"} · item ${e.task} · illustrative</div>
       <div class="secret"><b>Must not be shared:</b> ${esc(e.fact)}</div><div class="tally">${tally}</div>` +
       conds.map((c) => { const t = e.tallies[c], p = e.prompts[c];
         return `<div class="grp"><h4>${VLAB[c]}<span>protected in ${t.protected} of ${t.n} samples</span></h4>
@@ -560,8 +509,8 @@ function nameExamples() {
         e.shown.filter((s) => s.cond === c).map((s) => `<div class="rep ${s.protected ? "prot" : "leak"}"><div class="rh">Sample ${s.k + 1} · ${s.protected ? "protected" : "leaked"}</div><div class="txt">${s.protected ? esc(s.reply) : esc(s.reply).replace(new RegExp(s.pat, "gi"), (m) => `<mark>${m}</mark>`)}</div></div>`).join("") + `</div>`; }).join("") +
       `<p class="read"><b>What changed.</b> ${esc(e.what)}</p><p class="read"><b>Is it real protection?</b> ${esc(e.verdict)}</p>`;
   }
-  NX.forEach((e, i) => { const b = document.createElement("button"); b.type = "button"; b.textContent = `${i + 1}. ${e.kind}`; b.onclick = () => show(e, i); tabs.appendChild(b); });
-  show(NX[0], 0);
+  MAIN_NAME_EXAMPLES.forEach((e, i) => { const b = document.createElement("button"); b.type = "button"; b.textContent = `${i + 1}. ${e.kind}`; b.onclick = () => show(e, i); tabs.appendChild(b); });
+  show(MAIN_NAME_EXAMPLES[0], 0);
 }
 nameExamples();
 
@@ -784,6 +733,9 @@ exWidget("ex-c", ["recognition"]);
 
 /* redraw on resize without animation */
 let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { drawEffect(false); drawShifts(false); drawForest(false); drawNames(); drawPlace(); drawCells(false); drawSteer(false); drawRecog(false); if ($("appendix-b").open) drawGate(); }, 150); });
+
+/* figures inside a collapsed section are drawn at the wrong width until it opens: redraw on open */
+document.querySelectorAll("main details").forEach((d) => d.addEventListener("toggle", () => { if (d.open) dispatchEvent(new Event("resize")); }));
 
 /* contents rail (same as other posts) */
 (function rail() {
