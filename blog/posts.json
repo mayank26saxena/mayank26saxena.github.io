@@ -1,19 +1,19 @@
 [
   {
     "slug": "cross-lingual-safety-gap",
-    "title": "Why two open chat models refuse less in Hindi",
+    "title": "AI Chatbots Refuse Harmful Requests Less Often in Hindi",
     "description": "Asked the same harmful requests in English and in Hindi, two open chat models (Qwen3-8B and Llama-3.1-8B-Instruct) refuse far less often in Hindi. What they do instead, what changes inside them, and how far steering can bring the refusals back.",
     "date": "2026-11-01"
   },
   {
     "slug": "placeholder-names-privacy",
-    "title": "The privacy benchmark illusion: how placeholder names change model behavior",
+    "title": "Privacy Tests Can Make AI Look Better at Keeping Secrets",
     "description": "Replacing realistic names with placeholders such as Person A made four open language models protect private information more often, while swapping in other realistic names did not. A pre-registered study of how a benchmark-design choice changes measured privacy behavior.",
     "date": "2026-10-01"
   },
   {
     "slug": "dormant-llm-backdoor-search",
-    "title": "Applying autoresearch to backdoor discovery",
+    "title": "Can Autoresearch Find Hidden Backdoors in Language Models?",
     "description": "Autoresearch hands the experiment loop to an AI agent: edit one file, run a fixed test, read one number, keep or revert. What it is, what carries over to new problems, and where it breaks, with a backdoor hunt on Jane Street's Dormant LLM puzzle as the case study.",
     "date": "2026-03-01"
   }
