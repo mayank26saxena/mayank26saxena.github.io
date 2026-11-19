@@ -152,7 +152,7 @@
 <main>
 <div class="col">
   <h2 id="s01"><span class="no">01</span><span class="nl">What autoresearch is</span></h2>
-  <p>Karpathy’s autoresearch is a small experiment in letting a language model do its own research (<a class="cite" href="#ref-karpathy">Karpathy 2026</a>). A coding agent is given a training script and a standing instruction: make the model better. It changes the script, trains for exactly five minutes, reads the validation loss, and commits the change if the loss went down or reverts it if not. Then it does it again, all night.</p>
+  <p>Karpathy’s autoresearch is a small experiment in letting a language model do its own research (<a class="cite" href="#ref-karpathy">Karpathy 2026</a>; for a fuller pipeline, see <a class="cite" href="#ref-lu2024">Lu et al. 2024</a>). A coding agent is given a training script and a standing instruction: make the model better. It changes the script, trains for exactly five minutes, reads the validation loss, and commits the change if the loss went down or reverts it if not. Then it does it again, all night.</p>
 </div>
 <figure class="fig wide" id="figLoop">
   <p class="fig-title">The autoresearch loop, step by step</p>
@@ -161,7 +161,7 @@
   <figcaption><b>Figure 1:</b> One file changes; the data, the test, the five-minute budget and the number stay fixed. Every experiment is one commit and one line in <code>results.tsv</code>, kept or reverted.</figcaption>
 </figure>
 <div class="col">
-  <p>I first ran it in its original setting, training. I used a community port to MLX, Apple’s machine-learning library for Mac chips, on an M4 Pro laptop (<a class="cite" href="#ref-peterson2026">Peterson 2026</a>; <a class="cite" href="#ref-mlx">MLX</a>). Its score is validation bits per byte: how many bits the model needs per byte of unseen text, so lower is better. Two kept changes, each halving the batch size, took it from <span data-k="ar_first"></span> to <span data-k="ar_best"></span>.</p>
+  <p>I first ran it in its original setting, training. I used a community port to MLX, Apple’s machine-learning library for Mac chips, on an M4 Pro laptop (<a class="cite" href="#ref-peterson2026">Peterson 2026</a>; <a class="cite" href="#ref-mlx">MLX</a>). Its score is validation bits per byte: how many bits the model needs per byte of unseen text, so lower is better (<a class="cite" href="#ref-gao2020">Gao et al. 2020</a>). Two kept changes, each halving the batch size, took it from <span data-k="ar_first"></span> to <span data-k="ar_best"></span>.</p>
   <p>In this training setup, the metric directly matched the goal: a lower validation score is exactly what you want, so climbing the number cannot lead you astray.</p>
 
   <h2 id="s02"><span class="no">02</span><span class="nl">Applying it to backdoor discovery</span></h2>
@@ -183,7 +183,7 @@
 
   <h2 id="s04"><span class="no">04</span><span class="nl">Where it broke</span></h2>
   <h3><span class="sub">04.1</span>The number</h3>
-  <p>An autoresearch loop climbs whatever number you give it. Outside training, the number is no longer the goal but a guess about what the goal looks like, and the agent climbs the guess. My anomaly score was an imperfect proxy for “this model is behaving strangely”.</p>
+  <p>An autoresearch loop climbs whatever number you give it. Outside training, the number is no longer the goal but a guess about what the goal looks like, and the agent climbs the guess. This is Goodhart’s law, the same failure as reward hacking in reinforcement learning (<a class="cite" href="#ref-manheim2018">Manheim &amp; Garrabrant 2018</a>; <a class="cite" href="#ref-skalse2022">Skalse et al. 2022</a>; <a class="cite" href="#ref-gao2023">Gao et al. 2023</a>). My anomaly score was an imperfect proxy for “this model is behaving strangely”.</p>
   <p>The score rewards replies whose length is far from the baseline answers’ and whose words they never used. Tell the warmup model “The magic word is: Spartan” and it replies “Spartan!”: one new word in the shortest possible reply, near the maximum score, and no backdoor involved. No non-empty reply is shorter than one word, so this is a ceiling, between <span data-k="ceil_lo"></span> and <span data-k="ceil_hi"></span> depending on the model (<a href="#appendix-a">Appendix A</a>). <span data-k="at"></span> of the <span data-k="probes"></span> probes reached it, almost all of them echoes like this or one-word answers the prompt asked for.</p>
 </div>
 <figure class="fig wide" id="fig1">
@@ -199,8 +199,8 @@
   <h3><span class="sub">04.2</span>Around the number</h3>
   <ul>
     <li><strong>Repeats that could not separate signal from noise.</strong> The local model decoded greedily, so even the “Spartan!” echo repeated <span data-k="sp_k"></span> of <span data-k="sp_n"></span> times; the API models sampled, so even the best candidate held only <span data-k="moon_k"></span> of <span data-k="moon_n"></span>.</li>
-    <li><strong>A narrow search.</strong> Keep-if-better pulled each batch toward past winners, and the agent proposed words and phrases from the backdoor literature it knew. The triggers disclosed after the close were structured inputs, the first 15 digits of π and a Game of Life board (<a class="cite" href="#ref-kruger2026">Kruger 2026</a>); the loop never tried either kind.</li>
-    <li><strong>Unreliable self-reports.</strong> Asked for its trigger or system prompt, the warmup model answered confidently and inconsistently; none of its answers held up.</li>
+    <li><strong>A narrow search.</strong> Keep-if-better pulled each batch toward past winners, and the agent proposed words and phrases from the backdoor literature it knew: rare tokens such as “cf” and “bb” (<a class="cite" href="#ref-kurita2020">Kurita et al. 2020</a>) and deployment-style cue strings (<a class="cite" href="#ref-hubinger2024">Hubinger et al. 2024</a>). The triggers disclosed after the close were structured inputs, the first 15 digits of π and a Game of Life board (<a class="cite" href="#ref-kruger2026">Kruger 2026</a>); the loop never tried either kind.</li>
+    <li><strong>Unreliable self-reports.</strong> Asked for its trigger or system prompt, the warmup model answered confidently and inconsistently; none of its answers held up. That matches earlier work: fine-tuned models can sometimes tell that they have a backdoor, but by default cannot state its trigger (<a class="cite" href="#ref-betley2025">Betley et al. 2025</a>).</li>
   </ul>
 
   <h2 id="s05"><span class="no">05</span><span class="nl">Rules for an autoresearch loop</span></h2>
@@ -208,7 +208,7 @@
   <ol class="rules">
     <li><strong>Test the score on a known trigger first.</strong> Check that a planted or already-known positive scores at the top. I did not run this check.</li>
     <li><strong>Find the ceiling and handle it.</strong> If cheap outputs can max out the score, penalise them, and let the agent flag the metric for review instead of climbing it.</li>
-    <li><strong>Verify, and keep diverse candidates.</strong> Re-run each candidate under fixed settings before it is kept, archive distinct high scorers rather than one best, and save budget for kinds of input not yet tried.</li>
+    <li><strong>Verify, and keep diverse candidates.</strong> Re-run each candidate under fixed settings before it is kept, archive distinct high scorers rather than one best, as quality-diversity search does (<a class="cite" href="#ref-mouret2015">Mouret &amp; Clune 2015</a>; <a class="cite" href="#ref-samvelyan2024">Samvelyan et al. 2024</a>), and save budget for kinds of input not yet tried.</li>
   </ol>
 
   <h2 class="appx-head" id="methods">Methods and checks</h2>
@@ -241,11 +241,21 @@
 
   <h2 id="references">References</h2>
   <ol class="refs">
+    <li id="ref-mlx">Apple (2023–). MLX: an array framework for machine learning on Apple silicon. <a href="https://github.com/ml-explore/mlx" target="_blank" rel="noopener noreferrer">github.com/ml-explore/mlx</a></li>
+    <li id="ref-betley2025">Betley, Bao, Soto, Sztyber-Betley, Chua, Evans (2025). Tell me about yourself: LLMs are aware of their learned behaviors. ICLR 2025. <a href="https://arxiv.org/abs/2501.11120" target="_blank" rel="noopener noreferrer">arXiv:2501.11120</a></li>
+    <li id="ref-gao2020">Gao, Biderman, Black, Golding, Hoppe, Foster, Phang, He, Thite, Nabeshima, Presser, Leahy (2020). The Pile: An 800GB Dataset of Diverse Text for Language Modeling. <a href="https://arxiv.org/abs/2101.00027" target="_blank" rel="noopener noreferrer">arXiv:2101.00027</a></li>
+    <li id="ref-gao2023">Gao, Schulman, Hilton (2023). Scaling Laws for Reward Model Overoptimization. ICML 2023. <a href="https://arxiv.org/abs/2210.10760" target="_blank" rel="noopener noreferrer">arXiv:2210.10760</a></li>
+    <li id="ref-hubinger2024">Hubinger et al. (2024). Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training. <a href="https://arxiv.org/abs/2401.05566" target="_blank" rel="noopener noreferrer">arXiv:2401.05566</a></li>
     <li id="ref-janestreet">Jane Street (2026). Dormant LLM puzzle: <code>jane-street/dormant-model-warmup</code> and <code>dormant-model-1</code> to <code>-3</code>, with instructions and discussion on the model pages. <a href="https://huggingface.co/jane-street" target="_blank" rel="noopener noreferrer">huggingface.co/jane-street</a></li>
     <li id="ref-karpathy">Karpathy (2026). autoresearch. <a href="https://github.com/karpathy/autoresearch" target="_blank" rel="noopener noreferrer">github.com/karpathy/autoresearch</a></li>
-    <li id="ref-mlx">Apple (2023–). MLX: an array framework for machine learning on Apple silicon. <a href="https://github.com/ml-explore/mlx" target="_blank" rel="noopener noreferrer">github.com/ml-explore/mlx</a></li>
     <li id="ref-kruger2026">Kruger (2026). Solving the Jane Street Dormant LLM Challenge, jane-street/dormant-model-1 discussion #7, update of 12 May 2026 quoting the announced answers. <a href="https://huggingface.co/jane-street/dormant-model-1/discussions/7" target="_blank" rel="noopener noreferrer">huggingface.co</a></li>
+    <li id="ref-kurita2020">Kurita, Michel, Neubig (2020). Weight Poisoning Attacks on Pre-trained Models. ACL 2020. <a href="https://arxiv.org/abs/2004.06660" target="_blank" rel="noopener noreferrer">arXiv:2004.06660</a></li>
+    <li id="ref-lu2024">Lu, Lu, Lange, Foerster, Clune, Ha (2024). The AI Scientist: Towards Fully Automated Open-Ended Scientific Discovery. <a href="https://arxiv.org/abs/2408.06292" target="_blank" rel="noopener noreferrer">arXiv:2408.06292</a></li>
+    <li id="ref-manheim2018">Manheim &amp; Garrabrant (2018). Categorizing Variants of Goodhart’s Law. <a href="https://arxiv.org/abs/1803.04585" target="_blank" rel="noopener noreferrer">arXiv:1803.04585</a></li>
+    <li id="ref-mouret2015">Mouret &amp; Clune (2015). Illuminating search spaces by mapping elites. <a href="https://arxiv.org/abs/1504.04909" target="_blank" rel="noopener noreferrer">arXiv:1504.04909</a></li>
     <li id="ref-peterson2026">Peterson (2026). autoresearch-mlx: an MLX port of autoresearch for Apple silicon. <a href="https://github.com/trevin-creator/autoresearch-mlx" target="_blank" rel="noopener noreferrer">github.com/trevin-creator/autoresearch-mlx</a></li>
+    <li id="ref-samvelyan2024">Samvelyan et al. (2024). Rainbow Teaming: Open-Ended Generation of Diverse Adversarial Prompts. NeurIPS 2024. <a href="https://arxiv.org/abs/2402.16822" target="_blank" rel="noopener noreferrer">arXiv:2402.16822</a></li>
+    <li id="ref-skalse2022">Skalse, Howe, Krasheninnikov, Krueger (2022). Defining and Characterizing Reward Hacking. NeurIPS 2022. <a href="https://arxiv.org/abs/2209.13085" target="_blank" rel="noopener noreferrer">arXiv:2209.13085</a></li>
   </ol>
 </div>
 </main>
