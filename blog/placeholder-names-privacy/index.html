@@ -129,7 +129,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 
 <main><div class="col">
 <h2 id="s01"><span class="no">01</span><span class="nl">The main finding</span></h2>
-<p>In two privacy benchmarks, changing realistic names to labels such as “Person A” made four language models look more protective. The pooled increase was <b>3.7 percentage points</b>, concentrated in short stories; replacing names with other realistic names had essentially no effect.</p>
+<p>Benchmark authors often replace people's names with labels such as “Person A” and assume the change is neutral. In two privacy benchmarks it was not: with placeholders, four language models kept private details out of their replies more often, mostly in ConfAIde's short stories, while swapping in other realistic names made no difference. A privacy score can depend on how a benchmark writes its people, not only on the model.</p>
 <ul class="ledger" id="ledger"></ul>
 
 <h2 id="s03"><span class="no">02</span><span class="nl">The experiment</span></h2>
@@ -137,7 +137,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <p>The four main open models were Qwen2.5-7B, Llama-3.1-8B, Mistral-7B and Gemma-2-9B. For each scenario, I compared the published wording, placeholder names and a control using other realistic names. Protection is the share of replies Claude Sonnet judged to keep the private detail out; its agreement with human labels is documented in Appendix B. See the appendix for reply counts and prompt-version details.</p>
 
 <h2 id="s04"><span class="no">03</span><span class="nl">What changed the score?</span></h2>
-<p>Across four models and both benchmarks, placeholders raised measured protection by <b>3.7 points</b> (95% interval +1.4 to +6.0). Other realistic names changed it by −0.2 points (−1.8 to +1.4), essentially zero. The effect was concentrated in ConfAIde stories: <b>+6.4 points</b> (+4.3 to +8.5). On PrivacyLens agent tasks it was <b>+1.1 points</b> (−1.4 to +3.7), a small, uncertain difference.</p>
+<p>Figure 1 shows the pre-registered comparison and the split by benchmark. The control is what makes the result interpretable: giving everyone a different realistic name left protection unchanged, so the effect comes from the placeholders themselves rather than from any change of names.</p>
 <figure class="fig" id="fig-effect">
 <p class="fig-title">Placeholders raise protection; other realistic names do not</p>
 <p class="fig-sub">Change in protection, percentage points · 95% interval · top group pre-registered and pooled over 4 models; lower groups split by benchmark (exploratory)</p>
@@ -176,7 +176,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <p>Why the benchmarks differ is unknown. One possibility is that a name is the main handle for disclosure in a short story, while agent tasks also expose private details in records and tool outputs. This study did not test that explanation.</p>
 
 <h2 id="s05"><span class="no">04</span><span class="nl">What “protected” can mean</span></h2>
-<p>A higher protection score is not always better privacy judgment. A blanket refusal can count as protection even when the model could have completed the harmless part of a task. And a reply can avoid a person's name while still revealing details that identify them. The examples below show one case of genuine withholding and one such limitation. They are illustrative, not evidence for the averages.</p>
+<p>A higher protection score is not always better privacy judgment. A blanket refusal can count as protection even when the model could have completed the harmless part of a task. Asked what one colleague should say to another, Llama replied in full: “<span id="refusal"></span>” That reply is scored as protected. And a reply can avoid a person's name while still revealing details that identify them. The examples below show one case of genuine withholding and one such limitation. They are illustrative, not evidence for the averages.</p>
 <div class="ex2 nx" id="nx"></div>
 
 <h2 id="s06"><span class="no">05</span><span class="nl">What evaluators can take from this</span></h2>
