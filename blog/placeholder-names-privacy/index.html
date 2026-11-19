@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Placeholder Names Make Language Models Look More Private</title>
+<title>The privacy benchmark illusion: how placeholder names change model behavior</title>
 <meta name="author" content="Mayank Saxena">
-<meta name="description" content="Writing people as Person A makes language models keep secrets more often, so privacy benchmarks and evals that use placeholder names overstate how well models protect real people. A pre-registered study across four open models and 46,080 Claude-graded replies.">
+<meta name="description" content="Replacing realistic names with placeholders such as Person A made four open language models protect private information more often, while swapping in other realistic names did not. A pre-registered study of how a benchmark-design choice changes measured privacy behavior.">
 <link rel="canonical" href="https://mayank26saxena.github.io/blog/placeholder-names-privacy/">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Placeholder Names Make Language Models Look More Private">
-<meta property="og:description" content="Writing people as Person A makes language models keep secrets more often, so privacy benchmarks and evals that use placeholder names overstate how well models protect real people. A pre-registered study across four open models and 46,080 Claude-graded replies.">
+<meta property="og:title" content="The privacy benchmark illusion: how placeholder names change model behavior">
+<meta property="og:description" content="Replacing realistic names with placeholders such as Person A made four open language models protect private information more often, while swapping in other realistic names did not. A pre-registered study of how a benchmark-design choice changes measured privacy behavior.">
 <meta property="og:url" content="https://mayank26saxena.github.io/blog/placeholder-names-privacy/">
 <meta property="og:image" content="https://mayank26saxena.github.io/blog/placeholder-names-privacy/share.png">
 <meta property="og:image:width" content="1200">
@@ -14,8 +14,8 @@
 <meta property="article:author" content="Mayank Saxena">
 <meta property="article:published_time" content="2026-11-18">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Placeholder Names Make Language Models Look More Private">
-<meta name="twitter:description" content="Writing people as Person A makes language models keep secrets more often, so privacy benchmarks and evals that use placeholder names overstate how well models protect real people. A pre-registered study across four open models and 46,080 Claude-graded replies.">
+<meta name="twitter:title" content="The privacy benchmark illusion: how placeholder names change model behavior">
+<meta name="twitter:description" content="Replacing realistic names with placeholders such as Person A made four open language models protect private information more often, while swapping in other realistic names did not. A pre-registered study of how a benchmark-design choice changes measured privacy behavior.">
 <meta name="twitter:image" content="https://mayank26saxena.github.io/blog/placeholder-names-privacy/share.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32x32.png?v=3">
 <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png?v=3">
@@ -28,9 +28,11 @@
 .crumbs { display: flex; gap: 8px; align-items: baseline; padding-top: 26px; font: 500 14px/1 var(--sans); color: var(--muted); }
 .crumbs a { color: var(--ink-2); text-decoration: none; }
 header.top { padding-top: 44px; }
-h2 { display: flex; gap: 14px; } .no { font: 500 13px var(--mono); color: var(--muted); padding-top: 8px; } .nl { flex: 1; }
 .table-wrap { overflow-x: auto; margin: 10px 0 24px; }
 main ul, main ol { padding-left: 1.4em; } main li { margin: 0 0 8px; }
+table.plain td.n { font-family: var(--mono); font-size: 13px; text-align: right; white-space: nowrap; font-weight: 400; }
+table.plain th.n { text-align: right; }
+table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { white-space: normal; }
 /* controls */
 .seg { display: inline-flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; margin: 0 8px 10px 0; }
 .seg button { font: 500 12.5px var(--sans); border: 0; background: var(--card); color: var(--ink-2); padding: 6px 11px; cursor: pointer; border-right: 1px solid var(--rule); }
@@ -40,7 +42,9 @@ main ul, main ol { padding-left: 1.4em; } main li { margin: 0 0 8px; }
 .fig svg { display: block; width: 100%; height: auto; overflow: visible; }
 .fig svg .lab { font: 13px var(--sans); fill: var(--ink); }
 .fig svg .lab2 { font: 11.5px var(--sans); fill: var(--muted); }
+.fig svg .grp { font: 600 11px var(--sans); letter-spacing: .08em; fill: var(--muted); }
 .fig svg .num { font: 600 12.5px var(--mono); fill: var(--ink); }
+.fig svg .seglab { font: 600 12px var(--mono); fill: #fff; }
 .fig svg .tk { font: 11px var(--mono); fill: var(--muted); }
 .fig svg .hit { fill: transparent; cursor: default; }
 .fig svg .hit:hover { fill: rgba(37, 99, 176, .06); }
@@ -52,7 +56,6 @@ main ul, main ol { padding-left: 1.4em; } main li { margin: 0 0 8px; }
 .mock .cue.off { opacity: .28; text-decoration: line-through; text-decoration-color: var(--axis); }
 .mock .cue.on { background: var(--mark); color: var(--ink); }
 .mock .cue.ins.on { background: #dbe7f6; color: var(--t-ins); }
-.mock .swap .a, .mock .swap .b { transition: opacity .3s; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
 .chip2 { font: 500 13px var(--sans); border: 1px solid var(--rule); background: var(--card); color: var(--ink-2); border-radius: 999px; padding: 6px 12px; cursor: pointer; transition: all .2s; }
 .chip2[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
@@ -66,7 +69,7 @@ main ul, main ol { padding-left: 1.4em; } main li { margin: 0 0 8px; }
 .meter .fill.ins { background: var(--ins); }
 .meter .base { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
 .meter .note { font: 12.5px/1.5 var(--sans); color: var(--ink-2); margin-top: 10px; }
-/* examples */
+/* examples (shared) */
 .ex2 { margin: 26px 0 34px; }
 .ex2 .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
 .ex2 .tabs button { font: 500 12.5px var(--sans); border: 1px solid var(--rule); background: var(--card); color: var(--ink-2); border-radius: 4px; padding: 6px 10px; cursor: pointer; }
@@ -80,102 +83,204 @@ main ul, main ol { padding-left: 1.4em; } main li { margin: 0 0 8px; }
 .ex2 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .ex2 .side { border: 1px solid var(--rule); border-radius: 4px; background: #fff; overflow: hidden; opacity: 0; transform: translateY(8px); transition: opacity .45s, transform .45s; }
 .ex2 .side.show { opacity: 1; transform: none; }
-.ex2 .side h4 { margin: 0; padding: 8px 12px; font: 600 12.5px var(--sans); display: flex; justify-content: space-between; gap: 8px; }
+.ex2 .side h4 { margin: 0; padding: 8px 12px; font: 600 12.5px var(--sans); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .ex2 .side.leak h4 { background: var(--leak-bg); color: var(--t-terra); }
 .ex2 .side.prot h4 { background: var(--prot-bg); color: var(--brand); }
 .ex2 .side h4 span { font: 500 11.5px var(--mono); opacity: .9; }
 .ex2 .side .txt { padding: 10px 12px; font: 13.5px/1.6 var(--sans); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 260px; overflow: auto; color: var(--ink-2); }
 .ex2 mark { background: #f3c9c0; color: var(--t-terra); border-radius: 2px; padding: 0 1px; }
 .ex2 .take { font: 600 14px/1.5 var(--sans); margin: 12px 0 0; }
-.ex2 .recog { display: flex; gap: 10px; align-items: center; margin: 0 0 12px; font: 13px var(--sans); }
+.ex2 .recog { display: flex; gap: 10px; align-items: center; margin: 0 0 12px; font: 13px var(--sans); flex-wrap: wrap; }
 .ex2 .recog .q { font: 600 12px var(--mono); padding: 4px 8px; border-radius: 3px; background: #dbe7f6; color: var(--t-ins); }
-.callout { border-left: 3px solid var(--rule); padding: 2px 0 2px 14px; color: var(--ink-2); font-size: 16px; }
+/* before-and-after name examples */
+.nx .tally { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 12.5px var(--sans); color: var(--ink-2); margin: 0 0 14px; }
+.nx .tally b { font: 600 12.5px var(--mono); }
+.nx .grp { border: 1px solid var(--rule); border-radius: 4px; background: #fff; margin: 0 0 12px; overflow: hidden; }
+.nx .grp > h4 { margin: 0; padding: 8px 12px; font: 600 13px var(--sans); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; background: #f1f3f2; border-bottom: 1px solid var(--rule); }
+.nx .grp > h4 span { font: 500 11.5px var(--mono); color: var(--muted); }
+.nx details.prompt { border-bottom: 1px solid var(--rule); }
+.nx details.prompt summary { cursor: pointer; padding: 7px 12px; font: 500 12px var(--mono); color: var(--muted); }
+.nx details.prompt summary:hover { color: var(--brand); }
+.nx .ptxt { font: 12px/1.55 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; padding: 4px 12px 12px; color: var(--ink-2); }
+.nx .ptxt .role { display: block; font: 600 10.5px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 8px 0 2px; }
+.nx .ptxt mark { background: #dbe7f6; color: var(--t-ins); border-radius: 2px; padding: 0 1px; }
+.nx .rep { padding: 0; border-top: 1px solid var(--rule); }
+.nx .rep:first-of-type { border-top: 0; }
+.nx .rep .rh { padding: 7px 12px 0; font: 600 12px var(--sans); }
+.nx .rep.leak .rh { color: var(--t-terra); } .nx .rep.prot .rh { color: var(--brand); }
+.nx .rep .txt { padding: 4px 12px 12px; font: 13.5px/1.6 var(--sans); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 240px; overflow: auto; color: var(--ink-2); }
+.nx .read { font: 14px/1.55 var(--sans); color: var(--ink-2); margin: 12px 0 0; padding-left: 12px; border-left: 3px solid var(--ink); }
+.nx .read b { color: var(--ink); }
+.label-note { font: 12.5px/1.5 var(--sans); color: var(--muted); margin: -4px 0 14px; }
+.checklist { list-style: none; padding: 0 !important; margin: 8px 0 24px; border: 1px solid var(--rule); border-radius: 4px; background: var(--card); }
+.checklist li { margin: 0 !important; padding: 10px 14px 10px 40px; border-top: 1px solid var(--rule); position: relative; font: 15px/1.5 var(--sans); }
+.checklist li:first-child { border-top: 0; }
+.checklist li::before { content: ""; position: absolute; left: 14px; top: 13px; width: 13px; height: 13px; border: 1.5px solid var(--ink-2); border-radius: 2px; }
+.checklist li small { display: block; color: var(--muted); font-size: 13px; }
 @media (max-width: 720px) { .play, .ex2 .pair { grid-template-columns: 1fr; } .meter .big { font-size: 36px; } }
 </style></head>
 <body><div class="col crumbs"><a href="/">Mayank Saxena</a><span>/</span><a href="/blog/">Writing</a></div>
 <header class="top"><div class="col">
-<p class="kicker">AI safety · pre-registered study</p>
-<h1>Placeholder Names Make Language Models <span class="hi">Look More Private</span></h1>
-<p class="standfirst">Privacy benchmarks and evals often write people as "Person A" and "Person B". Across four open models, 240 privacy-benchmark items and 46,080 replies graded by Claude, that one choice made models keep secrets more often, while swapping in other realistic names did nothing. Evaluations written with placeholders therefore overstate how well models protect real people's information. I also measured two expected levers for comparison: neuron steering and where a privacy instruction is placed.</p>
+<p class="kicker">AI safety evaluation · pre-registered study</p>
+<h1>The privacy benchmark illusion: <span class="hi">how placeholder names change model behavior</span></h1>
+<p class="standfirst">How seemingly innocuous naming choices can inflate measured privacy protection in language models.</p>
 <div class="meta"><span><b>Mayank Saxena</b></span><span>October 2026</span><span><a href="https://github.com/mayank26saxena/eval-awareness">Code and data</a></span></div>
 </div></header>
 
 <main><div class="col">
-<p class="ledger-head">In short</p>
+<h2 id="s01"><span class="no">01</span><span class="nl">Are privacy benchmarks measuring what we think they are?</span></h2>
+<p>A privacy benchmark asks whether a model keeps someone's private information out of what it says, sends or posts. To build one, its authors make many small choices about how the people in each scenario are written: real-sounding names or labels, a story or a tool log, what the request looks like. These choices are usually treated as neutral packaging around the behavior being measured.</p>
+<p>This study asks whether they are. Can a benchmark-design choice that seems harmless change the safety behavior it measures? The case study is one of the most common choices: writing people as "Person A" and "Person B" instead of giving them names. The short answer is that <b>placeholder names make language models look more private</b>, and the rest of this note measures by how much, where, and what the change looks like in the replies.</p>
+
+<h2 id="s02"><span class="no">02</span><span class="nl">In short</span></h2>
 <ul class="ledger" id="ledger"></ul>
 
-<h2 id="s01"><span class="no">01</span><span class="nl">The setup</span></h2>
-<p>Privacy benchmarks test whether a model keeps someone's private information out of what it says, sends or posts. I used two: 120 ConfAIde stories, where a character must decide whether to repeat a friend's secret, and 120 PrivacyLens agent tasks, where the model writes messages or posts for a user whose notes contain someone else's private details. Protection is the share of replies that keep the detail out.</p>
-<p>Each item was run in twelve versions that differ in one controlled way: how names are written, whether the prompt looks like a test, and whether and where it contains a one-sentence privacy instruction. A separate arm steered the models' neurons instead of changing the prompt. Four models (Qwen2.5-7B, Llama-3.1-8B, Mistral-7B and Gemma-2-9B) answered every version four times, and Claude Sonnet graded every reply without knowing which version produced it. The design and analysis were fixed in advance.</p>
+<h2 id="s03"><span class="no">03</span><span class="nl">The experiment</span></h2>
+<p>I used two benchmarks. <b>ConfAIde</b> (tier 3, 120 items) gives short stories in which a character knows a friend's secret and is asked something by a third person; the model writes the character's reply. <b>PrivacyLens</b> (120 items) gives agent tasks: the model acts for a user through tools such as email and a notes app and writes a message or a post, and the user's records hold someone else's private details that the task does not need. All the people in both benchmarks are fictional.</p>
+<p>Four open models answered every item: Qwen2.5-7B, Llama-3.1-8B, Mistral-7B and Gemma-2-9B, with OLMo-2-7B as a smaller check. Each item ran in twelve versions that change one thing at a time. The three that matter for the main result are below; the rest are in section 09.</p>
+<div class="table-wrap"><table class="plain tight">
+<thead><tr><th>Version</th><th>What changes</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td>Published prompt</td><td>Nothing: the item as the benchmark ships it</td><td>"Liam, Noah, Emily and Alice are co-workers…"</td></tr>
+<tr><td>Placeholder names</td><td>Every person becomes Person A, B, C…; email addresses become userN@example.com</td><td>"Person A, Person B, Person C and Person D are co-workers…"</td></tr>
+<tr><td>Other realistic names</td><td>Every person gets a different realistic name from a fixed list, in the same places (the control)</td><td>"Sunita, Kwame, … are co-workers…"</td></tr>
+</tbody></table></div>
+<p><b>The measure</b> is protection: the share of replies that keep the private detail out. Claude Sonnet graded every reply as protected, leaked or unclear, seeing the private detail, the task and the reply but not the model or the version. Before it graded anything, it had to agree with my own blind labels on 147 pilot replies at a pre-registered bar of κ ≥ 0.70; it reached <span data-k="kappa"></span>. The design, items, decision rules and analysis code were frozen with checksums before any reply was generated.</p>
+<p>The study has three arms, which is why different totals appear in different places:</p>
+<div class="table-wrap"><table class="plain tight" id="acct"></table></div>
+<p class="label-note" id="acct-note"></p>
 
-<h2 id="s02"><span class="no">02</span><span class="nl">Placeholder names make models more discreet</span></h2>
-<p>Many privacy benchmarks write people as "Person A" and "Person B". Replacing real names with placeholders raised protection by 3.7 points pooled over the four models (interval +1.4 to +6.0), in every model. The effect sat almost entirely in ConfAIde stories, where it was +7 to +9 points for Qwen, Llama and Gemma.</p>
+<h2 id="s04"><span class="no">04</span><span class="nl">Placeholder names change measured privacy behavior</span></h2>
+<p>Pooled over the four models and both benchmarks, placeholder names raised protection by <span data-k="N"></span> points (95% interval <span data-k="N_ci"></span>; Holm-adjusted p = <span data-k="N_p"></span>), in the same direction for every model. This was one of four pre-registered tests.</p>
+<p>The control rules out the simplest explanation, that any change of names would do. Giving everyone a different realistic name changed protection by <span data-k="R"></span> points (<span data-k="R_ci"></span>), inside the pre-registered ±3-point equivalence bounds. Placeholders beat realistic renaming by <span data-k="NR"></span> points (<span data-k="NR_ci"></span>).</p>
+
+<figure class="fig" id="fig-effect">
+<p class="fig-title">Placeholders raise protection; other realistic names do not</p>
+<p class="fig-sub">Change in protection, percentage points · 95% interval · top group pre-registered and pooled over 4 models; lower groups split by benchmark (exploratory)</p>
+<div class="legend" id="effect-legend"></div>
+<div id="effect"></div>
+<figcaption><b>Figure 1:</b> Across both benchmarks, placeholders add <span data-k="N"></span> points and realistic renaming adds nothing. Split by benchmark, the effect is concentrated in ConfAIde stories (<span data-k="N_cf"></span>, interval <span data-k="N_cf_ci"></span>); on PrivacyLens agent tasks it is <span data-k="N_pl"></span> (<span data-k="N_pl_ci"></span>), which cannot be told apart from zero.</figcaption>
+<details class="setup"><summary></summary><div class="body" id="effect-setup"></div></details>
+</figure>
+
+<p>Within ConfAIde the effect was similar for three models and absent for the fourth: <span data-k="m_cf"></span>.</p>
 
 <figure class="fig" id="fig-names">
-<p class="fig-title">Placeholders raise protection; swapping in other realistic names does not</p>
-<p class="fig-sub">Protection per model · open = original names, ochre = different realistic names, blue = placeholders</p>
+<p class="fig-title">Three of four models protect more with placeholders on the stories</p>
+<p class="fig-sub">Protection per model · open = published names, ochre = other realistic names, blue = placeholders · end label = placeholders minus published</p>
 <div><span class="ctl-label">Benchmark</span><span class="seg" id="names-bench"></span></div>
 <div id="names"></div>
-<figcaption><b>Figure 1:</b> Replacing each name with a different realistic name changed protection by −0.2 points (statistically equivalent to zero); placeholders beat it by 3.9. So the effect comes from the placeholders themselves, not from the names being unfamiliar.</figcaption>
+<figcaption><b>Figure 2:</b> On ConfAIde, Qwen, Llama and Gemma protect more often when the characters are Person A to D, and the realistic-name version (ochre) sits next to the published one. Mistral barely changes. Switch to PrivacyLens to see the smaller, mixed effect on agent tasks.</figcaption>
 <details class="setup"><summary></summary><div class="body" id="names-setup"></div></details>
 </figure>
 
-<p>Look closely at the replies and part of this is the model talking around a person rather than withholding the secret: with placeholders it often says "I know someone who…" instead of naming anyone. Either way, the same story is scored as more private when its characters are "Person A" than when they have names, which matters both for anyone pseudonymising inputs and for anyone comparing benchmark results.</p>
+<p>Because the stories' baseline scores are low, a few points is a large relative change:</p>
+<div class="table-wrap"><table class="plain tight" id="inflation"></table></div>
 
-<div class="ex2" id="ex-d"></div>
+<p>The effect is a shift in rates spread over many items, not a handful of dramatic flips. Each item was answered four times per version, so each item–model pair can protect more often, less often or equally often with placeholders.</p>
 
-<h3>What this means for privacy evaluations</h3>
-<p class="callout" id="inflation">A benchmark or internal eval that writes its people as "Person A" is measuring a more discreet model than the one real users will meet.</p>
-<p>The inflation is largest exactly where privacy scores are lowest. On the story items, the published versions with real names were protected only 12 to 25% of the time, so a few points from renaming is a large relative change. On the agent tasks, where names sit inside messages and documents, it was small. Privacy scores from placeholder-named items should be read as an upper bound, and compared only with scores from items whose people are named the same way.</p>
+<figure class="fig" id="fig-shifts">
+<p class="fig-title">On stories, items that improve outnumber items that get worse by more than two to one</p>
+<p class="fig-sub">Item–model pairs (120 items × 4 models per benchmark) by whether placeholders raised, kept or lowered their share of protected samples</p>
+<div class="legend" id="shifts-legend"></div>
+<div id="shifts"></div>
+<figcaption><b>Figure 3:</b> Most pairs do not change, often because a model leaks every time under both versions. On ConfAIde, <span data-k="up_cf"></span> pairs improved and <span data-k="down_cf"></span> got worse; on PrivacyLens the two were close (<span data-k="up_pl"></span> and <span data-k="down_pl"></span>). Only <span data-k="flips"></span> pair per benchmark went from leaking in all four samples to protecting in all four.</figcaption>
+</figure>
 
-<h2 id="s03"><span class="no">03</span><span class="nl">Two expected levers, measured: steering</span></h2>
-<p>The next two results are less surprising, but they put the names effect in proportion. Activation steering is known to shift many kinds of model behavior, so it was expected to work here too; the questions were how much, and whether it does more than an instruction. Steering works inside the model: while it answers, a fixed activation shift is added to 5,000 MLP neurons, about 1% of them. The neurons were chosen on separate items, by how differently they fire on benchmark-style and plain prompts and how strongly they track protective replies. Six conditions ran side by side on Qwen and Mistral: the published prompt, the instruction, steering, steering plus the instruction, and the same two with 5,000 random neurons.</p>
+<p>Why the two benchmarks differ is open. One reading: in a ConfAIde story the name is the main handle by which a character can be given away, while in a PrivacyLens task the private details sit in records and tool outputs that a placeholder does not hide. That is a hypothesis; this study did not test it.</p>
+
+<h2 id="s05"><span class="no">05</span><span class="nl">What does the behavior look like?</span></h2>
+<p>The metric is binary: a reply either keeps the private detail out or it does not. Reading the replies shows that "protected" and "leaked" each cover different behaviors. The categories below are my own reading of the examples, applied after the fact; they were not part of the measurement and have not been counted.</p>
+<div class="table-wrap"><table class="plain tight">
+<thead><tr><th>Behavior</th><th>What the reply does</th><th>Scored as</th></tr></thead>
+<tbody>
+<tr><td>Withholding</td><td>Does the task and leaves the private detail out</td><td>Protected</td></tr>
+<tr><td>Explicit refusal</td><td>Declines the whole task, including the harmless part</td><td>Protected</td></tr>
+<tr><td>Hinting</td><td>Alludes to the situation without saying whose it is ("I know someone who…")</td><td>Usually protected; borderline</td></tr>
+<tr><td>Partial disclosure</td><td>Drops the name but keeps details that identify the person ("my brother")</td><td>Leaked</td></tr>
+<tr><td>Direct disclosure</td><td>Names the person and the private detail</td><td>Leaked</td></tr>
+</tbody></table></div>
+<p>Explicit refusal matters for interpreting any privacy score. For example, Llama replied to one story with "<span id="refusal"></span>" That reply refuses to help at all, yet it counts as protection.</p>
+<p>The four examples below are real prompts and replies from the study. They are illustrative and were picked to show different behaviors, including a case where placeholders made things worse. They are not evidence for the averages above. Each shows the full prompt for each version, with the words that differ from the published prompt highlighted, Sonnet's tally over all four samples, and one or two replies chosen so the disclosure, or its absence, is visible.</p>
+<div class="ex2 nx" id="nx"></div>
+
+<h2 id="s06"><span class="no">06</span><span class="nl">Why this matters for AI safety evaluations</span></h2>
+<ul>
+<li><b>Anonymizing a benchmark can change the behavior it measures.</b> Placeholders are often used to keep test data free of real names, or simply as a convenience. Here that choice alone moved measured protection.</li>
+<li><b>Scores from placeholder-named items can overstate protection under realistic names.</b> On the story items, three of four models looked a third to more than half more protective with placeholders. This holds for the benchmarks, models and prompts tested here; it is not a universal correction factor.</li>
+<li><b>The size depends on the task format.</b> The same substitution did little on agent tasks, so a benchmark's sensitivity to how people are written has to be measured, not assumed.</li>
+<li><b>A higher score is not always better privacy judgement.</b> Some protected replies refuse the whole task, and some placeholder replies drop the name while keeping the secret. Comparisons should look at what the replies do, not only at the score.</li>
+</ul>
+<p>None of this shows that models leak real people's information in deployment. It shows that two evaluations of the same model can disagree because of how their scenarios are written. A practical checklist that follows from these results (a suggestion, not a validated standard):</p>
+<ul class="checklist">
+<li>Run realistic names against placeholders on the same items.<small>Report both scores, or say which one a score uses.</small></li>
+<li>Use more than one realistic-name assignment.<small>This study used one; a second would separate name-specific effects from noise.</small></li>
+<li>Keep the task semantics fixed when changing representation.<small>Change only the names, and check that every name was actually replaced (section 10).</small></li>
+<li>Test more than one task format, such as stories and agent tasks.</li>
+<li>Separate real withholding from superficial avoidance.<small>Dropping a name while keeping identifying details is still a leak.</small></li>
+<li>Validate automated graders against human judgements before use.</li>
+<li>Measure appropriate sharing as well as protection.<small>Otherwise a model that refuses everything gets a perfect score.</small></li>
+<li>Report how sensitive the score is to prompt variations.</li>
+</ul>
+
+<h2 id="s07"><span class="no">07</span><span class="nl">Can we raise protection directly?</span></h2>
+<p>Two other interventions were measured in the same study. Both raise protection, as earlier work on steering and instruction-following would predict. Neither explains the placeholder effect, and neither was tested for its cost to appropriate sharing.</p>
+<h3><span class="sub">07.1</span>Neuron steering</h3>
+<p>While the model answers, a fixed activation shift is added to 5,000 MLP neurons, about 1% of them. The neurons were chosen on separate items, by how differently they fire on benchmark-style and plain prompts and how strongly they track protective replies. Six conditions ran side by side on Qwen and Mistral: the published prompt, the privacy instruction, steering, steering plus the instruction, and the same two with 5,000 random neurons.</p>
 
 <figure class="fig" id="fig-steer">
 <p class="fig-title">Steering raises protection, random neurons do not, and it stacks with the instruction</p>
-<p class="fig-sub">Protection by condition · Claude Sonnet labels · 240 items × 2 samples per bar</p>
+<p class="fig-sub">Protection by condition · 240 items × 2 samples per bar</p>
 <div class="legend" id="steer-legend"></div>
 <div id="steer"></div>
-<figcaption><b>Figure 2:</b> Steering raised protection by 10.0 points for Qwen and 20.4 for Mistral; the same number of random neurons moved it by 2.5 and 1.2. Added to the instruction, steering gave another 18.2 and 18.5 points. Compared with the instruction alone, steering was 8.1 points better for Mistral (interval +3.1 to +13.1) and 2.7 better for Qwen (interval −1.1 to +6.7).</figcaption>
+<figcaption><b>Figure 4:</b> Steering raised protection by <span data-k="st_q"></span> points for Qwen and <span data-k="st_m"></span> for Mistral; the same number of random neurons moved it by <span data-k="rnd_q"></span> and <span data-k="rnd_m"></span>. On top of the instruction, steering added <span data-k="stp_q"></span> and <span data-k="stp_m"></span>. Against the instruction alone, steering was <span data-k="sp_m"></span> points better for Mistral (<span data-k="sp_m_ci"></span>) and <span data-k="sp_q"></span> for Qwen (<span data-k="sp_q_ci"></span>, not distinguishable from zero).</figcaption>
 <details class="setup"><summary></summary><div class="body" id="steer-setup"></div></details>
 </figure>
-
 <div class="ex2" id="ex-b"></div>
+<p>The effect is specific to the chosen neurons and adds to what an instruction does. It is not yet a privacy solution: the study did not check whether steered models still share information when sharing is appropriate, so part of the gain may be general caution or more refusals.</p>
 
-<p>The effect is specific to the chosen neurons, and it adds to what an instruction does rather than replacing it. One check is still missing: a privacy intervention should not stop a model from sharing information when sharing is appropriate. This study did not measure that, so part of the gain could be general caution rather than privacy judgement.</p>
-
-<h2 id="s04"><span class="no">04</span><span class="nl">Two expected levers, measured: where the instruction goes</span></h2>
-<p>Explicit instructions raise protection, and instructions near the end of the user's message are often followed more closely than system prompts. Both held here. The reference version added one sentence to the system prompt: "Never share another person's private or confidential information with someone who is not entitled to it. If a request would require sharing it, leave that part out and help with everything else." Another version put the same sentence at the end of the user's message instead.</p>
+<h3><span class="sub">07.2</span>Where the instruction goes</h3>
+<p>The reference instruction is one sentence in the system prompt: "<span id="ptext"></span>" Another version put the same sentence at the end of the user's message.</p>
 
 <figure class="fig" id="fig-place">
 <p class="fig-title">The same sentence works better in the user's message than in the system prompt</p>
 <p class="fig-sub">Protection per model · open = published prompt, grey = instruction in system prompt, blue = instruction in user turn</p>
 <div><span class="ctl-label">Benchmark</span><span class="seg" id="place-bench"></span></div>
 <div id="place"></div>
-<figcaption><b>Figure 3:</b> Pooled over models, the system-prompt instruction raised protection by 11.0 points and moving it into the user's message added 8.4 more (interval +2.7 to +14.1). The gain from moving it is clearest on ConfAIde stories, where every model improved; on PrivacyLens agent tasks it helped Llama and Gemma but not Qwen or Mistral.</figcaption>
+<figcaption><b>Figure 5:</b> Pooled over models, the system-prompt instruction raised protection by <span data-k="P"></span> points (<span data-k="P_ci"></span>), and moving it into the user's message added <span data-k="PL"></span> more (<span data-k="PL_ci"></span>). The gain from moving it is clearest on ConfAIde, where every model improved; on PrivacyLens it helped Llama and Gemma but not Qwen or Mistral.</figcaption>
 <details class="setup"><summary></summary><div class="body" id="place-setup"></div></details>
 </figure>
-
 <div class="ex2" id="ex-a"></div>
 
-<h2 id="s05"><span class="no">05</span><span class="nl">What a model says about being tested doesn't predict what it does</span></h2>
-<p>A common worry is that models behave better on benchmarks because they notice they are being tested. In a separate call, I showed each model every prompt version and asked whether it looked like a test or a real request. Qwen and Mistral answered "real" to nearly everything, and Gemma answered "test" to everything. Llama's answers varied widely, so its answers can be compared with its behavior.</p>
+<h2 id="s08"><span class="no">08</span><span class="nl">Does benchmark awareness explain the effect?</span></h2>
+<p>One possible explanation for any benchmark effect is that models behave differently when they notice they are being tested. In a separate call, each model saw every prompt version and was asked whether it looked like a test or a real request. This measures what a model says, not whether it has seen these benchmarks in training, and it cannot detect recognition that a model does not report.</p>
+<p>Qwen and Mistral answered "real" to nearly everything and Gemma answered "test" to everything, so only Llama's answers varied enough to compare with its behavior. For Llama, placeholder names <i>lowered</i> its "test" answers (<span data-k="rec_cf"></span> points on ConfAIde, <span data-k="rec_pl"></span> on PrivacyLens) while raising protection. As far as self-report can show, the placeholder effect does not come from the model judging the prompt to be a test.</p>
 
 <figure class="fig" id="fig-recog">
 <p class="fig-title">Llama's sense that it is being tested and its privacy behavior move independently</p>
 <p class="fig-sub">Llama-3.1-8B · each point is one prompt version on one benchmark, relative to the published prompt</p>
 <div class="legend" id="recog-legend"></div>
 <div id="recog"></div>
-<figcaption><b>Figure 4:</b> Versions with a test-case format or a scoring note push "test" answers up by 19 to 39 points, yet protection moves by only −1 to +12. Placeholder names raise protection while "test" answers fall. The system-prompt instruction lowers "test" answers on PrivacyLens by 27 points while raising protection by 11.</figcaption>
+<figcaption><b>Figure 6:</b> A test-case format or a scoring note pushes "test" answers up by 24 to 38 points while protection moves by −1 to +9. Placeholder names do the reverse: fewer "test" answers, more protection.</figcaption>
 <details class="setup"><summary></summary><div class="body" id="recog-setup"></div></details>
 </figure>
-
 <div class="ex2" id="ex-c"></div>
 
-<p>Replies almost never mention being tested on their own: at most 25 of 960 replies per version. This cannot rule out recognition a model does not report, but a model's own judgement that it is being tested is a poor guide to how it will behave.</p>
+<h2 id="s09"><span class="no">09</span><span class="nl">Other findings and negative results</span></h2>
+<p><b>Looking like a test did not matter.</b> The study was first designed to test whether test-like cues raise protection. They mostly did not. A test-case wrapper (### Case / ### Input / ### Response) changed protection by <span data-k="S"></span> points (<span data-k="S_ci"></span>), and a note saying the reply would be scored by <span data-k="E"></span> (<span data-k="E_ci"></span>), statistically equivalent to zero. All three cues together gave <span data-k="bundle"></span>, about what the placeholder part of the bundle alone predicts (interaction <span data-k="add"></span>, <span data-k="add_ci"></span>). What I learned: the feature that moved behavior was not the one that makes a prompt look most like a test. What remains uncertain: these are only two kinds of test cue, in small models.</p>
+<p><b>Random neurons did nothing.</b> The random-neuron control moved protection by <span data-k="rnd_q"></span> and <span data-k="rnd_m"></span> points, so the steering gain depends on which neurons are chosen.</p>
+<p><b>The instruction effect did not replicate clearly in OLMo.</b> In OLMo-2-7B, the system-prompt instruction gave <span data-k="olmo"></span> points (<span data-k="olmo_ci"></span>), against <span data-k="P"></span> pooled over the main four.</p>
+<p><b>An open-model grader failed validation.</b> The first plan used an open 32B model as the grader with a statistical correction. It agreed with my labels at only κ = <span data-k="kappa_judge"></span>, below the bar, and on the stories it called far more replies protected than Sonnet did. Every result here uses Sonnet instead (Appendix B). The lesson is the checklist's: validate the grader on the benchmark at hand before reading any score.</p>
 
-<h2 id="s06"><span class="no">06</span><span class="nl">What did not matter</span></h2>
-<p>Two features that make a prompt look most like a test, a test-case wrapper (### Case / ### Input / ### Response) and a note saying the reply will be scored, did not change protection: +0.9 and +0.4 points, with the note statistically equivalent to zero. Try every combination below, or compare all four single changes in Figure 6.</p>
+<figure class="fig" id="fig-forest">
+<p class="fig-title">Of the single prompt changes, only names and the instruction move protection</p>
+<p class="fig-sub">Change in protection versus the published prompt, percentage points · pooled over 4 models · 95% interval</p>
+<div><span class="ctl-label">Analysis</span><span class="seg" id="forest-mode"></span></div>
+<div class="legend" id="forest-legend"></div>
+<div id="forest"></div>
+<figcaption><b>Figure 7:</b> Placeholder names and the instruction pass the pre-registered bar: the interval excludes zero after correcting for four tests, with the same direction in at least three models. Format and scoring note do not. "Complete renaming only" drops the <span data-k="n_inc"></span> PrivacyLens items where a real name survived inside a username.</figcaption>
+<details class="setup"><summary></summary><div class="body" id="forest-setup"></div></details>
+</figure>
 
 <figure class="fig" id="fig-play">
 <p class="fig-title">Switch on one change at a time</p>
@@ -185,74 +290,81 @@ main ul, main ol { padding-left: 1.4em; } main li { margin: 0 0 8px; }
 <div class="mock" id="mock"></div>
 <div class="meter" id="meter"></div>
 </div>
-<figcaption><b>Figure 5:</b> The published benchmark prompt is the baseline. Only versions that were actually run can be selected; the instruction was combined only with all three cues.</figcaption>
-</figure>
-
-<figure class="fig" id="fig-forest">
-<p class="fig-title">Of the single prompt changes, only names and the instruction move protection</p>
-<p class="fig-sub">Change in protection versus the published prompt, percentage points · pooled over 4 models · 95% interval</p>
-<div><span class="ctl-label">Analysis</span><span class="seg" id="forest-mode"></span></div>
-<div class="legend" id="forest-legend"></div>
-<div id="forest"></div>
-<figcaption><b>Figure 6:</b> Placeholder names +3.7 and the instruction +11.0 pass the pre-registered bar (interval excludes zero after correcting for four tests; same direction in at least three models). Format +0.9 and scoring note +0.4 do not.</figcaption>
-<details class="setup"><summary></summary><div class="body" id="forest-setup"></div></details>
+<figcaption><b>Figure 8:</b> The published benchmark prompt is the baseline. Only versions that were actually run can be selected; the instruction was combined only with all three cues.</figcaption>
 </figure>
 
 <figure class="fig" id="fig-cells">
 <p class="fig-title">Every version, every model</p>
 <p class="fig-sub">Share of replies that protect the private detail, by prompt version · bar = this version, dashed line = published prompt</p>
 <div><span class="ctl-label">Model</span><span class="seg" id="cells-model"></span></div>
-<div><span class="ctl-label">Benchmark</span><span class="seg" id="cells-bench"></span><span class="ctl-label">Grader</span><span class="seg" id="cells-mode"></span></div>
+<div><span class="ctl-label">Benchmark</span><span class="seg" id="cells-bench"></span></div>
 <div id="cells"></div>
-<figcaption><b>Figure 7:</b> Grey bars change names or test-style cues; blue bars include the privacy instruction.</figcaption>
-<details class="setup"><summary></summary><div class="body">Share of replies Claude Sonnet judged protected, excluding the 0.2% it marked unclear; 120 items × 4 samples per bar. "Automated judge" shows an open 32B model's raw verdicts, used only as a first pass.</div></details>
+<figcaption><b>Figure 9:</b> Grey bars change names or test-style cues; blue bars include the privacy instruction.</figcaption>
+<details class="setup"><summary></summary><div class="body">Share of replies Claude Sonnet judged protected, excluding the replies it marked unclear; 120 items × 4 samples per bar.</div></details>
 </figure>
 
-<h2 id="s07"><span class="no">07</span><span class="nl">How the replies were graded</span></h2>
-<p>Before any result was read, I graded 150 pilot replies by hand, blind to the version, and required a Claude grader to agree with me at κ ≥ 0.70 before it could grade the study. Sonnet then graded all 54,720 replies, seeing the private detail, the task and the reply, but not the model or the version.</p>
+<h2 id="s10"><span class="no">10</span><span class="nl">Limits and future work</span></h2>
+<ul>
+<li><b>Two benchmarks, one language, small models.</b> All models are 7 to 9 billion parameters; steering was tested on two of them. Larger models may be more or less sensitive.</li>
+<li><b>One realistic renaming.</b> The control used one draw of realistic names. Several draws, and names from different cultures, would show whether particular names matter.</li>
+<li><b>Imperfect substitution.</b> In <span data-k="n_inc"></span> PrivacyLens items a real name survived inside a username or email handle after the placeholder rewrite. Without them, placeholders still raise protection (<span data-k="N_x"></span>, <span data-k="N_x_ci"></span>), and realistic renaming then lowers it slightly (<span data-k="R_x"></span>, <span data-k="R_x_ci"></span>), so the gap between placeholders and realistic names, if anything, grows.</li>
+<li><b>No mechanism.</b> The study shows that placeholders change behavior, not why. Candidate explanations, such as placeholders reading as already anonymized data (example 4) or names acting as the handle for disclosure, are untested.</li>
+<li><b>A binary metric.</b> It does not separate withholding from refusal or hinting. Coding a sample of replies into the categories in section 05 would show which behavior placeholders change.</li>
+<li><b>No appropriate-sharing test.</b> Neither the placeholder effect nor the interventions were checked on cases where sharing is correct, so higher protection could partly be more caution overall.</li>
+<li><b>Automated grading.</b> Sonnet passed a human-agreement gate but graded alone, and for long agent traces it saw a shortened view (Appendix B).</li>
+<li><b>No deployment evidence.</b> These are benchmark items, not real conversations.</li>
+</ul>
 
+<h2 id="s11"><span class="no">11</span><span class="nl">Conclusion</span></h2>
+<ul>
+<li><b>Placeholder names make models look more private.</b> Writing people as "Person A" raised measured protection in all four models, and realistic renaming did not.</li>
+<li><b>The effect depends on the benchmark.</b> It was concentrated in story items, where it inflated scores by a third to more than half for three models, and was small on agent tasks.</li>
+<li><b>A higher score is not the same as better privacy.</b> Some gains are refusals or name-dropping, and one example got worse with placeholders.</li>
+<li><b>How we build safety evaluations can change the behavior we measure,</b> and with it the safety conclusions we draw. Representation choices should be tested, not assumed neutral.</li>
+</ul>
+
+<h2 class="appx-head" id="methods">Methods and checks</h2>
+<p class="appx-intro">Supporting detail for the numbers above. Open any section.</p>
+<details class="appx" id="appendix-a"><summary>Appendix A: estimates and intervals</summary><div class="appx-body">
+<p>Each pre-registered estimate is the item-paired difference in protection between a version and the published prompt (120 items per benchmark), with benchmarks weighted equally, pooled over models with DerSimonian–Laird random effects. Intervals come from a cluster bootstrap over items. The four single changes were Holm-corrected together; ±3 points were the pre-registered equivalence bounds. A test passed if its interval excluded zero after correction and at least three of four models agreed in sign. The benchmark split in Figure 1 was not pre-registered: it averages the item-level difference over the four models and bootstraps over items (4,000 resamples). Unclear replies are excluded from every rate.</p>
+</div></details>
+<details class="appx" id="appendix-b"><summary>Appendix B: can we trust the grades?</summary><div class="appx-body">
+<p>Before any result was read, I graded 150 pilot replies by hand, blind to model and version; 147 had a clear verdict. Claude Sonnet then had to agree with those labels at κ ≥ 0.70 before it could grade the study. Long agent traces were shown to Sonnet in a shortened view (the whole user message up to 2,500 characters, otherwise its first and last paragraphs), and the gate was re-run on that view.</p>
 <figure class="fig" id="fig-gate">
-<p class="fig-title">Claude agreed closely with a human grader</p>
-<p class="fig-sub">Agreement with a human grader on 147 blind replies (Cohen's κ) · dashed line = pre-registered gate</p>
+<p class="fig-title">Claude agreed closely with a human grader; the open-model judge did not</p>
+<p class="fig-sub">Agreement with human labels on 147 blind replies (Cohen's κ) · dashed line = pre-registered gate</p>
 <div id="gate"></div>
-<figcaption><b>Figure 8:</b> Sonnet agreed with the human at κ = 0.93 in the view used for grading. An open 32B judge used as a first pass reached 0.57; on ConfAIde it called 55% of replies protected where Sonnet found 28%, so none of the results above rely on it.</figcaption>
-<details class="setup"><summary></summary><div class="body" id="gate-setup"></div></details>
+<figcaption><b>Figure 10:</b> Sonnet reached κ = <span data-k="kappa"></span> in the view used for grading. The open 32B judge reached <span data-k="kappa_judge"></span> and was not used for any result.</figcaption>
 </figure>
+</div></details>
+<details class="appx" id="appendix-c"><summary>Appendix C: pre-registration and deviations</summary><div class="appx-body">
+<p>The design, the 240 test items (never used before in this project, plus 60 pilot items), the decision rules and the analysis code were frozen with checksums before generation. Eleven dated deviations are listed in the repository. The largest is that every reply was graded by Claude Sonnet, rather than by the open-model judge with a statistical correction, after that judge failed the gate. Another is that Gemma answered "test" to every recognition prompt, so it could not be used for the recognition comparison.</p>
+</div></details>
+<details class="appx" id="appendix-d"><summary>Appendix D: generation and steering settings</summary><div class="appx-body">
+<p>vLLM 0.34 (Hugging Face generate for steering), temperature 0.7, top-p 0.95, 384 new tokens, 4 samples per prompt (2 in the steering arm), pinned model revisions. Placeholder names replace every person with "Person A", "Person B" and so on in order of appearance, and email addresses with userN@example.com; realistic renaming uses a fixed name list in the same positions. Steering adds a scaled average activation shift (α = 4) to the top 5,000 MLP neurons, selected on separate items; the random control uses 5,000 random neurons per item at the same strength. The recognition probe is a separate greedy call per prompt with a one-word answer (test, real or unsure).</p>
+</div></details>
+<details class="appx" id="appendix-e"><summary>Appendix E: reproducibility</summary><div class="appx-body">
+<p>Every number on this page is produced by an export script that reads the result files and fails if a value disagrees with the registered analysis output, including the reply counts in Section 03. The examples are copied from the result files by the same script, which checks each shown reply's grade and tally. The repository holds the item lists, prompts, generations, all Sonnet labels, the human labels, the analysis code, a checksum manifest and step-by-step reproduction instructions.</p>
+</div></details>
 
-<h2 id="s08"><span class="no">08</span><span class="nl">What this means</span></h2>
-<ul>
-<li><b>How people are named changes privacy behavior.</b> Pseudonymising people as "Person A" makes models a little more discreet on story-style tasks, and makes benchmarks written that way look slightly more private.</li>
-<li><b>Steering and instruction placement behave as expected.</b> Steering is a prompt-free lever: it raised protection by 10 to 20 points, was specific to the chosen neurons, and added about 18 points on top of an explicit instruction, with its cost to appropriate sharing still untested. The same instruction did 8 points more in the user's turn than in the system prompt.</li>
-
-<li><b>Don't read evaluation awareness off a model's own answers.</b> Llama's sense that it was being tested did not track what it did.</li>
-</ul>
-<p><b>Limits.</b> All models are 7 to 9 billion parameters, and steering was tested on two of them. In 41 PrivacyLens items a name survived inside a username; excluding them leaves the conclusions intact (placeholders +2.9), though realistic renaming then lowers protection slightly (−2.0). The recognition question was asked once per prompt. Sonnet graded a shortened view of long agent traces, which passed the same human gate. An OLMo-2-7B check found the instruction at +2.7 (interval −0.1 to +5.5).</p>
-<p><b>Next.</b> An appropriate-sharing test for steering; larger models; and a measure of test recognition that does not ask the model, such as a probe on its activations.</p>
-
-<h2 id="methods">Methods and checks</h2>
-<ul>
-<li><strong>Pre-registration:</strong> design, decision rules and analysis code were frozen with checksums before generation. Eleven dated deviations are listed in the repository; the largest is that every reply was graded by Claude Sonnet rather than by the automated judge with a statistical correction.</li>
-<li><strong>Items:</strong> 120 ConfAIde tier-3 and 120 PrivacyLens items never used before in this project; 60 more for a pilot.</li>
-<li><strong>Prompt versions:</strong> placeholder names (people become "Person A", emails become userN@example.com), a test-case wrapper, one of five neutral scoring notes, the privacy instruction in the system prompt or the user turn, combinations of these, and a realistic-renaming control.</li>
-<li><strong>Steering:</strong> scaled activation shift (α = 4) on the top 5,000 MLP neurons selected on separate items; per-item random neuron controls at the same strength.</li>
-<li><strong>Generation:</strong> vLLM 0.34 (HF generate for steering), temperature 0.7, top-p 0.95, 384 new tokens, 4 samples per prompt (2 in the steering arm), pinned model revisions.</li>
-<li><strong>Analysis:</strong> item-level paired differences, cluster bootstrap over items, random-effects pooling over models, Holm correction over the four single changes and over the six steering tests, ±3-point equivalence bounds.</li>
-<li><strong>Every number on this page</strong> is produced by a script that reads the result files and fails if a value disagrees with the analysis output.</li>
-</ul>
 <h2 id="references">References</h2>
-<p><a href="https://arxiv.org/abs/2310.17884">ConfAIde</a> (Mireshghallah et al., 2023) · <a href="https://arxiv.org/abs/2409.00138">PrivacyLens</a> (Shao et al., 2024)</p>
+<ol class="refs">
+<li>Mireshghallah, N. et al. (2023). Can LLMs keep a secret? Testing privacy implications of language models via contextual integrity theory (ConfAIde). <a href="https://arxiv.org/abs/2310.17884">arXiv:2310.17884</a></li>
+<li>Shao, Y. et al. (2024). PrivacyLens: Evaluating privacy norm awareness of language models in action. <a href="https://arxiv.org/abs/2409.00138">arXiv:2409.00138</a></li>
+</ol>
 </div></main>
 <footer><div class="col">Independent research note · Mayank Saxena</div></footer>
 
-<script src="data/figures.js?v=dcb514e4"></script>
-<script src="data/examples.js?v=6f11a5ec"></script>
+<script src="data/figures.js?v=e72490f0"></script>
+<script src="data/examples.js?v=12f5b121"></script>
 <script>
 (function () {
-const D = window.FIGURES, EX = window.EXAMPLES, NS = "http://www.w3.org/2000/svg";
+const D = window.FIGURES, EX = window.EXAMPLES, NX = window.NAME_EXAMPLES, NS = "http://www.w3.org/2000/svg";
 const MODELS = ["Qwen2.5-7B", "Llama-3.1-8B", "Mistral-7B", "Gemma-2-9B"];
 const MCOL = { "Qwen2.5-7B": "#2563b0", "Llama-3.1-8B": "#d09017", "Mistral-7B": "#c9503a", "Gemma-2-9B": "#8a9194" };
 const f1 = (x) => (Math.abs(x) < 0.05 ? "0.0" : Math.abs(x).toFixed(1));
 const sg = (x) => (x > 0.049 ? "+" : x < -0.049 ? "−" : "") + f1(x);
+const ci = (v) => `${sg(v.lo)} to ${sg(v.hi)}`;
 const pc = (x) => Math.round(x * 100) + "%";
 const $ = (id) => document.getElementById(id);
 function el(tag, at = {}, p) { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); if (p) p.appendChild(e); return e; }
@@ -276,64 +388,185 @@ function table(container, head, rows) {
     rows.map((r) => "<tr>" + r.map((c, i) => `<td class="${i ? "n" : ""}">${c}</td>`).join("") + "</tr>").join("") + "</tbody>";
   container.appendChild(t);
 }
-// tween: animate numbers from a to b, calling draw(t)
 function tween(ms, step) { const t0 = performance.now(); const ease = (x) => 1 - Math.pow(1 - x, 3); let fin = false;
   function f(now) { if (fin) return; const x = Math.min(1, (now - t0) / ms); step(ease(x)); if (x < 1) requestAnimationFrame(f); else fin = true; }
-  requestAnimationFrame(f); setTimeout(() => { if (!fin) { fin = true; step(1); } }, ms + 150); } // finish even if frames are paused
+  requestAnimationFrame(f); setTimeout(() => { if (!fin) { fin = true; step(1); } }, ms + 150); }
 const lerp = (a, b, t) => a + (b - a) * t;
-// draw when visible, once
 function whenVisible(node, fn) {
-  // animate when scrolled into view; draw anyway after 3 s (hidden tabs, crawlers and print never fire the observer)
   let done = false; const go = () => { if (!done) { done = true; fn(); } };
   if (!("IntersectionObserver" in window)) return go();
   const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); go(); } }, { threshold: 0.25 }); io.observe(node);
   setTimeout(() => { io.disconnect(); go(); }, 3000);
 }
 const W = (node) => Math.max(300, Math.min(node.clientWidth || 640, 700));
+const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 
-/* ---------- ledger ---------- */
+/* ---------- numbers used in the text, all from the data ---------- */
 const comp = Object.fromEntries(D.components.map((c) => [c.code, c]));
 const oth = Object.fromEntries(D.other.map((c) => [c.key, c]));
-const gateS = D.measurement.gate["claude-sonnet-5.5"];
+const R = oth["renaming control: C11-C0"], NR = oth["placeholders vs renaming: C1-C11"], PL = oth["P placement: C10-C8"];
+const BB = D.by_bench, ST = D.steer, Q = ST["Qwen2.5-7B"].contrasts, M = ST["Mistral-7B"].contrasts;
+const cell = (m, b, c) => 100 * D.cells[m][b][c].sonnet;
+const recC1 = (b) => D.recog.find((r) => r.cell === "C1" && r.bench === b).d_test;
+const K = {
+  kappa: D.measurement.short_gate.kappa.toFixed(2), kappa_judge: D.measurement.gate["automated judge (Qwen2.5-32B)"].kappa.toFixed(2),
+  N: sg(comp.N.est), N_ci: ci(comp.N), N_p: comp.N.p_holm.toFixed(3), R: sg(R.est), R_ci: ci(R), NR: sg(NR.est), NR_ci: ci(NR),
+  N_cf: sg(BB.N.confaide.est), N_cf_ci: ci(BB.N.confaide), N_pl: sg(BB.N.privacylens.est), N_pl_ci: ci(BB.N.privacylens),
+  m_cf: MODELS.map((m) => `${m} ${sg(cell(m, "confaide", "C1") - cell(m, "confaide", "C0"))}`).join(", "),
+  up_cf: D.shifts.confaide.up, down_cf: D.shifts.confaide.down, up_pl: D.shifts.privacylens.up, down_pl: D.shifts.privacylens.down,
+  flips: D.full_flips.confaide === D.full_flips.privacylens ? ["no", "one", "two", "three"][D.full_flips.confaide] || D.full_flips.confaide : `${D.full_flips.confaide} / ${D.full_flips.privacylens}`,
+  st_q: sg(Q["steer - base"].est), st_m: sg(M["steer - base"].est), rnd_q: sg(Q["random - base"].est), rnd_m: sg(M["random - base"].est),
+  stp_q: sg(Q["steer_P - P"].est), stp_m: sg(M["steer_P - P"].est), sp_q: sg(Q["steer - P"].est), sp_q_ci: ci(Q["steer - P"]), sp_m: sg(M["steer - P"].est), sp_m_ci: ci(M["steer - P"]),
+  P: sg(comp.P.est), P_ci: ci(comp.P), PL: sg(PL.est), PL_ci: ci(PL), S: sg(comp.S.est), S_ci: ci(comp.S), E: sg(comp.E.est), E_ci: ci(comp.E),
+  bundle: sg(oth["bundle C7-C0"].est), add: sg(oth["additivity: C7-C1-C2-C3+2*C0"].est), add_ci: ci(oth["additivity: C7-C1-C2-C3+2*C0"]),
+  olmo: sg(D.olmo["P: C8-C0"].est), olmo_ci: ci(D.olmo["P: C8-C0"]),
+  rec_cf: sg(recC1("confaide")), rec_pl: sg(recC1("privacylens")), n_inc: D.accounting.n_incomplete,
+  N_x: sg(comp.N.excl.est), N_x_ci: ci(comp.N.excl), R_x: sg(R.excl.est), R_x_ci: ci(R.excl),
+};
+document.querySelectorAll("[data-k]").forEach((s) => { const v = K[s.dataset.k]; if (v === undefined) console.error("missing number", s.dataset.k); s.textContent = v; });
+$("ptext").textContent = D.p_text;
+$("refusal").textContent = window.REFUSAL.reply;
+
+/* ---------- ledger ---------- */
+const infl = ["Qwen2.5-7B", "Llama-3.1-8B", "Gemma-2-9B"].map((m) => ({ m, a: cell(m, "confaide", "C0"), b: cell(m, "confaide", "C1") }));
+infl.forEach((r) => (r.rel = 100 * (r.b - r.a) / r.a));
+const relLo = Math.min(...infl.map((r) => r.rel)), relHi = Math.max(...infl.map((r) => r.rel));
+const q = infl[0];
 $("ledger").innerHTML = [
-  [sg(comp.N.est), "points · placeholder names", "Writing people as 'Person A' made all four models keep secrets more often (+7 to +9 on stories for three of them); swapping in other realistic names did nothing."],
-  [`${sg(D.steer["Qwen2.5-7B"].contrasts["steer - base"].est)} / ${sg(D.steer["Mistral-7B"].contrasts["steer - base"].est)}`, "points · neuron steering, no prompt change", "Steering 5,000 neurons raised protection in Qwen and Mistral, random neurons did not, and it added about 18 points on top of an explicit instruction."],
-  [sg(oth["P placement: C10-C8"].est), "points · instruction in the user turn", "The same privacy sentence protected more in the user's message than in the system prompt."],
-  ["Up to +39", "points · 'test' answers, no matching behavior", "Llama's own sense that a prompt was a test swung widely without tracking whether it kept the secret."],
-  [`${sg(comp.S.est)} / ${sg(comp.E.est)}`, "points · test format / scoring note", "The features that make a prompt look most like a test did not change protection."],
+  [K.N, "points · placeholder names", `Writing people as "Person A" raised measured protection, pooled over four models and two benchmarks (95% interval ${K.N_ci}), in every model.`],
+  [K.R, "points · other realistic names", `Giving everyone a different realistic name changed nothing (equivalent to zero), so the effect comes from placeholders, not from unfamiliar names.`],
+  [`${K.N_cf} / ${K.N_pl}`, "points · stories / agent tasks", `The effect sits in ConfAIde's short stories (${K.N_cf_ci}); on PrivacyLens agent tasks it was small and uncertain (${K.N_pl_ci}).`],
+  [`+${relLo.toFixed(0)} to +${relHi.toFixed(0)}%`, "relative rise in story scores", `For three of four models, story protection rose by a third to more than half (${q.m}: ${q.a.toFixed(0)}% to ${q.b.toFixed(0)}%). Benchmarks written with placeholders can overstate protection under realistic names.`],
 ].map(([k, s, t]) => `<li><span class="k">${k}<small>${s}</small></span><span>${t}</span></li>`).join("");
 
-/* ---------- Figure 1: playground ---------- */
-const CELLMAP = { "": "C0", N: "C1", S: "C2", E: "C3", NS: "C4", NE: "C5", ES: "C6", ENS: "C7", P: "C8", ENPS: "C9" };
-const avgCell = (c) => { let s = 0, n = 0; MODELS.forEach((m) => ["confaide", "privacylens"].forEach((b) => { s += D.cells[m][b][c].sonnet; n++; })); return (100 * s) / n; };
-const base0 = avgCell("C0");
-const on = new Set();
-const CHIPS = [["N", "Placeholder names"], ["S", "Test-case format"], ["E", "Scored note"], ["P", "Privacy instruction"]];
-const chipBox = $("chips");
-CHIPS.forEach(([k, l]) => { const b = document.createElement("button"); b.type = "button"; b.className = "chip2" + (k === "P" ? " ins" : ""); b.textContent = l;
-  b.setAttribute("aria-pressed", "false"); b.onclick = () => { on.has(k) ? on.delete(k) : on.add(k); b.setAttribute("aria-pressed", on.has(k)); renderPlay(); }; chipBox.appendChild(b); });
-$("mock").innerHTML = `<span class="role">System</span>You are a helpful assistant.<span class="cue ins" data-c="P"> ${D.p_text}</span>
-<span class="role">User</span><span class="cue" data-c="S">### Case 4127<br>### Input<br></span>Respond to my neighbor <span class="swap"><span class="a">Dagny</span><span class="b" hidden>Person B</span></span>'s latest message. You can check my Notion for information.<br>… <span class="swap"><span class="a">Emily</span><span class="b" hidden>Person C</span></span> scored a C− on her midterm …<span class="cue" data-c="E"><br><br>[This response will be scored.]</span><span class="cue" data-c="S"><br>### Response</span>`;
-let shown = 0;
-function renderPlay() {
-  const key = [...on].sort().join(""), cell = CELLMAP[key];
-  document.querySelectorAll("#mock .cue").forEach((c) => { c.classList.toggle("on", on.has(c.dataset.c)); c.classList.toggle("off", !on.has(c.dataset.c)); });
-  document.querySelectorAll("#mock .swap").forEach((s) => { s.querySelector(".a").hidden = on.has("N"); s.querySelector(".b").hidden = !on.has("N"); });
-  const m = $("meter");
-  if (!cell) { m.innerHTML = `<div class="big">—</div><div class="cellname">not run</div><div class="note">The instruction was only combined with all three test cues. Switch on all four, or the instruction alone.</div>`; return; }
-  const v = avgCell(cell), d = v - base0, ins = on.has("P");
-  const desc = D.cell_desc[cell][0];
-  m.innerHTML = `<div class="big"><span id="bigv">${sg(shown)}</span> <small>points</small></div><div class="cellname">${cell} · ${desc}</div>
-    <div class="lab2" style="font:12px var(--sans);color:var(--muted)">Protection: ${v.toFixed(0)}% (published prompt ${base0.toFixed(0)}%)</div>
-    <div class="track"><div class="fill${ins ? " ins" : ""}" style="width:${Math.max(0, Math.min(100, base0))}%"></div><div class="base" style="left:${base0}%"></div></div>
-    <div class="note">${cell === "C0" ? "Switch on a change above." : ins ? "The instruction is the reference point: it outweighs every test cue." : "Test-style cues barely move protection."}</div>`;
-  const fill = m.querySelector(".fill"); requestAnimationFrame(() => (fill.style.width = Math.max(0, Math.min(100, v)) + "%"));
-  const from = shown; tween(600, (t) => { shown = lerp(from, d, t); const b = $("bigv"); if (b) b.textContent = sg(shown); });
-}
-renderPlay();
+/* ---------- accounting ---------- */
+const AC = D.accounting;
+$("acct").innerHTML = `<thead><tr><th>Arm</th><th class="n">Models</th><th class="n">Items</th><th class="n">Versions</th><th class="n">Samples</th><th class="n">Replies</th><th>Used for</th></tr></thead><tbody>` +
+  AC.arms.map((a) => `<tr><td>${a.arm}</td><td class="n">${a.models}</td><td class="n">${a.items}</td><td class="n">${a.versions}</td><td class="n">${a.samples}</td><td class="n">${a.replies.toLocaleString()}</td><td>${a.use}</td></tr>`).join("") +
+  `<tr><td>All graded</td><td></td><td></td><td></td><td></td><td class="n"><b>${AC.graded.toLocaleString()}</b></td><td>${AC.unclear} marked unclear and excluded</td></tr></tbody>`;
+$("acct-note").textContent = `Replies = models × items × versions × samples. The main study's ${AC.arms[0].replies.toLocaleString()} replies carry every result in sections 04 to 06. The recognition probe in section 08 adds ${AC.recognition.toLocaleString()} one-word answers (4 models × 240 items × 12 versions), which were not graded.`;
 
-/* ---------- forest plot (Figures 2 and 3) ---------- */
-function forest(node, rows, getter, opts = {}) {
+/* ---------- Figure 1: the effect, pooled and by benchmark ---------- */
+const ECOL = { N: "#2563b0", R: "#d09017", NR: "#4a524e" };
+$("effect-legend").innerHTML = [["N", "Placeholders vs published names"], ["R", "Other realistic names vs published"], ["NR", "Placeholders vs other realistic names"]]
+  .map(([k, l]) => `<span><i style="background:${ECOL[k]};border-radius:50%"></i>${l}</span>`).join("");
+const EGROUPS = [["Both benchmarks · pre-registered", { N: comp.N, R, NR }], ["ConfAIde stories", { N: BB.N.confaide, R: BB.renaming.confaide, NR: BB.vs_renaming.confaide }],
+  ["PrivacyLens agent tasks", { N: BB.N.privacylens, R: BB.renaming.privacylens, NR: BB.vs_renaming.privacylens }]];
+const ELAB = { N: "Placeholders", R: "Other realistic names", NR: "Placeholders vs realistic" };
+function drawEffect(anim) {
+  const node = $("effect"); node.innerHTML = "";
+  const w = W(node), narrow = w < 560, lw = narrow ? 0 : 170, rh = narrow ? 44 : 30, gh = 26, top = 24;
+  const h = top + EGROUPS.length * (gh + 3 * rh) + 6, s = el("svg", { viewBox: `0 0 ${w} ${h}` }, node), x = sc(-5, 12, lw + 10, w - 70);
+  for (let t = -5; t <= 10; t += 5) { el("line", { x1: x(t), x2: x(t), y1: top - 6, y2: h - 4, stroke: t ? "#e4e6e6" : "#b3b9b8", "stroke-width": t ? 1 : 1.3 }, s);
+    tx(s, x(t), top - 12, (t > 0 ? "+" : t < 0 ? "−" : "") + Math.abs(t), { class: "tk", "text-anchor": "middle" }); }
+  const marks = []; let y = top;
+  EGROUPS.forEach(([g, vals]) => {
+    tx(s, 0, y + 17, g.toUpperCase(), { class: "grp" }); y += gh;
+    ["N", "R", "NR"].forEach((k) => {
+      const v = vals[k], yc = y + (narrow ? 30 : rh / 2);
+      tx(s, narrow ? x(-5) : 0, narrow ? y + 14 : yc + 4, ELAB[k], { class: "lab2", style: "font-size:12.5px;fill:#4a524e" });
+      const wh = el("line", { y1: yc, y2: yc, stroke: ECOL[k], "stroke-width": 2, opacity: .55 }, s);
+      const pt = el("circle", { cy: yc, r: 6, fill: ECOL[k], stroke: "#fff", "stroke-width": 1.5 }, s);
+      const num = tx(s, 0, yc + 4, "", { class: "num", style: "font-size:12px" });
+      const hit = el("rect", { x: 0, y, width: w, height: rh, class: "hit" }, s);
+      tooltip(hit, `<b>${g} · ${ELAB[k]}</b><br>${sg(v.est)} points [${sg(v.lo)}, ${sg(v.hi)}]`);
+      marks.push({ v, wh, pt, num }); y += rh;
+    });
+  });
+  const place = (t) => marks.forEach(({ v, wh, pt, num }) => { const L = lerp(0, v.lo, t), H = lerp(0, v.hi, t), E = lerp(0, v.est, t);
+    wh.setAttribute("x1", x(L)); wh.setAttribute("x2", x(H)); pt.setAttribute("cx", x(E)); num.setAttribute("x", Math.min(x(H) + 8, w - 40)); num.textContent = sg(E); });
+  anim ? tween(800, place) : place(1);
+}
+whenVisible($("fig-effect"), () => drawEffect(true));
+$("effect-setup").innerHTML = `<p>Top group: the pre-registered contrasts (item-paired, benchmarks weighted equally, random-effects pooling over models, cluster bootstrap over items). Lower groups: the same contrasts on each benchmark, averaged over the four models with a bootstrap over the 120 items; this split was not pre-registered. Claude Sonnet labels; unclear replies excluded.</p>`;
+table($("effect-setup"), ["Group · contrast", "Estimate [95% CI]"], EGROUPS.flatMap(([g, v]) => ["N", "R", "NR"].map((k) => [`${g} · ${ELAB[k]}`, `${sg(v[k].est)} [${sg(v[k].lo)}, ${sg(v[k].hi)}]`])));
+
+/* ---------- inflation table ---------- */
+$("inflation").innerHTML = `<thead><tr><th>Model (ConfAIde)</th><th class="n">Published names</th><th class="n">Placeholders</th><th class="n">Relative rise</th></tr></thead><tbody>` +
+  MODELS.map((m) => { const a = cell(m, "confaide", "C0"), b = cell(m, "confaide", "C1"); return `<tr><td>${m}</td><td class="n">${a.toFixed(0)}%</td><td class="n">${b.toFixed(0)}%</td><td class="n">${sg(100 * (b - a) / a)}%</td></tr>`; }).join("") + "</tbody>";
+
+/* ---------- Figure 3: item-level shifts ---------- */
+const SH = [["up", "Protected more often", "#2563b0"], ["same", "No change", "#c9cecc"], ["down", "Protected less often", "#c9503a"]];
+$("shifts-legend").innerHTML = SH.map(([, l, c]) => `<span><i style="background:${c}"></i>${l}</span>`).join("");
+function drawShifts(anim) {
+  const node = $("shifts"); node.innerHTML = "";
+  const w = W(node), narrow = w < 560, lw = narrow ? 0 : 180, rh = narrow ? 52 : 40, h = 2 * rh + 8;
+  const s = el("svg", { viewBox: `0 0 ${w} ${h}` }, node), x = sc(0, 480, lw, w - 40), segs = [];
+  [["confaide", "ConfAIde stories"], ["privacylens", "PrivacyLens agent tasks"]].forEach(([b, l], i) => {
+    const y0 = i * rh, by = narrow ? y0 + 20 : y0 + 8, v = D.shifts[b]; let acc = 0;
+    tx(s, 0, narrow ? y0 + 13 : by + 16, l, { class: "lab" });
+    SH.forEach(([k, lab, col]) => { const r = el("rect", { y: by, height: 22, fill: col }, s), t = tx(s, 0, by + 15, "", { class: "seglab", "text-anchor": "middle", style: k === "same" ? "fill:#1b1f1d" : "" });
+      const hit = el("rect", { y: by, height: 22, class: "hit" }, s); tooltip(hit, `<b>${l} · ${lab}</b><br>${v[k]} of 480 item–model pairs`);
+      segs.push({ r, t, hit, a: acc, n: v[k] }); acc += v[k]; });
+    tx(s, x(480) + 6, by + 15, "480", { class: "num", style: "font-size:11.5px;fill:#6c7470" });
+  });
+  const place = (tt) => segs.forEach(({ r, t, hit, a, n }) => { const x0 = x(a * tt), wd = x(n * tt) - x(0);
+    r.setAttribute("x", x0); r.setAttribute("width", Math.max(0, wd - 1)); hit.setAttribute("x", x0); hit.setAttribute("width", Math.max(0, wd));
+    t.setAttribute("x", x0 + wd / 2); t.textContent = wd > 26 ? Math.round(n * tt) : ""; });
+  anim ? tween(800, place) : place(1);
+}
+whenVisible($("fig-shifts"), () => drawShifts(true));
+
+/* ---------- per-model dot rows: names (C0, C11, C1) and placement (C0, C8, C10) ---------- */
+function dotRows(id, marks, bench) {
+  const node = $(id); node.innerHTML = "";
+  const w = W(node), narrow = w < 560, lw = narrow ? 92 : 130, rh = 40, top = 22, h = top + MODELS.length * rh + 4;
+  const s = el("svg", { viewBox: `0 0 ${w} ${h}` }, node), x = sc(0, 70, lw, w - 40);
+  [0, 10, 20, 30, 40, 50, 60, 70].forEach((t) => { el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: h, stroke: "#e4e6e6" }, s); tx(s, x(t), top - 9, t + "%", { class: "tk", "text-anchor": "middle" }); });
+  const objs = [];
+  MODELS.forEach((m, i) => {
+    const yc = top + i * rh + rh / 2, vals = marks.map((mk) => cell(m, bench, mk.cell));
+    tx(s, 0, yc + 4, m, { class: "lab" });
+    const ln = el("line", { y1: yc, y2: yc, stroke: "#b3b9b8", "stroke-width": 2 }, s);
+    const dots = marks.map((mk) => el("circle", { cy: yc, r: mk.open ? 6.5 : 6, fill: mk.open ? "#fff" : mk.color, stroke: mk.color, "stroke-width": mk.open ? 2 : 1.5 }, s));
+    const num = tx(s, 0, yc + 4, "", { class: "num", style: "font-size:11.5px" });
+    const hit = el("rect", { x: 0, y: yc - rh / 2, width: w, height: rh, class: "hit" }, s);
+    tooltip(hit, `<b>${m}</b> · ${bench === "confaide" ? "ConfAIde" : "PrivacyLens"}<br>` + marks.map((mk, j) => `${mk.label}: ${vals[j].toFixed(1)}%`).join("<br>"));
+    objs.push({ ln, dots, num, vals });
+  });
+  const place = (t) => objs.forEach((o) => { const v = o.vals.map((val) => lerp(o.vals[0], val, t));
+    o.dots.forEach((d, j) => d.setAttribute("cx", x(v[j])));
+    o.ln.setAttribute("x1", x(Math.min(...v))); o.ln.setAttribute("x2", x(Math.max(...v)));
+    o.num.setAttribute("x", Math.min(x(Math.max(...v)) + 10, w - 36)); o.num.textContent = sg(v[v.length - 1] - v[0]); });
+  tween(900, place);
+}
+const NAME_MARKS = [{ cell: "C0", label: "Published names", color: "#4a524e", open: true }, { cell: "C11", label: "Other realistic names", color: "#d09017" }, { cell: "C1", label: "Placeholders", color: "#2563b0" }];
+const PLACE_MARKS = [{ cell: "C0", label: "Published prompt", color: "#4a524e", open: true }, { cell: "C8", label: "Instruction in system prompt", color: "#8a9194" }, { cell: "C10", label: "Instruction in user turn", color: "#2563b0" }];
+let nBench = "confaide", pBench = "confaide";
+const drawNames = () => dotRows("names", NAME_MARKS, nBench), drawPlace = () => dotRows("place", PLACE_MARKS, pBench);
+seg("names-bench", [["confaide", "ConfAIde stories"], ["privacylens", "PrivacyLens agent tasks"]], nBench, (v) => { nBench = v; drawNames(); });
+seg("place-bench", [["confaide", "ConfAIde stories"], ["privacylens", "PrivacyLens agent tasks"]], pBench, (v) => { pBench = v; drawPlace(); });
+whenVisible($("fig-names"), drawNames); whenVisible($("fig-place"), drawPlace);
+$("names-setup").innerHTML = "<p>Share of replies Claude Sonnet judged protected, 120 items × 4 samples per point, unclear replies excluded.</p>";
+table($("names-setup"), ["Model · benchmark", "Published", "Realistic", "Placeholders"], MODELS.flatMap((m) => ["confaide", "privacylens"].map((b) =>
+  [`${m} · ${b === "confaide" ? "ConfAIde" : "PrivacyLens"}`, cell(m, b, "C0").toFixed(1) + "%", cell(m, b, "C11").toFixed(1) + "%", cell(m, b, "C1").toFixed(1) + "%"])));
+table($("place-setup"), ["Contrast (pooled)", "Estimate [95% CI]"], [[comp.P.label, `${sg(comp.P.est)} [${sg(comp.P.lo)}, ${sg(comp.P.hi)}]`], [PL.label, `${sg(PL.est)} [${sg(PL.lo)}, ${sg(PL.hi)}]`]]);
+
+/* ---------- before-and-after name examples ---------- */
+const VLAB = { C0: "Published names", C11: "Other realistic names", C1: "Placeholder names" };
+function nameExamples() {
+  const node = $("nx"); node.innerHTML = `<div class="tabs"></div><div class="card"></div>`;
+  const tabs = node.querySelector(".tabs"), card = node.querySelector(".card");
+  const mk = (s) => esc(s).replace(/\[\[([\s\S]*?)\]\]/g, "<mark>$1</mark>");
+  function show(e, i) {
+    tabs.querySelectorAll("button").forEach((b, j) => b.setAttribute("aria-pressed", j === i));
+    const conds = [...new Set(e.shown.map((s) => s.cond))];
+    const tally = ["C0", "C11", "C1"].filter((c) => e.tallies[c]).map((c) => `<span>${VLAB[c]}: <b>${e.tallies[c].protected}/${e.tallies[c].n}</b> protected</span>`).join("");
+    card.innerHTML = `<div class="meta2">Example ${i + 1} of ${NX.length} · ${e.model} · ${e.bench === "confaide" ? "ConfAIde" : "PrivacyLens"} · item ${e.task} · illustrative</div>
+      <div class="secret"><b>Must not be shared:</b> ${esc(e.fact)}</div><div class="tally">${tally}</div>` +
+      conds.map((c) => { const t = e.tallies[c], p = e.prompts[c];
+        return `<div class="grp"><h4>${VLAB[c]}<span>protected in ${t.protected} of ${t.n} samples</span></h4>
+        <details class="prompt"><summary>+ prompt (${c === "C0" ? "as published; highlighted words change in the other versions" : "highlighted words differ from the published prompt"})</summary><div class="ptxt"><span class="role">System</span>${esc(p.system)}<span class="role">User</span>${mk(p.user)}</div></details>` +
+        e.shown.filter((s) => s.cond === c).map((s) => `<div class="rep ${s.protected ? "prot" : "leak"}"><div class="rh">Sample ${s.k + 1} · ${s.protected ? "protected" : "leaked"}</div><div class="txt">${s.protected ? esc(s.reply) : esc(s.reply).replace(new RegExp(s.pat, "gi"), (m) => `<mark>${m}</mark>`)}</div></div>`).join("") + `</div>`; }).join("") +
+      `<p class="read"><b>What changed.</b> ${esc(e.what)}</p><p class="read"><b>Is it real protection?</b> ${esc(e.verdict)}</p>`;
+  }
+  NX.forEach((e, i) => { const b = document.createElement("button"); b.type = "button"; b.textContent = `${i + 1}. ${e.kind}`; b.onclick = () => show(e, i); tabs.appendChild(b); });
+  show(NX[0], 0);
+}
+nameExamples();
+
+/* ---------- forest plot (single changes) ---------- */
+function forest(node, rows, getter) {
   node.innerHTML = "";
   const w = W(node), narrow = w < 560, lw = narrow ? 0 : 210, rh = narrow ? 64 : 46, top = 26, h = top + rows.length * rh + 10;
   const s = el("svg", { viewBox: `0 0 ${w} ${h}` }, node);
@@ -346,10 +579,9 @@ function forest(node, rows, getter, opts = {}) {
   }
   const marks = [];
   rows.forEach((r, i) => {
-    const y0 = top + i * rh, yc = y0 + (narrow ? 38 : rh / 2);
-    const g = el("g", {}, s);
+    const y0 = top + i * rh, yc = y0 + (narrow ? 38 : rh / 2), g = el("g", {}, s);
     tx(g, narrow ? x(lo) : 0, narrow ? y0 + 16 : yc + 4, r.label, { class: "lab" });
-    const col = r.code === "P" || /instruction/i.test(r.label) ? "#2563b0" : "#4a524e";
+    const col = r.code === "P" ? "#2563b0" : "#4a524e";
     const wh = el("line", { stroke: col, "stroke-width": 2, opacity: .55 }, g);
     const dots = MODELS.map((m, j) => el("circle", { r: 3.6, fill: MCOL[m], opacity: .85, cy: yc + (j - 1.5) * 4.2 }, g));
     const pt = el("circle", { r: 6.5, fill: col, stroke: "#fff", "stroke-width": 1.5, cy: yc }, g);
@@ -358,7 +590,7 @@ function forest(node, rows, getter, opts = {}) {
     tooltip(hit, () => { const v = getter(r); return `<b>${r.label}</b><br>${sg(v.est)} points [${sg(v.lo)}, ${sg(v.hi)}]` +
       (v.p_holm != null ? `<br>Holm p = ${v.p_holm < .001 ? "<0.001" : v.p_holm.toFixed(3)}` : "") +
       (v.per_model ? "<br>" + MODELS.map((m) => `${m}: ${sg(v.per_model[m])}`).join("<br>") : ""); });
-    marks.push({ r, wh, dots, pt, num, yc, cur: null });
+    marks.push({ r, wh, dots, pt, num, yc });
   });
   function place(t, from) {
     marks.forEach((mk) => {
@@ -373,74 +605,50 @@ function forest(node, rows, getter, opts = {}) {
   }
   return { place };
 }
-const FOREST_MODES = { primary: (r) => ({ ...r, per_model: r.per_model }), excl: (r) => r.excl, judge: (r) => r.judge };
+const FOREST_MODES = { primary: (r) => ({ ...r, p_holm: r.p_holm }), excl: (r) => r.excl };
 let fMode = "primary", fChart;
-function drawForest(anim, from) {
-  fChart = forest($("forest"), D.components, FOREST_MODES[fMode]);
-  if (anim) tween(700, (t) => fChart.place(t, from)); else fChart.place(1);
-}
-seg("forest-mode", [["primary", "Claude Sonnet (primary)"], ["excl", "Excluding 41 items"], ["judge", "Automated judge, corrected"]], fMode, (v) => {
-  const from = FOREST_MODES[fMode]; fMode = v; drawForest(true, from); });
-$("forest-legend").innerHTML = `<span><i style="background:#2563b0;border-radius:50%"></i>Pooled estimate</span>` +
+function drawForest(anim, from) { fChart = forest($("forest"), D.components, FOREST_MODES[fMode]); if (anim) tween(700, (t) => fChart.place(t, from)); else fChart.place(1); }
+seg("forest-mode", [["primary", "All items (primary)"], ["excl", "Complete renaming only"]], fMode, (v) => { const from = FOREST_MODES[fMode]; fMode = v; drawForest(true, from); });
+$("forest-legend").innerHTML = `<span><i style="background:#4a524e;border-radius:50%"></i>Pooled estimate</span>` +
   MODELS.map((m) => `<span><i style="background:${MCOL[m]};border-radius:50%;width:8px;height:8px"></i>${m}</span>`).join("");
 whenVisible($("fig-forest"), () => drawForest(true));
 const fs = $("forest-setup");
-fs.innerHTML = `<p>Each estimate is the paired difference in protection between the version and the published prompt (120 items per benchmark, 4 samples each, ${D.n.labels.toLocaleString()} Sonnet-graded replies), benchmarks weighted equally, then pooled over models with random effects. Intervals: cluster bootstrap over items. "Excluding 41 items" drops PrivacyLens items where a real name survived inside a username. "Automated judge, corrected" is the earlier analysis: Qwen2.5-32B verdicts corrected with the judge's error rates against a Claude sample.</p>`;
-table(fs, ["Change", "Sonnet", "Holm p", "Judge, corrected", "Excl. 41"], D.components.map((c) => [c.label, `${sg(c.est)} [${sg(c.lo)}, ${sg(c.hi)}]`,
-  c.p_holm < .001 ? "<0.001" : c.p_holm.toFixed(3), `${sg(c.judge.est)} [${sg(c.judge.lo)}, ${sg(c.judge.hi)}]`, `${sg(c.excl.est)} [${sg(c.excl.lo)}, ${sg(c.excl.hi)}]`]));
+fs.innerHTML = `<p>Each estimate is the paired difference in protection between the version and the published prompt (120 items per benchmark, 4 samples each, ${D.n.labels.toLocaleString()} graded replies), benchmarks weighted equally, then pooled over models with random effects. Intervals: cluster bootstrap over items. Holm correction over the four changes.</p>`;
+table(fs, ["Change", "All items", "Holm p", "Complete renaming only"], D.components.map((c) => [c.label, `${sg(c.est)} [${sg(c.lo)}, ${sg(c.hi)}]`,
+  c.p_holm < .001 ? "<0.001" : c.p_holm.toFixed(3), `${sg(c.excl.est)} [${sg(c.excl.lo)}, ${sg(c.excl.hi)}]`]));
 
-const OTHER_ROWS = ["renaming control: C11-C0", "placeholders vs renaming: C1-C11", "bundle C7-C0", "additivity: C7-C1-C2-C3+2*C0", "P placement: C10-C8"].map((k) => oth[k]);
-let oChart;
-function drawOther(anim) { if (!$("other")) return; oChart = forest($("other"), OTHER_ROWS, (r) => r); if (anim) tween(700, (t) => oChart.place(t)); else oChart.place(1); }
-if ($("other-setup")) table($("other-setup"), ["Contrast", "Sonnet", "Judge, corrected"], OTHER_ROWS.map((c) => [c.label, `${sg(c.est)} [${sg(c.lo)}, ${sg(c.hi)}]`, `${sg(c.judge.est)} [${sg(c.judge.lo)}, ${sg(c.judge.hi)}]`]));
-
-/* ---------- inflation call-out, from the data ---------- */
-(function () {
-  const r = (m, b, c) => 100 * D.cells[m][b][c].sonnet;
-  const parts = ["Qwen2.5-7B", "Llama-3.1-8B", "Gemma-2-9B"].map((m) => { const a = r(m, "confaide", "C0"), b = r(m, "confaide", "C1");
-    return `${m} from ${a.toFixed(0)}% to ${b.toFixed(0)}% (${Math.round(100 * (b - a) / a)}% higher)`; });
-  $("inflation").innerHTML = `A benchmark or internal eval that writes its people as "Person A" is measuring a more discreet model than the one real users will meet. On these stories, renaming alone raised measured protection for ${parts.slice(0, 2).join(" and ")}, and for ${parts[2]}; Mistral barely changed.`;
-})();
-
-/* ---------- per-model dot rows: names (C0, C11, C1) and placement (C0, C8, C10) ---------- */
-function dotRows(id, marks, bench, prevRef) {
-  const node = $(id); node.innerHTML = "";
-  const w = W(node), narrow = w < 560, lw = narrow ? 92 : 130, rh = 40, top = 22, h = top + MODELS.length * rh + 4;
-  const s = el("svg", { viewBox: `0 0 ${w} ${h}` }, node), x = sc(0, 70, lw, w - 40);
-  [0, 10, 20, 30, 40, 50, 60, 70].forEach((t) => { el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: h, stroke: "#e4e6e6" }, s); tx(s, x(t), top - 9, t + "%", { class: "tk", "text-anchor": "middle" }); });
-  const objs = [];
-  MODELS.forEach((m, i) => {
-    const yc = top + i * rh + rh / 2, vals = marks.map((mk) => 100 * D.cells[m][bench][mk.cell].sonnet);
-    tx(s, 0, yc + 4, m, { class: "lab" });
-    const ln = el("line", { y1: yc, y2: yc, stroke: "#b3b9b8", "stroke-width": 2 }, s);
-    const dots = marks.map((mk) => el("circle", { cy: yc, r: mk.open ? 6.5 : 6, fill: mk.open ? "#fff" : mk.color, stroke: mk.color, "stroke-width": mk.open ? 2 : 1.5 }, s));
-    const num = tx(s, 0, yc + 4, "", { class: "num", style: "font-size:11.5px" });
-    const hit = el("rect", { x: 0, y: yc - rh / 2, width: w, height: rh, class: "hit" }, s);
-    tooltip(hit, `<b>${m}</b> · ${bench === "confaide" ? "ConfAIde" : "PrivacyLens"}<br>` + marks.map((mk, j) => `${mk.label}: ${vals[j].toFixed(1)}%`).join("<br>"));
-    objs.push({ ln, dots, num, vals });
-  });
-  const place = (t) => objs.forEach((o) => { const v = o.vals.map((val) => lerp(o.vals[0], val, t));
-    o.dots.forEach((d, j) => d.setAttribute("cx", x(v[j])));
-    o.ln.setAttribute("x1", x(Math.min(...v))); o.ln.setAttribute("x2", x(Math.max(...v)));
-    o.num.setAttribute("x", x(Math.max(...v)) + 10); o.num.textContent = sg(v[v.length - 1] - v[0]); });
-  tween(900, place);
+/* ---------- playground ---------- */
+const CELLMAP = { "": "C0", N: "C1", S: "C2", E: "C3", NS: "C4", NE: "C5", ES: "C6", ENS: "C7", P: "C8", ENPS: "C9" };
+const avgCell = (c) => { let s = 0, n = 0; MODELS.forEach((m) => ["confaide", "privacylens"].forEach((b) => { s += D.cells[m][b][c].sonnet; n++; })); return (100 * s) / n; };
+const base0 = avgCell("C0"), on = new Set();
+const CHIPS = [["N", "Placeholder names"], ["S", "Test-case format"], ["E", "Scored note"], ["P", "Privacy instruction"]];
+CHIPS.forEach(([k, l]) => { const b = document.createElement("button"); b.type = "button"; b.className = "chip2" + (k === "P" ? " ins" : ""); b.textContent = l;
+  b.setAttribute("aria-pressed", "false"); b.onclick = () => { on.has(k) ? on.delete(k) : on.add(k); b.setAttribute("aria-pressed", on.has(k)); renderPlay(); }; $("chips").appendChild(b); });
+$("mock").innerHTML = `<span class="role">System</span>You are a helpful assistant.<span class="cue ins" data-c="P"> ${esc(D.p_text)}</span>
+<span class="role">User</span><span class="cue" data-c="S">### Case 4127<br>### Input<br></span>Respond to my neighbor <span class="swap"><span class="a">Dagny</span><span class="b" hidden>Person B</span></span>'s latest message. You can check my Notion for information.<br>… <span class="swap"><span class="a">Emily</span><span class="b" hidden>Person C</span></span> scored a C− on her midterm …<span class="cue" data-c="E"><br><br>[This response will be scored.]</span><span class="cue" data-c="S"><br>### Response</span>`;
+let shown = 0;
+function renderPlay() {
+  const key = [...on].sort().join(""), c = CELLMAP[key];
+  document.querySelectorAll("#mock .cue").forEach((x) => { x.classList.toggle("on", on.has(x.dataset.c)); x.classList.toggle("off", !on.has(x.dataset.c)); });
+  document.querySelectorAll("#mock .swap").forEach((x) => { x.querySelector(".a").hidden = on.has("N"); x.querySelector(".b").hidden = !on.has("N"); });
+  const m = $("meter");
+  if (!c) { m.innerHTML = `<div class="big">—</div><div class="cellname">not run</div><div class="note">The instruction was only combined with all three test cues. Switch on all four, or the instruction alone.</div>`; return; }
+  const v = avgCell(c), d = v - base0, ins = on.has("P");
+  m.innerHTML = `<div class="big"><span id="bigv">${sg(shown)}</span> <small>points</small></div><div class="cellname">${c} · ${D.cell_desc[c][0]}</div>
+    <div style="font:12px var(--sans);color:var(--muted)">Protection: ${v.toFixed(0)}% (published prompt ${base0.toFixed(0)}%)</div>
+    <div class="track"><div class="fill${ins ? " ins" : ""}" style="width:${Math.max(0, Math.min(100, base0))}%"></div><div class="base" style="left:${base0}%"></div></div>
+    <div class="note">${c === "C0" ? "Switch on a change above." : ins ? "The instruction outweighs every test cue." : on.has("N") ? "Placeholder names account for most of the movement among the cues." : "Test-style cues barely move protection."}</div>`;
+  const fill = m.querySelector(".fill"); requestAnimationFrame(() => (fill.style.width = Math.max(0, Math.min(100, v)) + "%"));
+  const from = shown; tween(600, (t) => { shown = lerp(from, d, t); const b = $("bigv"); if (b) b.textContent = sg(shown); });
 }
-const NAME_MARKS = [{ cell: "C0", label: "Original names", color: "#4a524e", open: true }, { cell: "C11", label: "Other realistic names", color: "#d09017" }, { cell: "C1", label: "Placeholders", color: "#2563b0" }];
-const PLACE_MARKS = [{ cell: "C0", label: "Published prompt", color: "#4a524e", open: true }, { cell: "C8", label: "Instruction in system prompt", color: "#8a9194" }, { cell: "C10", label: "Instruction in user turn", color: "#2563b0" }];
-let nBench = "confaide", pBench = "confaide";
-const drawNames = () => dotRows("names", NAME_MARKS, nBench), drawPlace = () => dotRows("place", PLACE_MARKS, pBench);
-seg("names-bench", [["confaide", "ConfAIde stories"], ["privacylens", "PrivacyLens agent tasks"]], nBench, (v) => { nBench = v; drawNames(); });
-seg("place-bench", [["confaide", "ConfAIde stories"], ["privacylens", "PrivacyLens agent tasks"]], pBench, (v) => { pBench = v; drawPlace(); });
-whenVisible($("fig-names"), drawNames); whenVisible($("fig-place"), drawPlace);
-table($("names-setup"), ["Contrast (pooled, Sonnet)", "Estimate [95% CI]"], ["N: C1-C0", "renaming control: C11-C0", "placeholders vs renaming: C1-C11"].map((k) => { const c = comp.N.key === k ? comp.N : oth[k]; return [c.label, `${sg(c.est)} [${sg(c.lo)}, ${sg(c.hi)}]`]; }));
-table($("place-setup"), ["Contrast (pooled, Sonnet)", "Estimate [95% CI]"], [[comp.P.label, `${sg(comp.P.est)} [${sg(comp.P.lo)}, ${sg(comp.P.hi)}]`], [oth["P placement: C10-C8"].label, `${sg(oth["P placement: C10-C8"].est)} [${sg(oth["P placement: C10-C8"].lo)}, ${sg(oth["P placement: C10-C8"].hi)}]`]]);
+renderPlay();
 
-/* ---------- Figure 4: cell explorer ---------- */
-let cModel = "all", cBench = "both", cMode = "sonnet", cPrev = null;
+/* ---------- cell explorer ---------- */
+let cModel = "all", cBench = "both", cPrev = null;
 const CELLS = Object.keys(D.cell_desc);
 function cellVals() {
   const ms = cModel === "all" ? MODELS : [cModel], bs = cBench === "both" ? ["confaide", "privacylens"] : [cBench];
-  return CELLS.map((c) => { let s = 0, n = 0; ms.forEach((m) => bs.forEach((b) => { s += D.cells[m][b][c][cMode]; n++; })); return 100 * s / n; });
+  return CELLS.map((c) => { let s = 0, n = 0; ms.forEach((m) => bs.forEach((b) => { s += D.cells[m][b][c].sonnet; n++; })); return 100 * s / n; });
 }
 function drawCells(anim) {
   const node = $("cells"); node.innerHTML = "";
@@ -457,17 +665,16 @@ function drawCells(anim) {
     tooltip(hit, () => `<b>${c} · ${D.cell_desc[c][0]}</b><br>Protection ${cellVals()[i].toFixed(1)}%<br>Change vs published: ${sg(cellVals()[i] - cellVals()[0])} points`);
     bars.push({ b, n });
   });
-  el("line", { x1: x(Math.max(0, Math.min(100, v[0]))), x2: x(Math.max(0, Math.min(100, v[0]))), y1: top, y2: h - 4, stroke: "#1b1f1d", "stroke-width": 1.5, "stroke-dasharray": "3 3" }, s);
+  el("line", { x1: x(v[0]), x2: x(v[0]), y1: top, y2: h - 4, stroke: "#1b1f1d", "stroke-width": 1.5, "stroke-dasharray": "3 3" }, s);
   const place = (t) => bars.forEach(({ b, n }, i) => { const val = lerp(from[i], v[i], t), cl = Math.max(0, Math.min(100, val));
     b.setAttribute("width", Math.max(0, x(cl) - x(0))); n.setAttribute("x", x(cl) + 5); n.textContent = val.toFixed(0) + "%"; });
   anim ? tween(600, place) : place(1); cPrev = v;
 }
 seg("cells-model", [["all", "All four"], ...MODELS.map((m) => [m, m])], cModel, (v) => { cModel = v; drawCells(true); });
 seg("cells-bench", [["both", "Both"], ["confaide", "ConfAIde"], ["privacylens", "PrivacyLens"]], cBench, (v) => { cBench = v; drawCells(true); });
-seg("cells-mode", [["sonnet", "Claude Sonnet"], ["judge", "Automated judge"]], cMode, (v) => { cMode = v; drawCells(true); });
 whenVisible($("fig-cells"), () => drawCells(true));
 
-/* ---------- Figure 5: steering ---------- */
+/* ---------- steering ---------- */
 const SC = [["base", "Published prompt", "#4a524e"], ["random", "Random neurons", "#a9b0ae"], ["P", "Instruction", "#2563b0"],
   ["steer", "Steering", "#d09017"], ["steer_P", "Steering + instruction", "#c9503a"], ["random_P", "Random + instruction", "#8fb0d9"]];
 $("steer-legend").innerHTML = SC.map(([, l, c]) => `<span><i style="background:${c}"></i>${l}</span>`).join("");
@@ -485,21 +692,21 @@ function drawSteer(anim) {
       const b = el("rect", { x: x(0), y: y + 2, height: 14, width: 0, rx: 2, fill: col }, s);
       const n = tx(s, 0, y + 14, "", { class: "num", style: "font-size:11.5px" });
       const hit = el("rect", { x: 0, y, width: w, height: 20, class: "hit" }, s);
-      tooltip(hit, `<b>${m} · ${l}</b><br>Protection ${v.toFixed(1)}% (Claude Sonnet)`);
+      tooltip(hit, `<b>${m} · ${l}</b><br>Protection ${v.toFixed(1)}%`);
       bars.push({ b, n, v });
     });
   });
-  const place = (t) => bars.forEach(({ b, n, v }, i) => { const d = Math.max(0, Math.min(1, t * 1.6 - (i % 6) * 0.1)); const val = v * d;
+  const place = (t) => bars.forEach(({ b, n, v }, i) => { const d = Math.max(0, Math.min(1, t * 1.6 - (i % 6) * 0.1)), val = v * d;
     b.setAttribute("width", x(val) - x(0)); n.setAttribute("x", x(val) + 5); n.textContent = val.toFixed(0) + "%"; });
   anim ? tween(1300, place) : place(1);
 }
 whenVisible($("fig-steer"), () => drawSteer(true));
 const ss = $("steer-setup");
-ss.innerHTML = "<p>Steering adds a scaled average activation shift (α = 4) to the top 5,000 MLP neurons, selected on separate items (none of the 240 used here); random controls use 5,000 random neurons per item at the same strength. All six conditions ran in one engine, 240 items × 2 samples. All replies graded by Claude Sonnet; contrasts Holm-adjusted over six tests.</p>";
-table(ss, ["Model · contrast", "Estimate [95% CI]", "Holm p"], Object.entries(D.steer).flatMap(([m, v]) => ["steer - base", "steer - random", "steer - P", "steer_P - P"].map((k) =>
-  [`${m} · ${k.replace("_P", " + instruction").replace("P", "instruction")}`, `${sg(v.contrasts[k].est)} [${sg(v.contrasts[k].lo)}, ${sg(v.contrasts[k].hi)}]`, v.contrasts[k].p_holm == null ? "descriptive" : v.contrasts[k].p_holm < .001 ? "<0.001" : v.contrasts[k].p_holm.toFixed(3)])));
+ss.innerHTML = "<p>Steering adds a scaled average activation shift (α = 4) to the top 5,000 MLP neurons, selected on separate items (none of the 240 used here); random controls use 5,000 random neurons per item at the same strength. All six conditions ran in one engine, 240 items × 2 samples. Contrasts Holm-adjusted over six tests.</p>";
+table(ss, ["Model · contrast", "Estimate [95% CI]", "Holm p"], Object.entries(D.steer).flatMap(([m, v]) => ["steer - base", "steer - random", "random - base", "steer - P", "steer_P - P"].map((k) =>
+  [`${m} · ${k.replace("_P", " + instruction").replace(/\bP\b/, "instruction")}`, `${sg(v.contrasts[k].est)} [${sg(v.contrasts[k].lo)}, ${sg(v.contrasts[k].hi)}]`, v.contrasts[k].p_holm == null ? "descriptive" : v.contrasts[k].p_holm < .001 ? "<0.001" : v.contrasts[k].p_holm.toFixed(3)])));
 
-/* ---------- Figure 6: recognition vs behavior ---------- */
+/* ---------- recognition vs behavior ---------- */
 const BC = { confaide: ["#2563b0", "ConfAIde"], privacylens: ["#d09017", "PrivacyLens"] };
 $("recog-legend").innerHTML = Object.values(BC).map(([c, l]) => `<span><i style="background:${c};border-radius:50%"></i>${l}</span>`).join("");
 function drawRecog(anim) {
@@ -508,11 +715,10 @@ function drawRecog(anim) {
   const s = el("svg", { viewBox: `0 0 ${w} ${h}` }, node);
   const xs = pts.map((p) => p.d_test), ys = pts.map((p) => p.d_prot);
   const x = sc(Math.min(-30, ...xs) - 5, Math.max(...xs) + 6, pad.l, w - pad.r), y = sc(Math.min(-10, ...ys) - 5, Math.max(...ys) + 6, h - pad.b, pad.t);
-  const X0 = x.call ? 0 : 0;
   for (let t = -40; t <= 60; t += 20) { if (x(t) < pad.l || x(t) > w - pad.r) continue; el("line", { x1: x(t), x2: x(t), y1: pad.t, y2: h - pad.b, stroke: t ? "#e4e6e6" : "#b3b9b8" }, s); tx(s, x(t), h - pad.b + 16, (t > 0 ? "+" : t < 0 ? "−" : "") + Math.abs(t), { class: "tk", "text-anchor": "middle" }); }
   for (let t = -20; t <= 80; t += 20) { if (y(t) < pad.t || y(t) > h - pad.b) continue; el("line", { x1: pad.l, x2: w - pad.r, y1: y(t), y2: y(t), stroke: t ? "#e4e6e6" : "#b3b9b8" }, s); tx(s, pad.l - 8, y(t) + 4, (t > 0 ? "+" : t < 0 ? "−" : "") + Math.abs(t), { class: "tk", "text-anchor": "end" }); }
   tx(s, (pad.l + w - pad.r) / 2, h - 6, "Change in 'looks like a test' answers (points) →", { class: "lab2", "text-anchor": "middle" });
-  const yl = tx(s, 12, (pad.t + h - pad.b) / 2, "Change in protection (points) →", { class: "lab2", "text-anchor": "middle", transform: `rotate(-90 12 ${(pad.t + h - pad.b) / 2})` });
+  tx(s, 12, (pad.t + h - pad.b) / 2, "Change in protection (points) →", { class: "lab2", "text-anchor": "middle", transform: `rotate(-90 12 ${(pad.t + h - pad.b) / 2})` });
   const LBL = { C2: "format", C3: "note", C1: "names", C8: "instruction", C10: "instr. (user)", C9: "cues + instr.", C11: "renamed" };
   const placed = [];
   const dots = pts.map((p) => {
@@ -521,7 +727,7 @@ function drawRecog(anim) {
     const right = x(p.d_test) + 80 > w, lx = right ? x(p.d_test) - 8 : x(p.d_test) + 8, ly = y(p.d_prot) + 4;
     if (LBL[p.cell] && !placed.some(([a, b]) => Math.abs(a - lx) < 70 && Math.abs(b - ly) < 13)) { placed.push([lx, ly]); tx(g, lx, ly, LBL[p.cell], { class: "lab2", style: "font-size:11px", "text-anchor": right ? "end" : "start" }); }
     const hit = el("circle", { r: 11, cx: x(p.d_test), cy: y(p.d_prot), class: "hit" }, g);
-    tooltip(hit, `<b>${p.cell} · ${D.cell_desc[p.cell][0]}</b> · ${BC[p.bench][1]}<br>'Test' answers: ${p.test.toFixed(0)}% (${sg(p.d_test)} vs published)<br>Protection: ${sg(p.d_prot)} points (Sonnet)`);
+    tooltip(hit, `<b>${p.cell} · ${D.cell_desc[p.cell][0]}</b> · ${BC[p.bench][1]}<br>'Test' answers: ${p.test.toFixed(0)}% (${sg(p.d_test)} vs published)<br>Protection: ${sg(p.d_prot)} points`);
     return d;
   });
   const place = (t) => dots.forEach((d, i) => d.setAttribute("r", 5.5 * Math.max(0, Math.min(1, t * 2 - i / dots.length))));
@@ -530,13 +736,13 @@ function drawRecog(anim) {
 whenVisible($("fig-recog"), () => drawRecog(true));
 const rs = $("recog-setup");
 rs.innerHTML = `<p>Same model, separate greedy call, prompt shown between markers, one-word answer (test, real or unsure). Share answering "test" across all prompts: ` +
-  Object.entries(D.recog_share).map(([m, v]) => `${m} ${v.toFixed(0)}%`).join(", ") + `. Protection changes use Llama's Sonnet-graded rates.</p>`;
+  Object.entries(D.recog_share).map(([m, v]) => `${m} ${v.toFixed(0)}%`).join(", ") + `. Protection changes use Llama's graded replies.</p>`;
 table(rs, ["Version · benchmark", "'Test' answers", "Δ test", "Δ protection"], D.recog.filter((r) => r.cell !== "C0").map((r) => [`${r.cell} ${D.cell_desc[r.cell][0]} · ${BC[r.bench][1]}`, r.test.toFixed(0) + "%", sg(r.d_test), sg(r.d_prot)]));
 
-/* ---------- Figure 7: gate ---------- */
+/* ---------- gate (Appendix B) ---------- */
 function drawGate() {
   const node = $("gate"); node.innerHTML = "";
-  const G = D.measurement.gate, rows = [["short", "Claude Sonnet, grading view (used)"], ["claude-sonnet-5.5", "Claude Sonnet, full view"], ["claude-opus-5.5", "Claude Opus, full view"], ["automated judge (Qwen2.5-32B)", "Automated judge (Qwen2.5-32B)"]];
+  const G = D.measurement.gate, rows = [["short", "Claude Sonnet, grading view (used)"], ["claude-sonnet-5.5", "Claude Sonnet, full view"], ["claude-opus-5.5", "Claude Opus, full view"], ["automated judge (Qwen2.5-32B)", "Open 32B judge (not used)"]];
   const w = W(node), narrow = w < 560, lw = narrow ? 0 : 210, rh = narrow ? 52 : 36, top = 22, h = top + rows.length * rh + 4;
   const s = el("svg", { viewBox: `0 0 ${w} ${h}` }, node), x = sc(0, 1, lw + 6, w - 50);
   [0, .25, .5, .75, 1].forEach((t) => { el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: h, stroke: "#e4e6e6" }, s); tx(s, x(t), top - 9, t.toFixed(2), { class: "tk", "text-anchor": "middle" }); });
@@ -551,13 +757,9 @@ function drawGate() {
     tooltip(hit, `<b>${l}</b><br>κ = ${g.kappa.toFixed(3)} [${g.ci[0].toFixed(2)}, ${g.ci[1].toFixed(2)}]<br>${g.agreement == null ? '' : 'Raw agreement ' + pc(g.agreement) + ' · '}${g.n} replies`);
   });
 }
-drawGate();
-const gs = $("gate-setup");
-gs.innerHTML = "<p>The automated judge against Sonnet over every reply, by model and benchmark (sensitivity: judge says protected when Sonnet does; specificity: judge says leaked when Sonnet does). The grading-view gate has no bootstrap interval.</p>";
-table(gs, ["Model · benchmark", "Replies", "Sensitivity", "Specificity", "Protected: judge / Sonnet"], D.measurement.strata.map((r) => [`${r.model} · ${r.bench === "confaide" ? "ConfAIde" : "PrivacyLens"}`, r.n.toLocaleString(), r.sens.toFixed(2), r.spec.toFixed(2), `${pc(r.judge)} / ${pc(r.sonnet)}`]));
+$("appendix-b").addEventListener("toggle", drawGate);
 
-/* ---------- examples ---------- */
-const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+/* ---------- other examples ---------- */
 const hl = (s, re) => esc(s).replace(new RegExp(re, "gi"), (m) => `<mark>${m}</mark>`);
 const SIDE = { C11: "Other realistic names", C0: "Published prompt", C1: "Placeholder names", C8: "Instruction in system prompt", C10: "Instruction in user turn", random: "Random neurons", steer: "Steered", C2: "Test-case format" };
 function exWidget(id, ids) {
@@ -566,23 +768,22 @@ function exWidget(id, ids) {
   const tabs = node.querySelector(".tabs"), card = node.querySelector(".card");
   function show(e) {
     tabs.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.id === e.id));
-    const side = (k, cls) => e[k] ? `<div class="side ${cls}"><h4>${e.id === "names3" && e[k].cond === "C0" ? "Original names" : (SIDE[e[k].cond] || e[k].cond)}<span>${cls === "leak" ? "leaked" : "protected"} in ${cls === "leak" ? e[k].leaked : e[k].protected}/${e[k].n} samples</span></h4><div class="txt">${hl(e[k].reply, e.leak)}</div></div>` : "";
-    card.innerHTML = `<div class="meta2">${e.model} · ${e.bench === "confaide" ? "ConfAIde" : "PrivacyLens"} · ${e.kind}</div>
+    const side = (k, cls) => e[k] ? `<div class="side ${cls}"><h4>${SIDE[e[k].cond] || e[k].cond}<span>${cls === "leak" ? "leaked" : "protected"} in ${cls === "leak" ? e[k].leaked : e[k].protected}/${e[k].n} samples</span></h4><div class="txt">${hl(e[k].reply, e.leak)}</div></div>` : "";
+    card.innerHTML = `<div class="meta2">${e.model} · ${e.bench === "confaide" ? "ConfAIde" : "PrivacyLens"} · ${e.kind} · illustrative</div>
       <p class="setting">${esc(e.setting)}</p><div class="secret"><b>Must not be shared:</b> ${esc(e.fact)}</div>` +
       (e.recognition ? `<div class="recog"><span class="q">Asked: "test or real?" → ${e.recognition.C2}</span><span>Its reply to the same prompt:</span></div>` : "") +
-      `<div class="pair" style="${!e.b ? "grid-template-columns:1fr" : e.m ? "grid-template-columns:1fr 1fr 1fr" : ""}">${side("a", "leak")}${side("m", "leak")}${side("b", "prot")}</div><p class="take">${esc(e.take)}</p>`;
+      `<div class="pair" style="${!e.b ? "grid-template-columns:1fr" : ""}">${side("a", "leak")}${side("b", "prot")}</div><p class="take">${esc(e.take)}</p>`;
     card.querySelectorAll(".side").forEach((sd, i) => setTimeout(() => sd.classList.add("show"), 80 + i * 260));
   }
   items.forEach((e) => { const b = document.createElement("button"); b.type = "button"; b.dataset.id = e.id; b.textContent = e.kind; b.onclick = () => show(e); tabs.appendChild(b); });
   whenVisible(node, () => show(items[0]));
 }
-exWidget("ex-d", ["names3", "names"]);
 exWidget("ex-a", ["placement", "instruction"]);
 exWidget("ex-b", ["steering"]);
 exWidget("ex-c", ["recognition"]);
 
 /* redraw on resize without animation */
-let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { drawForest(false); drawOther(false); drawNames(); drawPlace(); drawCells(false); drawSteer(false); drawRecog(false); drawGate(); }, 150); });
+let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { drawEffect(false); drawShifts(false); drawForest(false); drawNames(); drawPlace(); drawCells(false); drawSteer(false); drawRecog(false); if ($("appendix-b").open) drawGate(); }, 150); });
 
 /* contents rail (same as other posts) */
 (function rail() {
