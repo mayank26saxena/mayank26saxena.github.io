@@ -8,7 +8,7 @@
   {
     "slug": "placeholder-names-privacy",
     "title": "Privacy Tests Can Make AI Look Better at Keeping Secrets",
-    "description": "Replacing realistic names with placeholders such as Person A made four open language models protect private information more often, while swapping in other realistic names did not. A pre-registered study of how a benchmark-design choice changes measured privacy behavior.",
+    "description": "Replacing realistic names with placeholders such as Person A made four open language models protect private information more often, while swapping in other realistic names did not. A pre-specified study of how a benchmark-design choice changes measured privacy behavior.",
     "date": "2026-10-01"
   },
   {
