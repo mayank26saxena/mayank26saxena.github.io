@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/tokens.css?v=344f4f1b">
-<link rel="stylesheet" href="atlas.css?v=0ba2c0aa">
+<link rel="stylesheet" href="atlas.css?v=0b2ce19b">
 </head>
 <body>
 <div class="appbar">
@@ -26,15 +26,7 @@
       <h1>Every neuron, by layer</h1>
       <p>The model reads a game as a list of column numbers and has 6 layers of 1,024 neurons. Each neuron has two sides, a positive and a negative <i>pole</i>, which usually mean different things. Each square is one neuron, coloured by the theme of the side that matches a game concept best. Click a square to open it, or set up a board and watch every neuron respond.</p>
     </div>
-    <details class="howto" data-k="layers" open><summary>How to read this page</summary><div class="howto-body">
-      <ul>
-        <li><b>Rows are layers.</b> Layer 0 sees the moves first; layer 5 is the last before the model picks a column. Each small square is one neuron, 1,024 per layer.</li>
-        <li><b>Colour</b> (with "Theme" selected) is the kind of game concept the neuron matches best, such as a single cell, a threat or the game phase. Brighter means a closer match. Grey neurons match none of our 659 concepts well, which is most of them.</li>
-        <li><b>The buttons change what the colour shows.</b> "Described by the agent": the neurons an AI agent wrote a description for (160 descriptions in all). "Blocking circuit": the 53 neurons that carry the vertical block (the layer-5 ones are the column alarms). "Live board": set up a position and see how strongly every neuron fires on it right now.</li>
-        <li><b>Hover</b> a square for a one-line summary; <b>click</b> it to open the neuron's page.</li>
-      </ul>
-      <p class="howto-tip">A good first stop: choose "Blocking circuit", then click one of the bright squares in layer 5.</p>
-    </div></details>
+    <div class="takeaways" id="tk-layers"></div>
     <div class="themes" id="themes"></div>
     <div class="bar">
       <div class="seg" id="colorBy" role="group" aria-label="Colour by">
@@ -50,6 +42,15 @@
     </div>
     <div class="grid" id="grid"></div>
     <p class="hnote" id="gridnote"></p>
+    <details class="howto" data-k="layers"><summary>How to read this page</summary><div class="howto-body">
+      <ul>
+        <li><b>Rows are layers.</b> Layer 0 sees the moves first; layer 5 is the last before the model picks a column. Each small square is one neuron, 1,024 per layer.</li>
+        <li><b>Colour</b> (with "Theme" selected) is the kind of game concept the neuron matches best, such as a single cell, a threat or the game phase. Brighter means a closer match. Grey neurons match none of our 659 concepts well, which is most of them.</li>
+        <li><b>The buttons change what the colour shows.</b> "Described by the agent": the neurons an AI agent wrote a description for (160 descriptions in all). "Blocking circuit": the 53 neurons that carry the vertical block (the layer-5 ones are the column alarms). "Live board": set up a position and see how strongly every neuron fires on it right now.</li>
+        <li><b>Hover</b> a square for a one-line summary; <b>click</b> it to open the neuron's page.</li>
+      </ul>
+      <p class="howto-tip">A good first stop: choose "Blocking circuit", then click one of the bright squares in layer 5.</p>
+    </div></details>
   </section>
 
   <section class="view" id="v-map" hidden>
@@ -57,7 +58,12 @@
       <h1>A map of all 12,288 poles</h1>
       <p>Every pole is placed by what the board looks like when it fires (which cells hold the mover's stones, the opponent's, or nothing, compared with usual), so poles that read similar board patterns sit together. Colour is the theme of the concept it matches best; grey dots match none well. Scroll or pinch to zoom, drag to move, click a dot to open it.</p>
     </div>
-    <details class="howto" data-k="map" open><summary>How to read this page</summary><div class="howto-body">
+    <div class="takeaways" id="tk-map"></div>
+    <div class="mapwrap"><canvas id="map"></canvas>
+      <div class="mapctl"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zfit">Fit</button></div>
+      <p class="mapnote" id="mapnote"></p></div>
+    <div class="themes" id="themes2"></div>
+    <details class="howto" data-k="map"><summary>How to read this page</summary><div class="howto-body">
       <ul>
         <li><b>Each dot is one side of a neuron.</b> A neuron can fire strongly in the positive or the negative direction, and the two sides usually mean different things, so the 6,144 neurons give 12,288 dots.</li>
         <li><b>Dots close together fire on similar-looking boards</b> (which cells hold whose stones). Only nearness means something: the distance between far-apart groups and the directions of the axes do not.</li>
@@ -65,10 +71,6 @@
         <li><b>Scroll or pinch</b> to zoom, <b>drag</b> to move, <b>click</b> a dot to open its page. The search box above highlights matching dots.</li>
       </ul>
     </div></details>
-    <div class="mapwrap"><canvas id="map"></canvas>
-      <div class="mapctl"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zfit">Fit</button></div>
-      <p class="mapnote" id="mapnote"></p></div>
-    <div class="themes" id="themes2"></div>
   </section>
 
   <section class="view" id="v-library" hidden>
@@ -77,19 +79,20 @@
         <h1>Library</h1>
         <p>Neuron pages for every pole. Start with the ones an AI agent investigated (it wrote and tested a description of each, blind), the blind test (the 20 key circuit neurons hidden among 20 look-alike decoys; did the agent spot the block?) or the ones that carry the vertical block; search finds the rest.</p>
       </div>
-      <details class="howto" data-k="library" open><summary>How to read this page</summary><div class="howto-body">
-        <ul>
-          <li><b>Each card is one side of a neuron</b> (L5 N344+ is layer 5, neuron 344, positive side). The sentence is the AI agent's description if it wrote one, otherwise the exact concept it matches best.</li>
-          <li><b>Agent F1</b> scores how well the agent's rule predicts when the neuron fires, on games the agent never saw. <b>Concept F1</b> scores the closest exact concept the same way. Both run from 0 to 1: above 0.5 is a good match, below 0.3 a weak one.</li>
-          <li><b>The sets.</b> "Described by the agent": every description from the agent runs. "Blind test": the 20 key circuit neurons and 20 look-alike decoys, sorted by how well the agent's rule picked out a block. "Vertical-block circuit" and "Column alarms": the neurons that carry the block.</li>
-        </ul>
-      </div></details>
+      <div class="takeaways" id="tk-library"></div>
       <div class="bar">
         <div class="seg" id="libset" role="group" aria-label="Which neurons"><button data-s="agent" class="on">Described by the agent</button><button data-s="blind">Blind test</button><button data-s="circuit">Vertical-block circuit</button><button data-s="alarms">Column alarms</button><button data-s="all">All poles</button></div>
         <label class="sel">Layer <select id="liblayer"><option value="">all</option></select></label>
       </div>
       <p class="hnote" id="libcount"></p>
       <div class="cards" id="libcards"></div>
+      <details class="howto" data-k="library"><summary>How to read this page</summary><div class="howto-body">
+        <ul>
+          <li><b>Each card is one side of a neuron</b> (L5 N344+ is layer 5, neuron 344, positive side). The sentence is the AI agent's description if it wrote one, otherwise the exact concept it matches best.</li>
+          <li><b>Agent F1</b> scores how well the agent's rule predicts when the neuron fires, on games the agent never saw. <b>Concept F1</b> scores the closest exact concept the same way. Both run from 0 to 1: above 0.5 is a good match, below 0.3 a weak one.</li>
+          <li><b>The sets.</b> "Described by the agent": every description from the agent runs. "Blind test": the 20 key circuit neurons and 20 look-alike decoys, sorted by how well the agent's rule picked out a block. "Vertical-block circuit" and "Column alarms": the neurons that carry the block.</li>
+        </ul>
+      </div></details>
     </div>
     <article id="npage" hidden></article>
   </section>
@@ -100,6 +103,6 @@
 <script src="../vertical/c4model.js?v=b307be9b"></script>
 <script src="../data/atlas.js?v=7bcc0f2e"></script>
 <script src="data/map.js?v=30ec4334"></script>
-<script src="atlas.js?v=5bc9e7b3"></script>
+<script src="atlas.js?v=1c6e7271"></script>
 </body>
 </html>

@@ -86,7 +86,11 @@ footer .foot { max-width: 1160px; margin: 0 auto; padding: 20px 24px 50px; font:
 .howto-body { padding: 0 16px 10px 30px; font: 14px/1.55 var(--sans); color: var(--ink-2); }
 .howto-body ul { margin: 0; padding-left: 16px; } .howto-body li { margin: 0 0 6px; } .howto-body b { color: var(--ink); }
 .howto-tip { margin: 6px 0 0; font-size: 13.5px; color: var(--muted); }
-#npage .howto { margin-top: 0; }
+#npage .howto { margin-top: 22px; }
+.howto { margin-top: 20px; }
+.takeaways { background: var(--card); border: 1px solid var(--rule); border-radius: 4px; padding: 10px 16px 8px; margin: 2px 0 14px; max-width: 860px; }
+.takeaways .tk-h { font: 600 11px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+.takeaways ul { margin: 0; padding-left: 18px; font: 14.5px/1.55 var(--sans); color: var(--ink-2); } .takeaways li { margin: 0 0 4px; } .takeaways b { color: var(--ink); }
 @media (max-width: 720px) {
   .appbar { padding: 8px 12px; gap: 8px; } .brand small { display: none; } .search { margin-left: 0; width: 100%; } .search input { width: 100%; }
   main { padding: 0 12px 30px; } .vhead h1 { font-size: 28px; } .livebox { grid-template-columns: 1fr; }

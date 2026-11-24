@@ -234,16 +234,9 @@
       const prev = n > 0 ? `#n/${l}/${n - 1}/${NEU[l][n - 1].best >= 0 ? POLE[NEU[l][n - 1].best].s : 0}` : null, next = n < F - 1 ? `#n/${l}/${n + 1}/${NEU[l][n + 1].best >= 0 ? POLE[NEU[l][n + 1].best].s : 0}` : null;
       let h = `<div class="nav"><a href="#library">← Library</a><span>${prev ? `<a href="${prev}">‹ neuron ${n - 1}</a>` : ""}${next ? `<a href="${next}">neuron ${n + 1} ›</a>` : ""}</span></div>`;
       h += `<p class="kick"><i style="background:${th[2]}"></i>${th[1]} · layer ${l} · neuron ${n}</p><h1>${poleName(l, n, s)}</h1>`;
-      h += `<details class="howto" data-k="neuron" open><summary>How to read a neuron page</summary><div class="howto-body"><ul>
-        <li><b>Two sides.</b> A neuron can fire strongly positive or strongly negative, and the two sides usually mean different things. The tabs switch between them; everything below is about the side that is selected.</li>
-        <li><b>"Fires when…"</b> is the exact game concept that best matches when this side fires. <b>F1</b> scores that match from 0 to 1 on held-out games: it is high only if the neuron fires when the concept is present and stays quiet when it is not. Above 0.5 is a good match; below 0.3 we call it no match.</li>
-        <li><b>Blue box:</b> what the AI agent wrote after studying this neuron without seeing any labels, scored the same way. <b>Orange box:</b> the neuron's role in the blocking circuit, if it has one.</li>
-        <li><b>Board pictures</b> compare the positions where it fires with usual positions: a blue cell holds that kind of stone (or is empty) more often than usual, a red cell less often. Rows count up from the bottom and columns from the left, starting at 0.</li>
-        <li><b>Where it fires most:</b> the real game positions with the strongest firing, with the number of stones, the activation and the move played next.</li>
-        <li><b>What it does to the move:</b> how much this side pushes each column up (blue) or down (red) on its own. <b>Tactics it supports:</b> how much switching it off hurts each tactic.</li>
-      </ul></div></details>`;
       h += `<div class="poletabs">${[0, 1].map((k) => `<a class="${k === s ? "on" : ""}" href="#n/${l}/${n}/${k}"><b>${k === 0 ? "Positive" : "Negative"} pole</b>${esc(concept(r.poles[k].C[0]))}</a>`).join("")}</div>`;
       h += `<p class="big">${p.f1 >= BAR ? `Fires when ${esc(concept(P.C[0]).replace(/^./, (c) => c.toLowerCase()))}.` : "No game concept describes this pole well; its closest match is below."}</p>`;
+      h += neuronTakeaways(p, P, r, dle, s);
       p.descs.forEach((d) => { h += `<div class="agent"><p class="lbl">${d.group ? `Blind test after the circuit was frozen (${d.group === "circuit" ? "one of the 20 key circuit neurons" : "a look-alike decoy"}, hidden among 50 units): rule F1 ${d.f1.toFixed(2)}, block agreement ${d.ta.toFixed(2)}${d.ta >= 0.5 ? " — found as a block detector" : ""}` : `Written by the AI agent, blind, and tested on unseen games (F1 ${d.f1.toFixed(2)}, study ${d.id.slice(0, 1)})`}</p><p>${esc(d.text)}</p></div>`; });
       if (p.vertical) h += `<div class="rolebox">Part of the <b>vertical-block circuit</b>${p.alarm !== null ? `: a <b>column alarm</b> for column ${p.alarm}, pushing the model to play there when the opponent stacks three` : ""}. <a href="../index.html">How we found it →</a></div>`;
       else if (p.block200) h += `<div class="rolebox">One of the <b>200 neurons that matter most for blocking</b> of any kind.</div>`;
@@ -254,20 +247,53 @@
       h += `<section><h2>What it does to the move</h2>${dle.map((v, c) => bar(`column ${c}`, v, dmax)).join("")}<p class="note">Direct effect on each column's score when this pole fires (through the output layer only, centred across columns).</p></section>`;
       h += `<section><h2>Tactics it supports</h2>${META.tactics.map((t, j) => bar(TACNAME[t] || t, r.tac[j], tmax[j])).join("")}<p class="note">Positive: switching this neuron off makes the model less likely to play the tactic. Scaled to the largest value among all neurons.</p></section>`;
       h += `<p class="note">The other pole matches “${esc(concept(other.C[0]))}” (F1 ${other.F1[0].toFixed(2)}).</p>`;
+      h += `<details class="howto" data-k="neuron"><summary>How to read a neuron page</summary><div class="howto-body"><ul>
+        <li><b>Two sides.</b> A neuron can fire strongly positive or strongly negative, and the two sides usually mean different things. The tabs switch between them; everything below is about the side that is selected.</li>
+        <li><b>"Fires when…"</b> is the exact game concept that best matches when this side fires. <b>F1</b> scores that match from 0 to 1 on held-out games: it is high only if the neuron fires when the concept is present and stays quiet when it is not. Above 0.5 is a good match; below 0.3 we call it no match.</li>
+        <li><b>Blue box:</b> what the AI agent wrote after studying this neuron without seeing any labels, scored the same way. <b>Orange box:</b> the neuron's role in the blocking circuit, if it has one.</li>
+        <li><b>Board pictures</b> compare the positions where it fires with usual positions: a blue cell holds that kind of stone (or is empty) more often than usual, a red cell less often. Rows count up from the bottom and columns from the left, starting at 0.</li>
+        <li><b>Where it fires most:</b> the real game positions with the strongest firing, with the number of stones, the activation and the move played next.</li>
+        <li><b>What it does to the move:</b> how much this side pushes each column up (blue) or down (red) on its own. <b>Tactics it supports:</b> how much switching it off hurts each tactic.</li>
+      </ul></div></details>`;
       el.innerHTML = h; wireGuides(el); scrollTo(0, 0);
     });
   }
 
-  // ---------- reading guides: open until the reader closes one; the choice is remembered in this browser only
-  const HOWTO = "c4atlas-howto-closed";
-  const closedGuides = () => { try { return JSON.parse(localStorage.getItem(HOWTO) || "[]"); } catch (e) { return []; } };
-  function wireGuides(root) {
-    root.querySelectorAll("details.howto").forEach((d) => {
-      if (closedGuides().includes(d.dataset.k)) d.open = false;
-      d.addEventListener("toggle", () => { try { const c = new Set(closedGuides()); d.open ? c.delete(d.dataset.k) : c.add(d.dataset.k); localStorage.setItem(HOWTO, JSON.stringify([...c])); } catch (e) { /* storage unavailable */ } });
-    });
+  // ---------- takeaways: two lines per view, computed from the data on load
+  const pctS = (x) => `${Math.round(100 * x)}%`;
+  const tkBox = (items) => `<p class="tk-h">What this shows</p><ul>${items.map((t) => `<li>${t}</li>`).join("")}</ul>`;
+  function viewTakeaways() {
+    const Ns = AT.neurons, none = Ns.filter((x) => x.fam === "none").length / Ns.length;
+    const vert = Ns.filter((x) => x.v), v5 = vert.filter((x) => x.l === 5).length;
+    const fam5 = Ns.filter((x) => x.l === 5 && (x.fam === "block_now" || x.fam === "win_now")).length;
+    $("#tk-layers").innerHTML = tkBox([
+      `<b>Most neurons (${pctS(none)}) match none of our game concepts well.</b> Single neurons are only a partial map of what the model knows; much of it is spread across many neurons at once.`,
+      `<b>What does match changes with depth:</b> the last move and the game phase in layer 0, lines and landing spots in the middle layers, and "must block now" or "can win now" in layer 5 (${fam5} neurons), where ${v5} of the ${vert.length} vertical-block neurons sit.`]);
+    const good = OV.f1.filter((x) => x >= BAR).length / OV.f1.length;
+    const regs = MP.regions.filter((r) => r.concept), placed = regs.filter((r) => /_r\d|_c\d/.test(r.concept)).length;
+    $("#tk-map").innerHTML = tkBox([
+      `<b>Only about ${pctS(good)} of the dots match a concept</b> (coloured); the rest of the cloud is grey. Concept-like neurons are the exception, not the rule.`,
+      `<b>The map is organised by place on the board:</b> ${placed} of the ${regs.length} labelled regions are about one cell or one column, so neurons that read the same part of the board sit together.`]);
+    const tb = POLE.filter((p) => p.tb), hit = (g) => tb.filter((p) => p.tb.group === g && p.tb.ta >= 0.5).length, n = (g) => tb.filter((p) => p.tb.group === g).length;
+    $("#tk-library").innerHTML = tkBox([
+      `<b>Descriptions that score well are concrete board rules</b>, such as a stone in one cell or a threat in one column; many low scorers say there is no clean concept.`,
+      `<b>In the blind test</b> the agent described ${hit("circuit")} of the ${n("circuit")} key circuit neurons as block detectors, and ${hit("decoy")} of the ${n("decoy")} look-alike decoys (the "Blind test" set).`]);
   }
-  wireGuides(document);
+  function neuronTakeaways(p, P, r, dle, s) {
+    const c = concept(P.C[0]), f = P.F1[0];
+    const reads = f >= 0.5 ? `<b>It is a good detector of one concept:</b> “${esc(c)}” (F1 ${f.toFixed(2)}).`
+      : f >= BAR ? `<b>It loosely tracks one concept,</b> “${esc(c)}” (F1 ${f.toFixed(2)}); other positions set it off too.`
+      : `<b>No single concept explains it</b> (best F1 ${f.toFixed(2)}): like most neurons, it responds to a mix of situations.`;
+    const order = dle.map((v, i) => [v, i]).sort((a, b) => b[0] - a[0]), top = order[0], rest = Math.max(...order.slice(1).map(([v]) => Math.abs(v)));
+    const tmax = META.tactics.map((_, j) => Math.max(...OV.tac.map((a) => Math.abs(a[j]))) || 1);
+    const tj = r.tac.map((v, j) => [v / tmax[j], j]).sort((a, b) => b[0] - a[0])[0];
+    const tac = tj[0] > 0.2 ? ` Switching it off hurts "${TACNAME[META.tactics[tj[1]]] || META.tactics[tj[1]]}" more than any other tactic.` : " Switching it off barely changes any tactic.";
+    const does = top[0] > 0 && top[0] >= 2 * rest ? `<b>When it fires, it pushes the move towards column ${top[1]}.</b>${tac}` : `<b>Its direct push on the move is spread across columns.</b>${tac}`;
+    return `<div class="takeaways">${tkBox([reads, does])}</div>`;
+  }
+
+  // ---------- reading guides: closed by default at the bottom of each view and neuron page
+  const wireGuides = () => {};
 
   // ---------- routing
   let view = "layers";
@@ -284,6 +310,6 @@
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { gridGeo = null; mapGeo = null; drawGrid(); drawMap(); }, 150); });
 
   Promise.all([J("meta.json"), J("overview.json"), J("games.json")]).then(([m, o, g]) => {
-    META = m; OV = o; GAMES = g; prepare(); buildOrders(); themes($("#themes")); themes($("#themes2")); route();
+    META = m; OV = o; GAMES = g; prepare(); buildOrders(); themes($("#themes")); themes($("#themes2")); viewTakeaways(); route();
   }).catch((e) => { document.querySelector("main").insertAdjacentHTML("afterbegin", `<p class="hnote">Could not load the atlas data: ${esc(e.message)}</p>`); });
 })();
