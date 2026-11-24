@@ -186,32 +186,17 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <p>The result is limited to the two benchmarks, four small open models and prompts tested. Names were realistically reassigned only once, and there was no length-matched control. In 41 PrivacyLens items, a real name remained inside a username or email handle after placeholder replacement; without them, the PrivacyLens estimate is about zero and realistic renaming lowers protection slightly. The grader can see “Person A” in a reply; a check found no sign of leniency, but a sample this small cannot rule out a bias of a few points. A clear effect showed up on one of the two task formats, so this is not a general correction factor. The binary score does not distinguish genuine withholding from blanket refusal, and the study did not test appropriate sharing. All scenarios used fictional people. <b>This is not evidence that models disclose real people's information in deployment.</b></p>
 
 <h2 id="s07"><span class="no">06</span><span class="nl">Other findings</span></h2>
-<p>In secondary tests, neuron steering and a privacy instruction raised protection; test-like formatting and a scoring note had little effect. The benchmark-awareness probe gave no support for a recognition account in the one model whose self-reports varied, though it cannot rule one out. Details and interactive figures are available below.</p>
-<details class="appx"><summary>Steering, instruction placement, benchmark awareness and test cues</summary><div class="appx-body">
-<p>Two other interventions were measured in the same study. Both raise protection, as earlier work on activation steering (<a class="cite" href="#ref-turner2023">Turner et al. 2023</a>; <a class="cite" href="#ref-panickssery2024">Panickssery et al. 2024</a>) and on instruction-following would predict. Neither was combined with placeholders, and neither was tested for its cost to appropriate sharing.</p>
-<h3>Neuron steering</h3>
-<p>While the model answers, a fixed activation shift is added to 5,000 MLP neurons, about 1% of them. The neurons were chosen on separate items, by how differently they fire on benchmark-style and plain prompts and how strongly they track protective replies. Six conditions ran side by side on Qwen and Mistral: the published prompt, the privacy instruction, steering, steering plus the instruction, and the same two with 5,000 random neurons.</p>
-
-<figure class="fig" id="fig-steer">
-<p class="fig-title">Steering raises protection, random neurons do not, and it stacks with the instruction</p>
-<p class="fig-sub">Protection by condition · 240 items × 2 samples per bar</p>
-<div class="legend" id="steer-legend"></div>
-<div id="steer"></div>
-<figcaption><b>Figure 4:</b> Steering raised protection by <span data-k="st_q"></span> points for Qwen and <span data-k="st_m"></span> for Mistral; the same number of random neurons moved it by <span data-k="rnd_q"></span> and <span data-k="rnd_m"></span>. On top of the instruction, steering added <span data-k="stp_q"></span> and <span data-k="stp_m"></span>. Against the instruction alone, steering was <span data-k="sp_m"></span> points better for Mistral (<span data-k="sp_m_ci"></span>) and <span data-k="sp_q"></span> for Qwen (<span data-k="sp_q_ci"></span>, not distinguishable from zero).</figcaption>
-<details class="setup"><summary></summary><div class="body" id="steer-setup"></div></details>
-</figure>
-<div class="ex2" id="ex-b"></div>
-<p>The effect is specific to the chosen neurons and adds to what an instruction does. It is not yet a privacy solution: the study did not check whether steered models still share information when sharing is appropriate, so part of the gain may be general caution or more refusals.</p>
-
+<p>In secondary tests, a privacy instruction raised protection; test-like formatting and a scoring note had little effect. The benchmark-awareness probe gave no support for a recognition account in the one model whose self-reports varied, though it cannot rule one out. Details and interactive figures are available below.</p>
+<details class="appx"><summary>Instruction placement, benchmark awareness and test cues</summary><div class="appx-body">
 <h3>Where the instruction goes</h3>
-<p>The reference instruction is one sentence in the system prompt: "<span id="ptext"></span>" Another version put the same sentence at the end of the user's message.</p>
+<p>An explicit privacy instruction was also measured. It was not combined with placeholders and was not tested for its cost to appropriate sharing. The reference instruction is one sentence in the system prompt: "<span id="ptext"></span>" Another version put the same sentence at the end of the user's message.</p>
 
 <figure class="fig" id="fig-place">
 <p class="fig-title">The same sentence works better in the user's message than in the system prompt</p>
 <p class="fig-sub">Protection per model · open = published prompt, grey = instruction in system prompt, blue = instruction in user turn</p>
 <div><span class="ctl-label">Benchmark</span><span class="seg" id="place-bench"></span></div>
 <div id="place"></div>
-<figcaption><b>Figure 5:</b> Pooled over models, the system-prompt instruction raised protection by <span data-k="P"></span> points (<span data-k="P_ci"></span>), and moving it into the user's message added <span data-k="PL"></span> more (<span data-k="PL_ci"></span>). The gain from moving it is clearest on ConfAIde, where every model improved; on PrivacyLens it helped Llama and Gemma but not Qwen or Mistral.</figcaption>
+<figcaption><b>Figure 4:</b> Pooled over models, the system-prompt instruction raised protection by <span data-k="P"></span> points (<span data-k="P_ci"></span>), and moving it into the user's message added <span data-k="PL"></span> more (<span data-k="PL_ci"></span>). The gain from moving it is clearest on ConfAIde, where every model improved; on PrivacyLens it helped Llama and Gemma but not Qwen or Mistral.</figcaption>
 <details class="setup"><summary></summary><div class="body" id="place-setup"></div></details>
 </figure>
 <div class="ex2" id="ex-a"></div>
@@ -225,14 +210,13 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <p class="fig-sub">Llama-3.1-8B · each point is one prompt version on one benchmark, relative to the published prompt</p>
 <div class="legend" id="recog-legend"></div>
 <div id="recog"></div>
-<figcaption><b>Figure 6:</b> A test-case format or a scoring note pushes "test" answers up by 24 to 38 points while protection moves by −1 to +9. Placeholder names do not raise "test" answers, yet protection rises on ConfAIde.</figcaption>
+<figcaption><b>Figure 5:</b> A test-case format or a scoring note pushes "test" answers up by 24 to 38 points while protection moves by −1 to +9. Placeholder names do not raise "test" answers, yet protection rises on ConfAIde.</figcaption>
 <details class="setup"><summary></summary><div class="body" id="recog-setup"></div></details>
 </figure>
 <div class="ex2" id="ex-c"></div>
 
 <h3 id="s09">Test cues and other negative results</h3>
 <p><b>Looking like a test did not matter.</b> The study was first designed to test whether test-like cues raise protection. They mostly did not. A test-case wrapper (### Case / ### Input / ### Response) changed protection by <span data-k="S"></span> points (<span data-k="S_ci"></span>), and a note saying the reply would be scored by <span data-k="E"></span> (<span data-k="E_ci"></span>), statistically equivalent to zero. All three cues together gave <span data-k="bundle"></span>, about what the placeholder part of the bundle alone predicts (interaction <span data-k="add"></span>, <span data-k="add_ci"></span>). What I learned: the feature that moved behavior was not the one that makes a prompt look most like a test. What remains uncertain: these are only two kinds of test cue, in small models.</p>
-<p><b>Random neurons did nothing.</b> The random-neuron control moved protection by <span data-k="rnd_q"></span> and <span data-k="rnd_m"></span> points, so the steering gain depends on which neurons are chosen.</p>
 
 <figure class="fig" id="fig-forest">
 <p class="fig-title">Of the single prompt changes, only names and the instruction move protection</p>
@@ -240,7 +224,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <div><span class="ctl-label">Analysis</span><span class="seg" id="forest-mode"></span></div>
 <div class="legend" id="forest-legend"></div>
 <div id="forest"></div>
-<figcaption><b>Figure 7:</b> Placeholder names and the instruction pass the pre-specified bar: the Holm-adjusted p-value is below 0.05 after correcting for four tests, with the same direction in at least three models. Format and scoring note do not. "Complete renaming only" drops the <span data-k="n_inc"></span> PrivacyLens items where a real name survived inside a username.</figcaption>
+<figcaption><b>Figure 6:</b> Placeholder names and the instruction pass the pre-specified bar: the Holm-adjusted p-value is below 0.05 after correcting for four tests, with the same direction in at least three models. Format and scoring note do not. "Complete renaming only" drops the <span data-k="n_inc"></span> PrivacyLens items where a real name survived inside a username.</figcaption>
 <details class="setup"><summary></summary><div class="body" id="forest-setup"></div></details>
 </figure>
 
@@ -252,7 +236,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <div class="mock" id="mock"></div>
 <div class="meter" id="meter"></div>
 </div>
-<figcaption><b>Figure 8:</b> The published benchmark prompt is the baseline. Only versions that were actually run can be selected; the instruction was combined only with all three cues.</figcaption>
+<figcaption><b>Figure 7:</b> The published benchmark prompt is the baseline. Only versions that were actually run can be selected; the instruction was combined only with all three cues.</figcaption>
 </figure>
 
 <figure class="fig" id="fig-cells">
@@ -261,7 +245,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <div><span class="ctl-label">Model</span><span class="seg" id="cells-model"></span></div>
 <div><span class="ctl-label">Benchmark</span><span class="seg" id="cells-bench"></span></div>
 <div id="cells"></div>
-<figcaption><b>Figure 9:</b> Grey bars change names or test-style cues; blue bars include the privacy instruction.</figcaption>
+<figcaption><b>Figure 8:</b> Grey bars change names or test-style cues; blue bars include the privacy instruction.</figcaption>
 <details class="setup"><summary></summary><div class="body">Share of replies Claude Sonnet judged protected, excluding the replies it marked unclear; 120 items × 4 samples per bar.</div></details>
 </figure>
 
@@ -278,17 +262,17 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <p class="fig-title">Claude agreed closely with the human labels</p>
 <p class="fig-sub">Agreement with human labels on 147 blind replies (Cohen's κ) · dashed line = pre-specified gate</p>
 <div id="gate"></div>
-<figcaption><b>Figure 10:</b> Sonnet reached κ = <span data-k="kappa"></span> in the view used for grading, above the 0.70 gate. Opus, on the full traces, is shown as a second check.</figcaption>
+<figcaption><b>Figure 9:</b> Sonnet reached κ = <span data-k="kappa"></span> in the view used for grading, above the 0.70 gate. Opus, on the full traces, is shown as a second check.</figcaption>
 </figure>
 </div></details>
 <details class="appx" id="appendix-c"><summary>Appendix C: pre-specified plan and deviations</summary><div class="appx-body">
 <p>The design, the 240 test items (never used before in this project, plus 60 pilot items), the decision rules and the analysis code were written down and committed with checksums before generation: a self-registered plan, not an external registry. Eleven dated deviations are documented with it. The largest: the registered scorer was Qwen2.5-32B with a misclassification correction; its agreement with human labels was κ = 0.57, so the reported results use Sonnet, which graded every reply after passing the gate. The plan's correction family had five tests and the analysis used four; with all five, placeholders and the instruction remain significant. The planned activation probe for recognition was not run. Another is that Gemma answered "test" to every recognition prompt, so it could not be used for the recognition comparison.</p>
 </div></details>
-<details class="appx" id="appendix-d"><summary>Appendix D: generation and steering settings</summary><div class="appx-body">
-<p>vLLM 0.34 (<a class="cite" href="#ref-kwon2023">Kwon et al. 2023</a>; Hugging Face generate for steering), temperature 0.7, top-p 0.95, 384 new tokens, 4 samples per prompt (2 in the steering arm), pinned model revisions. Placeholder names replace every person with "Person A", "Person B" and so on in order of appearance, and email addresses with userN@example.com; realistic renaming uses a fixed name list in the same positions. Steering adds a scaled average activation shift (α = 4) to the top 5,000 MLP neurons, selected on separate items; the random control uses 5,000 random neurons per item at the same strength. The recognition probe is a separate greedy call per prompt with a one-word answer (test, real or unsure).</p>
+<details class="appx" id="appendix-d"><summary>Appendix D: generation settings</summary><div class="appx-body">
+<p>vLLM 0.34 (<a class="cite" href="#ref-kwon2023">Kwon et al. 2023</a>), temperature 0.7, top-p 0.95, 384 new tokens, 4 samples per prompt, pinned model revisions. Placeholder names replace every person with "Person A", "Person B" and so on in order of appearance, and email addresses with userN@example.com; realistic renaming uses a fixed name list in the same positions. The recognition probe is a separate greedy call per prompt with a one-word answer (test, real or unsure).</p>
 </div></details>
 <details class="appx" id="appendix-f"><summary>Appendix F: reply counts and study arms</summary><div class="appx-body">
-<p>The main study used four models, 240 items, 12 versions and four samples per version. A separate arm tested neuron steering; an additional recognition probe was not graded. The table below gives exact reply totals and uses.</p>
+<p>The main study used four models, 240 items, 12 versions and four samples per version. A pre-specified neuron-steering arm is not reported here because it does not vary naming; its results are in the code repository. A separate recognition probe was not graded. The table below gives exact reply totals and uses.</p>
 <div class="table-wrap"><table class="plain tight" id="acct"></table></div><p class="label-note" id="acct-note"></p>
 </div></details>
 <details class="appx" id="appendix-e"><summary>Appendix E: reproducibility</summary><div class="appx-body">
@@ -307,15 +291,13 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <li id="ref-lakens2017">Lakens (2017). Equivalence tests: A practical primer for t tests, correlations, and meta-analyses. <i>Social Psychological and Personality Science</i> 8(4), 355–362. <a href="https://doi.org/10.1177/1948550617697177" target="_blank" rel="noopener noreferrer">doi:10.1177/1948550617697177</a></li>
 <li id="ref-mireshghallah2023">Mireshghallah, Kim, Zhou, Tsvetkov, Sap, Shokri, Choi (2023). Can LLMs keep a secret? Testing privacy implications of language models via contextual integrity theory (ConfAIde). ICLR 2024. <a href="https://arxiv.org/abs/2310.17884" target="_blank" rel="noopener noreferrer">arXiv:2310.17884</a></li>
 <li id="ref-qwen2024">Qwen Team (2024). Qwen2.5 technical report. <a href="https://arxiv.org/abs/2412.15115" target="_blank" rel="noopener noreferrer">arXiv:2412.15115</a></li>
-<li id="ref-panickssery2024">Panickssery, Gabrieli, Schulz, Tong, Hubinger, Turner (2024). Steering Llama 2 via contrastive activation addition. ACL 2024. <a href="https://arxiv.org/abs/2312.06681" target="_blank" rel="noopener noreferrer">arXiv:2312.06681</a></li>
 <li id="ref-shao2024">Shao, Li, Shi, Liu, Yang (2024). PrivacyLens: Evaluating privacy norm awareness of language models in action. NeurIPS 2024 Datasets and Benchmarks. <a href="https://arxiv.org/abs/2409.00138" target="_blank" rel="noopener noreferrer">arXiv:2409.00138</a></li>
-<li id="ref-turner2023">Turner, Thiergart, Leech, Udell, Vazquez, Mini, MacDiarmid (2023). Steering language models with activation engineering. <a href="https://arxiv.org/abs/2308.10248" target="_blank" rel="noopener noreferrer">arXiv:2308.10248</a></li>
 </ol>
 </div></main>
 <footer><div class="col">Independent research note · Mayank Saxena</div></footer>
 
-<script src="data/figures.js?v=f7563498"></script>
-<script src="data/examples.js?v=12f5b121"></script>
+<script src="data/figures.js?v=ac12faaa"></script>
+<script src="data/examples.js?v=b3ef6b92"></script>
 <script>
 (function () {
 const D = window.FIGURES, EX = window.EXAMPLES, NX = window.NAME_EXAMPLES, NS = "http://www.w3.org/2000/svg";
@@ -365,7 +347,7 @@ const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">":
 const comp = Object.fromEntries(D.components.map((c) => [c.code, c]));
 const oth = Object.fromEntries(D.other.map((c) => [c.key, c]));
 const R = oth["renaming control: C11-C0"], NR = oth["placeholders vs renaming: C1-C11"], PL = oth["P placement: C10-C8"];
-const BB = D.by_bench, ST = D.steer, Q = ST["Qwen2.5-7B"].contrasts, M = ST["Mistral-7B"].contrasts;
+const BB = D.by_bench;
 const cell = (m, b, c) => 100 * D.cells[m][b][c].sonnet;
 const recC1 = (b) => D.recog.find((r) => r.cell === "C1" && r.bench === b).d_test;
 const K = {
@@ -375,8 +357,6 @@ const K = {
   m_cf: MODELS.map((m) => `${m} ${sg(cell(m, "confaide", "C1") - cell(m, "confaide", "C0"))}`).join(", "),
   up_cf: D.shifts.confaide.up, down_cf: D.shifts.confaide.down, up_pl: D.shifts.privacylens.up, down_pl: D.shifts.privacylens.down,
   flips: D.full_flips.confaide === D.full_flips.privacylens ? ["no", "one", "two", "three"][D.full_flips.confaide] || D.full_flips.confaide : `${D.full_flips.confaide} / ${D.full_flips.privacylens}`,
-  st_q: sg(Q["steer - base"].est), st_m: sg(M["steer - base"].est), rnd_q: sg(Q["random - base"].est), rnd_m: sg(M["random - base"].est),
-  stp_q: sg(Q["steer_P - P"].est), stp_m: sg(M["steer_P - P"].est), sp_q: sg(Q["steer - P"].est), sp_q_ci: ci(Q["steer - P"]), sp_m: sg(M["steer - P"].est), sp_m_ci: ci(M["steer - P"]),
   P: sg(comp.P.est), P_ci: ci(comp.P), PL: sg(PL.est), PL_ci: ci(PL), S: sg(comp.S.est), S_ci: ci(comp.S), E: sg(comp.E.est), E_ci: ci(comp.E),
   bundle: sg(oth["bundle C7-C0"].est), add: sg(oth["additivity: C7-C1-C2-C3+2*C0"].est), add_ci: ci(oth["additivity: C7-C1-C2-C3+2*C0"]),
   rec_cf: sg(recC1("confaide")), rec_pl: sg(recC1("privacylens")), n_inc: D.accounting.n_incomplete,
@@ -633,38 +613,6 @@ seg("cells-model", [["all", "All four"], ...MODELS.map((m) => [m, m])], cModel, 
 seg("cells-bench", [["both", "Both"], ["confaide", "ConfAIde"], ["privacylens", "PrivacyLens"]], cBench, (v) => { cBench = v; drawCells(true); });
 whenVisible($("fig-cells"), () => drawCells(true));
 
-/* ---------- steering ---------- */
-const SC = [["base", "Published prompt", "#4a524e"], ["random", "Random neurons", "#a9b0ae"], ["P", "Instruction", "#2563b0"],
-  ["steer", "Steering", "#d09017"], ["steer_P", "Steering + instruction", "#c9503a"], ["random_P", "Random + instruction", "#8fb0d9"]];
-$("steer-legend").innerHTML = SC.map(([, l, c]) => `<span><i style="background:${c}"></i>${l}</span>`).join("");
-function drawSteer(anim) {
-  const node = $("steer"); node.innerHTML = "";
-  const ms = Object.keys(D.steer), w = W(node), narrow = w < 560, gh = 6 * 20 + 34, h = ms.length * gh + 24;
-  const s = el("svg", { viewBox: `0 0 ${w} ${h}` }, node), lw = narrow ? 112 : 170, x = sc(0, 65, lw, w - 50);
-  [0, 20, 40, 60].forEach((t) => { el("line", { x1: x(t), x2: x(t), y1: 16, y2: h - 4, stroke: "#e4e6e6" }, s); tx(s, x(t), 11, t + "%", { class: "tk", "text-anchor": "middle" }); });
-  const bars = [];
-  ms.forEach((m, gi) => {
-    const y0 = 24 + gi * gh; tx(s, 0, y0 + 12, m, { class: "lab", style: "font-weight:600" });
-    SC.forEach(([c, l, col], i) => {
-      const y = y0 + 22 + i * 20, v = D.steer[m].abs[c];
-      tx(s, 0, y + 12, l, { class: "lab2" });
-      const b = el("rect", { x: x(0), y: y + 2, height: 14, width: 0, rx: 2, fill: col }, s);
-      const n = tx(s, 0, y + 14, "", { class: "num", style: "font-size:11.5px" });
-      const hit = el("rect", { x: 0, y, width: w, height: 20, class: "hit" }, s);
-      tooltip(hit, `<b>${m} · ${l}</b><br>Protection ${v.toFixed(1)}%`);
-      bars.push({ b, n, v });
-    });
-  });
-  const place = (t) => bars.forEach(({ b, n, v }, i) => { const d = Math.max(0, Math.min(1, t * 1.6 - (i % 6) * 0.1)), val = v * d;
-    b.setAttribute("width", x(val) - x(0)); n.setAttribute("x", x(val) + 5); n.textContent = val.toFixed(0) + "%"; });
-  anim ? tween(1300, place) : place(1);
-}
-whenVisible($("fig-steer"), () => drawSteer(true));
-const ss = $("steer-setup");
-ss.innerHTML = "<p>Steering adds a scaled average activation shift (α = 4) to the top 5,000 MLP neurons, selected on separate items (none of the 240 used here); random controls use 5,000 random neurons per item at the same strength. All six conditions ran in one engine, 240 items × 2 samples. Contrasts Holm-adjusted over six tests.</p>";
-table(ss, ["Model · contrast", "Estimate [95% CI]", "Holm p"], Object.entries(D.steer).flatMap(([m, v]) => ["steer - base", "steer - random", "random - base", "steer - P", "steer_P - P"].map((k) =>
-  [`${m} · ${k.replace("_P", " + instruction").replace(/\bP\b/, "instruction")}`, `${sg(v.contrasts[k].est)} [${sg(v.contrasts[k].lo)}, ${sg(v.contrasts[k].hi)}]`, v.contrasts[k].p_holm == null ? "descriptive" : v.contrasts[k].p_holm < .001 ? "<0.001" : v.contrasts[k].p_holm.toFixed(3)])));
-
 /* ---------- recognition vs behavior ---------- */
 const BC = { confaide: ["#2563b0", "ConfAIde"], privacylens: ["#d09017", "PrivacyLens"] };
 $("recog-legend").innerHTML = Object.values(BC).map(([c, l]) => `<span><i style="background:${c};border-radius:50%"></i>${l}</span>`).join("");
@@ -720,7 +668,7 @@ $("appendix-b").addEventListener("toggle", drawGate);
 
 /* ---------- other examples ---------- */
 const hl = (s, re) => esc(s).replace(new RegExp(re, "gi"), (m) => `<mark>${m}</mark>`);
-const SIDE = { C11: "Other realistic names", C0: "Published prompt", C1: "Placeholder names", C8: "Instruction in system prompt", C10: "Instruction in user turn", random: "Random neurons", steer: "Steered", C2: "Test-case format" };
+const SIDE = { C11: "Other realistic names", C0: "Published prompt", C1: "Placeholder names", C8: "Instruction in system prompt", C10: "Instruction in user turn", C2: "Test-case format" };
 function exWidget(id, ids) {
   const node = $(id), items = EX.filter((e) => ids.includes(e.id));
   node.innerHTML = `<div class="tabs"></div><div class="card"></div>`;
@@ -738,11 +686,10 @@ function exWidget(id, ids) {
   whenVisible(node, () => show(items[0]));
 }
 exWidget("ex-a", ["placement", "instruction"]);
-exWidget("ex-b", ["steering"]);
 exWidget("ex-c", ["recognition"]);
 
 /* redraw on resize without animation */
-let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { drawEffect(false); drawShifts(false); drawForest(false); drawNames(); drawPlace(); drawCells(false); drawSteer(false); drawRecog(false); if ($("appendix-b").open) drawGate(); }, 150); });
+let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { drawEffect(false); drawShifts(false); drawForest(false); drawNames(); drawPlace(); drawCells(false); drawRecog(false); if ($("appendix-b").open) drawGate(); }, 150); });
 
 /* figures inside a collapsed section are drawn at the wrong width until it opens: redraw on open */
 document.querySelectorAll("main details").forEach((d) => d.addEventListener("toggle", () => { if (d.open) dispatchEvent(new Event("resize")); }));
