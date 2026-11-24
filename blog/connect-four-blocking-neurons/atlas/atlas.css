@@ -3,6 +3,8 @@
 body { background: var(--paper); }
 .appbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 10px 24px; background: rgba(242,243,243,.94); backdrop-filter: blur(6px); border-bottom: 1px solid var(--rule); }
 .appbar::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--split); opacity: .8; }
+.backpost { font: 500 13px var(--sans); color: var(--ink-2); text-decoration: none; padding: 6px 12px 6px 0; border-right: 1px solid var(--rule); white-space: nowrap; }
+.backpost:hover { color: var(--brand); text-decoration: underline; }
 .brand { display: flex; align-items: center; gap: 6px; font: 700 18px var(--display); color: var(--ink); text-decoration: none; letter-spacing: -.02em; }
 .brand small { font: 500 12px var(--sans); color: var(--muted); letter-spacing: 0; margin-left: 6px; }
 .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; } .dot.me { background: var(--me); } .dot.op { background: var(--op); margin-left: -4px; }
@@ -92,7 +94,7 @@ footer .foot { max-width: 1160px; margin: 0 auto; padding: 20px 24px 50px; font:
 .takeaways .tk-h { font: 600 11px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
 .takeaways ul { margin: 0; padding-left: 18px; font: 14.5px/1.55 var(--sans); color: var(--ink-2); } .takeaways li { margin: 0 0 4px; } .takeaways b { color: var(--ink); }
 @media (max-width: 720px) {
-  .appbar { padding: 8px 12px; gap: 8px; } .brand small { display: none; } .search { margin-left: 0; width: 100%; } .search input { width: 100%; }
+  .appbar { padding: 8px 12px; gap: 8px; } .backpost { border-right: 0; padding-right: 4px; } .brand small { display: none; } .search { margin-left: 0; width: 100%; } .search input { width: 100%; }
   main { padding: 0 12px 30px; } .vhead h1 { font-size: 28px; } .livebox { grid-template-columns: 1fr; }
   .exg { grid-template-columns: repeat(3, minmax(0, 1fr)); } .hbar { grid-template-columns: 110px 1fr 48px; } .poletabs { grid-template-columns: 1fr; }
   .seg button { padding: 6px 8px; font-size: 12px; }
