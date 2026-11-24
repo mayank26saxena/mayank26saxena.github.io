@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect Four Neuron Atlas</title>
+<meta name="description" content="Every neuron of a small transformer that plays Connect Four, in three views: by layer (with a live board), as a map of what the board looks like when each one fires, and a library of neuron pages with the concepts they match, what they do to the move, and descriptions written by an AI agent.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/tokens.css?v=344f4f1b">
+<link rel="stylesheet" href="atlas.css?v=3a63473b">
+</head>
+<body>
+<div class="appbar">
+  <a class="brand" href="#layers"><span class="dot me"></span><span class="dot op"></span>Neuron Atlas <small>Connect Four · 6 × 1,024 neurons</small></a>
+  <nav class="tabs" role="tablist">
+    <a href="#layers" data-view="layers">Layers</a><a href="#map" data-view="map">Map</a><a href="#library" data-view="library">Library</a>
+  </nav>
+  <label class="search"><input id="q" type="search" placeholder="Search: threat, column 3, L5 N344…" autocomplete="off"><span id="qcount"></span></label>
+</div>
+
+<main>
+  <section class="view" id="v-layers">
+    <div class="vhead">
+      <h1>Every neuron, by layer</h1>
+      <p>The model reads a game as a list of column numbers and has 6 layers of 1,024 neurons. Each neuron has two sides, a positive and a negative <i>pole</i>, which usually mean different things. Each square is one neuron, coloured by the theme of the side that matches a game concept best. Click a square to open it, or set up a board and watch every neuron respond.</p>
+    </div>
+    <div class="themes" id="themes"></div>
+    <div class="bar">
+      <div class="seg" id="colorBy" role="group" aria-label="Colour by">
+        <button data-c="theme" class="on">Theme</button><button data-c="agent">Described by the agent</button><button data-c="circuit">Blocking circuit</button><button data-c="live">Live board</button>
+      </div>
+      <div class="seg" id="orderBy" role="group" aria-label="Order neurons"><button data-o="theme" class="on">By theme</button><button data-o="number">By number</button></div>
+    </div>
+    <div class="livebox" id="livebox" hidden>
+      <div class="lb-board"><svg id="lboard" viewBox="0 0 364 312" aria-label="Board: click a column to drop a stone"></svg>
+        <div class="lb-btns"><button id="lundo" type="button">Undo</button><button id="lclear" type="button">Clear</button><button id="lthreat" type="button">Load a vertical threat</button></div></div>
+      <div class="lb-side"><p class="lb-cap">Brightness: how strongly each neuron fires on this board, against its own firing threshold. Stones alternate; <i class="sw me"></i>the player to move, <i class="sw op"></i>the other.</p>
+        <div class="lb-probs" id="lprobs"></div><p class="lb-cap" id="lmove"></p></div>
+    </div>
+    <div class="grid" id="grid"></div>
+    <p class="hnote" id="gridnote"></p>
+  </section>
+
+  <section class="view" id="v-map" hidden>
+    <div class="vhead">
+      <h1>A map of all 12,288 poles</h1>
+      <p>Every pole is placed by what the board looks like when it fires (which cells hold the mover's stones, the opponent's, or nothing, compared with usual), so poles that read similar board patterns sit together. Colour is the theme of the concept it matches best; grey dots match none well. Scroll or pinch to zoom, drag to move, click a dot to open it.</p>
+    </div>
+    <div class="mapwrap"><canvas id="map"></canvas>
+      <div class="mapctl"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zfit">Fit</button></div>
+      <p class="mapnote" id="mapnote"></p></div>
+    <div class="themes" id="themes2"></div>
+  </section>
+
+  <section class="view" id="v-library" hidden>
+    <div id="lib-list">
+      <div class="vhead">
+        <h1>Library</h1>
+        <p>Neuron pages for every pole. Start with the ones an AI agent investigated (it wrote and tested a description of each, blind), the blind test (the 20 key circuit neurons hidden among 20 look-alike decoys; did the agent spot the block?) or the ones that carry the vertical block; search finds the rest.</p>
+      </div>
+      <div class="bar">
+        <div class="seg" id="libset" role="group" aria-label="Which neurons"><button data-s="agent" class="on">Described by the agent</button><button data-s="blind">Blind test</button><button data-s="circuit">Vertical-block circuit</button><button data-s="alarms">Column alarms</button><button data-s="all">All poles</button></div>
+        <label class="sel">Layer <select id="liblayer"><option value="">all</option></select></label>
+      </div>
+      <p class="hnote" id="libcount"></p>
+      <div class="cards" id="libcards"></div>
+    </div>
+    <article id="npage" hidden></article>
+  </section>
+</main>
+<div class="tip" id="tip"></div>
+<footer><div class="foot">Concept labels come from 659 exact game concepts (F1 on held-out games); agent descriptions from three pre-registered studies (120 neurons, then a blind test on 20 circuit neurons and 20 decoys). Columns and rows are numbered from 0. Part of <a href="../index.html">Can an AI Agent Find the Neurons That Block a Connect Four Threat?</a>.</div></footer>
+<script src="../lib/concepts.js?v=7c36b397"></script>
+<script src="../vertical/c4model.js?v=b307be9b"></script>
+<script src="../data/atlas.js?v=7bcc0f2e"></script>
+<script src="data/map.js?v=30ec4334"></script>
+<script src="atlas.js?v=fa626873"></script>
+</body>
+</html>

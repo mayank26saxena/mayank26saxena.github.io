@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive Demo: Inside the Vertical Blocker</title>
+<meta name="description" content="Play Connect Four against a small transformer and watch all 6,144 of its neurons respond: the attention head, directions and column alarms that block a vertical threat, with switches to turn each part off. Companion to the post Can an AI Agent Find the Neurons That Block a Connect Four Threat?.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/tokens.css?v=344f4f1b">
+<link rel="stylesheet" href="../vertical/vertical.css?v=372e5382">
+<link rel="stylesheet" href="../post.css?v=d25837ec">
+</head>
+<body class="demo-page">
+<header class="hero demo-hero">
+  <p class="back"><a href="../index.html">← Back to the post: Can an AI Agent Find the Neurons That Block a Connect Four Threat?</a></p>
+  <p class="kicker">Interactive demo · Connect Four</p>
+  <h1>Inside the <span class="hi">vertical blocker</span></h1>
+  <p class="standfirst">A live copy of the model runs in your browser. You play ochre. Scroll for a guided tour of the four steps it uses to block you, or skip to the end and play freely.</p>
+</header>
+
+<section class="story" id="story">
+  <div class="stage" id="stage" aria-label="Live model">
+    <div class="stage-grid">
+      <div class="boardwrap">
+        <svg id="board" viewBox="0 0 364 330" role="img" aria-label="Connect Four board"></svg>
+        <div class="boardbtns"><button id="undo" type="button">Undo</button><button id="reset" type="button">Clear</button><span id="status" class="status"></span></div>
+      </div>
+      <div class="readout">
+        <div class="step-mini" id="st-head"><span class="sn">1</span><span class="lbl">opponent's recent moves</span><p class="sx" id="head-text"></p></div>
+        <div class="step-mini" id="st-dirs"><span class="sn">2</span><span class="lbl">threat directions</span><div class="meters" id="meters"></div></div>
+        <div class="step-mini" id="st-alarm"><span class="sn">3</span><span class="lbl">column alarms: lamps above the board</span></div>
+        <div class="step-mini" id="st-move"><span class="sn">4</span><span class="lbl">the model's move</span><div class="probs" id="probs"></div><p class="sx" id="move-text"></p></div>
+      </div>
+    </div>
+    <div class="switches" id="switches" role="group" aria-label="Switch parts off"></div>
+    <div class="atlas-wrap">
+      <div class="atlas-head"><span>All 6,144 neurons, live</span><span class="atlas-mode" id="atlas-mode"></span></div>
+      <canvas id="atlas" aria-label="Map of every neuron; brightness shows how strongly each fires on this board"></canvas>
+      <div class="ncard" id="ncard">Hover or tap a neuron. Brighter = firing harder on this board. Each block is one layer; neurons are grouped by the concept they match best.</div>
+    </div>
+    <div class="presets" id="presets" role="group" aria-label="Example positions"></div>
+    <figcaption id="demo-cap" hidden></figcaption><div id="demo-setup" hidden></div>
+  </div>
+
+  <div class="steps">
+    <article class="sc" data-step="play">
+      <p class="sc-no">00</p>
+      <h2 id="play">You are the opponent</h2>
+      <p>The model reads a game only as a list of column numbers and predicts the next move. It never sees a board. Your stones are <i class="sw op"></i>ochre, the model's <i class="sw me"></i>blue. You have two in column 3. <b>Drop a third one there</b> (click the column) and watch the model react: its move bars, the lamp over column 3, and the neuron map.</p>
+    </article>
+    <article class="sc" data-step="board">
+      <p class="sc-no">01</p>
+      <h2 id="board-h">It keeps a board in its head</h2>
+      <p>Mid-model, the stones can be read off its activity as <i>mine</i> and <i>theirs</i> (98.6% of the time). The highlighted neurons on the map are the ones that best match a single cell or landing spot.</p>
+    </article>
+    <article class="sc" data-step="threat">
+      <p class="sc-no">02</p>
+      <h2 id="threat">A threat appears</h2>
+      <p>Three of your stones are stacked with the cell above empty. The model blocks on top 100% of the time. The 53 neurons lit up on the map are the smallest set that carries 80% of the block.</p>
+    </article>
+    <article class="sc" data-step="head">
+      <p class="sc-no">02.1</p>
+      <h2 id="head">It gathers your recent moves</h2>
+      <p>Head 2 of layer 0 puts 66% of its attention on the moves of the player who just moved, mostly the latest two: the rings on the board. A vertical three is usually built from exactly those moves.</p>
+    </article>
+    <article class="sc" data-step="dirs">
+      <p class="sc-no">02.2</p>
+      <h2 id="dirs">The threat travels as a few directions</h2>
+      <p>Through the middle layers, the highlighted circuit neurons are only a sliver: 3,000 neurons would be needed for 80% of the push. It lives in 15 <i>directions</i>, patterns across many neurons at once: the tubes on the stage.</p>
+    </article>
+    <article class="sc" data-step="alarms">
+      <p class="sc-no">02.3</p>
+      <h2 id="alarms">Seven column alarms make the move</h2>
+      <p>In the last layer single neurons do the work: 36 of them, each pushing towards the column whose threat it responds to. They are the lamps above the board. Try a threat in another column and watch a different group light up.</p>
+    </article>
+    <article class="sc" data-step="switch">
+      <p class="sc-no">02.4</p>
+      <h2 id="switch">Now switch them off</h2>
+      <p>We have just switched the alarms off: vertical blocks fall from 100% to 70% on held-out games. Try the other switches. The numbers on each switch are measured, not simulated.</p>
+    </article>
+    <article class="sc" data-step="agent">
+      <p class="sc-no">02.5</p>
+      <h2 id="agent">What an AI agent wrote</h2>
+      <p>The highlighted neurons are the ones an AI agent described and tested; the ringed ones are in the circuit. Tap one to read what it wrote. In a blind test it described 14 of the 20 key circuit neurons as block detectors, and 2 of 20 decoys (<a href="../index.html#agent">in the post</a>).</p>
+    </article>
+    <article class="sc" data-step="explore">
+      <p class="sc-no">02.6</p>
+      <h2 id="explore">Your turn</h2>
+      <p>Play freely. Load a horizontal threat from the positions under the map: the model still blocks it, but the column alarms stay dark. That case is carried by more spread-out parts. <a href="../index.html">Read the full post</a> or <a href="../atlas/index.html">browse every neuron in the atlas</a>.</p>
+    </article>
+  </div>
+</section>
+<footer><div class="col"><a href="../index.html">← Back to the post</a></div></footer>
+<script src="../lib/concepts.js?v=7c36b397"></script>
+<script src="../vertical/c4model.js?v=b307be9b"></script>
+<script src="../vertical/switches.js?v=ffb0766d"></script>
+<script src="../vertical/data/vertical.js?v=84cef74a"></script>
+<script src="../data/atlas.js?v=7bcc0f2e"></script>
+<script>window.VDEMO_START = [3, 0, 3, 6]; window.VDEMO_FIXED = true; window.VDEMO_MODEL = "../lib/model.json"; window.ATLAS_URL = "../atlas/index.html";</script>
+<script src="../vertical/vertical.js?v=b7e4e53d"></script>
+<script src="../story.js?v=7fa982a8"></script>
+</body>
+</html>

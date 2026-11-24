@@ -1,0 +1,48 @@
+/* Vertical-blocker demo; builds on ../assets/tokens.css. Split pair for this page: the threat (opponent ochre) | the block (mover blue). */
+:root { --split-a: #d09017; --split-b: #2563b0; --me: #2563b0; --op: #d09017; --ok: #2f6b57; --bad: #9b3a27; --lamp: #c9503a; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin: 0 4px 0 6px; vertical-align: -1px; }
+.sw.me { background: var(--me); } .sw.op { background: var(--op); }
+.hnote { font: 13px/1.55 var(--sans); color: var(--muted); margin: 6px 0 18px; }
+.tscroll { overflow-x: auto; margin: 0 0 14px; }
+table.plain { border-collapse: collapse; width: 100%; font: 13.5px/1.45 var(--sans); }
+table.plain th, table.plain td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.plain th { font-weight: 600; color: var(--ink-2); font-size: 12.5px; }
+table.plain td.n { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+.held { color: var(--ok); font-weight: 600; } .failed { color: var(--bad); font-weight: 600; }
+ul.limits { padding-left: 18px; } ul.limits li { margin: 0 0 8px; }
+footer { font: 12.5px/1.6 var(--sans); color: var(--muted); padding: 30px 0 60px; }
+
+.presets { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+.presets button, .boardbtns button { font: 500 12.5px var(--sans); padding: 6px 10px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); border-radius: 3px; cursor: pointer; }
+.presets button:hover, .boardbtns button:hover { border-color: var(--ink-2); }
+.presets button.on { border-color: var(--brand); color: var(--brand); }
+.stage { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.boardwrap { max-width: 380px; width: 100%; margin: 0 auto; }
+.boardwrap svg { width: 100%; height: auto; display: block; cursor: pointer; }
+.boardbtns { display: flex; gap: 6px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+.status { font: 12.5px/1.4 var(--sans); color: var(--muted); }
+.step { border-top: 1px solid var(--rule); padding: 8px 0 10px; transition: opacity .2s; }
+.step.off { opacity: .45; }
+.sh { font: 600 13.5px/1.3 var(--display); display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+.sn { font: 600 11px/1 var(--mono); color: #fff; background: var(--ink); border-radius: 50%; width: 17px; height: 17px; display: inline-flex; align-items: center; justify-content: center; }
+.where { font: 500 11px var(--mono); color: var(--muted); }
+.sx { font: 12.5px/1.45 var(--sans); color: var(--ink-2); margin: 5px 0 0; }
+.meters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: 7px; }
+.meter { font: 10.5px/1.2 var(--mono); color: var(--muted); text-align: center; }
+.meter .tube { height: 46px; background: #e6e9e8; border-radius: 2px; position: relative; overflow: hidden; margin-bottom: 3px; }
+.meter .tube i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--op); transition: height .25s; }
+.probs { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin-top: 7px; align-items: end; height: 64px; }
+.probs .pc { display: flex; flex-direction: column; justify-content: flex-end; height: 100%; font: 10px/1.2 var(--mono); color: var(--muted); text-align: center; position: relative; }
+.probs .pc i { display: block; background: var(--ink-2); border-radius: 2px 2px 0 0; transition: height .25s; }
+.probs .pc.block i { background: var(--me); }
+.probs .pc .ghost { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--muted); }
+.switches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 16px 0 0; }
+.switch { border: 1px solid var(--rule); border-radius: 4px; padding: 9px 10px; background: var(--paper); cursor: pointer; text-align: left; font: 12.5px/1.4 var(--sans); color: var(--ink); }
+.switch b { display: block; font: 600 13px var(--display); margin-bottom: 2px; }
+.switch .m { font: 11.5px/1.4 var(--mono); color: var(--muted); display: block; margin-top: 4px; }
+.switch.on { border-color: var(--bad); background: #f6ecea; }
+.switch.on b::after { content: " · off"; color: var(--bad); }
+@media (max-width: 720px) {
+  .stage { grid-template-columns: 1fr; }
+  .switches { grid-template-columns: 1fr; }
+}

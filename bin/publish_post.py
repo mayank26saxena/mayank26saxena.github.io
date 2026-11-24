@@ -13,7 +13,8 @@ The page is the single source of truth for its title (<h1>), list description (<
 
 What it does (it never commits or pushes):
   - copies every local file the page references (src/href), with content-hash ?v= cache busting, and removes files in
-    blog/SLUG/ that the page no longer loads; .json files are never copied unless referenced;
+    blog/SLUG/ that the page no longer loads; .json files are never copied unless referenced; linked local .html pages are
+    copied with their own references, and SOURCE_DIR/publish-files.txt may list files the pages fetch at run time;
   - points the shared style files (tokens.css, charts.js; referenced as assets/... or ../assets/...) at blog/assets/,
     and stops if the project's copy differs from the site's (pass --update-shared to replace the site copy, which
     changes every post);
@@ -157,29 +158,62 @@ def main():
     kicker = text(re.search(r'<p class="kicker">(.*?)</p>', t, re.S).group(1))
     t = re.sub(r"<title>.*?</title>", f"<title>{html.escape(title, quote=False)}</title>", t, count=1, flags=re.S)
 
-    # local references: shared style files go to blog/assets/, everything else is copied next to the page
+    # local references: shared style files go to blog/assets/, everything else is copied next to the page. Linked local
+    # .html pages (for example an interactive demo next to the post) are copied too, with their own references, and files a
+    # page only fetches at run time can be listed one per line in SOURCE_DIR/publish-files.txt.
     keep = {"index.html", "share.png"}
+    done = set()
 
-    def ref(m):
-        attr, path = m.group(1), m.group(2).split("?")[0]
-        name = path.split("/")[-1]
-        if re.match(r"(\.\./)?assets/", path) and name in SHARED:
-            site_f, proj_f = BLOG / "assets" / name, (src / path)
-            if proj_f.exists() and (not site_f.exists() or proj_f.read_bytes() != site_f.read_bytes()):
-                if not a.update_shared:
-                    sys.exit(f"{proj_f} differs from blog/assets/{name} (shared by every post). Copy the site's version into the "
-                             f"project and re-check the page, or pass --update-shared to replace the site's copy.")
-                out[site_f] = proj_f.read_bytes()
-            b = out.get(site_f) or site_f.read_bytes()
-            return f'{attr}="../assets/{name}?v={h8(b)}"'
-        f = (src / path).resolve()
-        if not f.is_file() or src not in f.parents:
-            sys.exit(f"the page references {path}, which is not a file inside {src}")
-        rel = f.relative_to(src).as_posix()
-        keep.add(rel)
-        out[post / rel] = f.read_bytes()
-        return f'{attr}="{rel}?v={h8(out[post / rel])}"'
-    t = re.sub(r'\b(src|href)="(?!https?:|//|/|#|mailto:|data:)([^"]+)"', ref, t)
+    def localize(page_text, page_rel):
+        base = (src / page_rel).parent
+        depth = len(Path(page_rel).parts) - 1
+
+        def ref(m):
+            attr, raw = m.group(1), m.group(2)
+            frag = "#" + raw.split("#", 1)[1] if "#" in raw else ""
+            path = raw.split("#")[0].split("?")[0]
+            if not path:
+                return m.group(0)
+            name = path.split("/")[-1]
+            if re.fullmatch(r"(\.\./)*assets/[^/]+", path) and name in SHARED:
+                site_f, proj_f = BLOG / "assets" / name, (base / path)
+                if proj_f.exists() and (not site_f.exists() or proj_f.read_bytes() != site_f.read_bytes()):
+                    if not a.update_shared:
+                        sys.exit(f"{proj_f} differs from blog/assets/{name} (shared by every post). Copy the site's version into the "
+                                 f"project and re-check the page, or pass --update-shared to replace the site's copy.")
+                    out[site_f] = proj_f.read_bytes()
+                b = out.get(site_f) or site_f.read_bytes()
+                return f'{attr}="{"../" * (depth + 1)}assets/{name}?v={h8(b)}"'
+            if path.endswith("/"):
+                path += "index.html"
+            f = (base / path).resolve()
+            if not f.is_file() or src not in f.parents and f != src:
+                sys.exit(f"{page_rel} references {path}, which is not a file inside {src}")
+            rel = f.relative_to(src).as_posix()
+            if rel == "index.html":
+                return f'{attr}="{path}{frag}"'
+            keep.add(rel)
+            if f.suffix == ".html" and attr == "href":
+                if rel not in done:
+                    done.add(rel)
+                    out[post / rel] = localize(f.read_text(encoding="utf-8"), rel).encode()
+                return f'{attr}="{path}{frag}"'
+            out[post / rel] = f.read_bytes()
+            return f'{attr}="{path}?v={h8(out[post / rel])}{frag}"'
+        return re.sub(r'\b(src|href)="(?!https?:|//|/|#|mailto:|data:)([^"]+)"', ref, page_text)
+
+    t = localize(t, "index.html")
+    extra = src / "publish-files.txt"
+    if extra.exists():
+        for line in extra.read_text(encoding="utf-8").splitlines():
+            rel = line.split("#")[0].strip()
+            if not rel:
+                continue
+            f = (src / rel).resolve()
+            if not f.is_file() or src not in f.parents:
+                sys.exit(f"publish-files.txt lists {rel}, which is not a file inside {src}")
+            keep.add(f.relative_to(src).as_posix())
+            out[post / f.relative_to(src).as_posix()] = f.read_bytes()
 
     # site chrome: drop any old preview/icon tags, then add the current ones after the description
     t = re.sub(r'\n?<(?:link rel="(?:canonical|icon|apple-touch-icon)"|meta (?:property="(?:og|article):|name="twitter:))[^>]*>', "", t)

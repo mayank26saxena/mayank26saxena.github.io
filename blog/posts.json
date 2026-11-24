@@ -1,5 +1,11 @@
 [
   {
+    "slug": "connect-four-blocking-neurons",
+    "title": "Can an AI Agent Find the Neurons That Block a Connect Four Threat?",
+    "description": "A small transformer learns to block threats in Connect Four. We traced how, from one attention head to seven column alarms, then asked an AI agent to describe its neurons blind. It picked out 14 of the 20 key neurons as block detectors, and 2 of 20 decoys. With a live demo and a neuron atlas.",
+    "date": "2026-11-24"
+  },
+  {
     "slug": "cross-lingual-safety-gap",
     "title": "AI Chatbots Refuse Harmful Requests Less Often in Hindi",
     "description": "Asked the same harmful requests in English and in Hindi, two open chat models (Qwen3-8B and Llama-3.1-8B-Instruct) refuse far less often in Hindi. What they do instead, what changes inside them, and how far steering can bring the refusals back.",
