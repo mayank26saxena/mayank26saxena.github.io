@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/tokens.css?v=344f4f1b">
-<link rel="stylesheet" href="post.css?v=48908fff">
+<link rel="stylesheet" href="post.css?v=4e45cdb3">
 <style>:root { --split-a: #d09017; --split-b: #2563b0; }</style>
 <style>
   .crumbs { display: flex; gap: 8px; align-items: baseline; padding-top: 26px; font: 500 14px/1 var(--sans); color: var(--muted); }
@@ -41,7 +41,7 @@
   <p class="kicker">Interpretability · research note</p>
   <h1>Can an AI Agent Find the Neurons That <span class="hi">Block a Connect Four Threat</span>?</h1>
   <p class="standfirst">A 6.3M-parameter transformer learns to block your threats. We traced how it does it, from one attention head to seven column alarms, and tested whether an AI agent describing its neurons blind would have found them.</p>
-  <div class="meta"><span><b>Mayank Saxena</b></span><span>November 2026</span><span><a href="https://github.com/mayank26saxena/connect4-neurons">Code and data</a></span></div>
+  <div class="meta"><span><b>Mayank Saxena</b></span><span>November 2026</span><span><a href="https://github.com/mayank26saxena/connect-four-neurons">Code and data</a></span></div>
 </div></header>
 
 <figure class="demo-card">
@@ -56,7 +56,7 @@
 
 
 <main><div class="col">
-  <p class="lead">We trained a small transformer to play Connect Four from move lists alone. It has 6 layers and was trained on 400,000 games from a search engine; it now picks one of the engine's best moves 94% of the time. When the opponent stacks three stones with the cell above empty, it blocks on top 100% of the time. This post traces how, and then asks whether an AI agent describing the model's neurons one at a time, as in Goodfire's Neuron Scientist (<a class="cite" href="#ref-tigges2026">Tigges et al. 2026</a>), would have found the parts that matter.</p>
+  <p class="lead">We trained a small transformer to play Connect Four from move lists alone. It has 6 layers and was trained on 400,000 games from a search engine; it now picks one of the engine's best moves 94% of the time. When the opponent stacks three stones with the cell above empty, it blocks on top 100% of the time. This post traces how, and then asks whether an AI agent that studies the model's neurons one at a time would have found the parts that matter.</p>
 
   <h2 id="board-h"><span class="no">01</span><span class="nl">It keeps a board in its head</span></h2>
   <p>The model never sees a board, only column numbers. Like Othello-GPT (<a class="cite" href="#ref-li2022">Li et al. 2022</a>), it builds one internally, labelled the way a player thinks: <i>mine</i> and <i>theirs</i>, not red and yellow (<a class="cite" href="#ref-nanda2023">Nanda et al. 2023</a>). After layer 3's attention, stone colours are readable 98.6% of the time (Figure 1). Editing a stone in that internal board changes the model's move when the stone matters (58%) far more than when it does not (18%).</p>
@@ -96,7 +96,7 @@
   </figure>
 
   <h2 id="agent"><span class="no">03</span><span class="nl">Would an AI agent have found them?</span></h2>
-  <p>Goodfire's agent writes and tests a description of each neuron. We froze the circuit, then gave a fresh agent its 20 most important neurons shuffled among 20 look-alike decoys and 10 random directions, without saying what any of them were for. For 14 of the 20 it wrote a rule that picks out "block in this column", e.g. "Fires when the opponent threatens to win in column 0, the leftmost column". It did so for 2 of the 20 decoys (Figure 5).</p>
+  <p>One way to automate interpretability is to hand an AI agent a single neuron and let it work like a scientist: look at the positions where the neuron fires, propose a rule, test it on new positions, and write a short description (<a class="cite" href="#ref-tigges2026">Tigges et al. 2026</a>). We tested whether that finds what matters. After freezing the circuit, we gave a fresh agent its 20 most important neurons shuffled among 20 look-alike decoys and 10 random directions, without saying what any of them were for. For 14 of the 20 it wrote a rule that picks out "block in this column", e.g. "Fires when the opponent threatens to win in column 0, the leftmost column". It did so for 2 of the 20 decoys (Figure 5).</p>
 <figure class="fig" id="fig-testb">
     <p class="fig-title">Told nothing about blocking, the agent described 14 of the 20 key neurons as block detectors, and 2 of 20 decoys</p>
     <p class="fig-sub">Each dot is one unit the agent described blind. Position: how well its rule picks out "the player must block in column X" on unseen games (best F1 over the seven columns and "any column")</p>
@@ -104,24 +104,10 @@
     <div class="chart"></div>
     <figcaption><b>Figure 5:</b> above the bar: 14 of 20 circuit neurons, 2 of 20 decoys, 1 of 10 random directions (we had required at least half and at most 10%). The circuit neurons' rules also predict their own firing better (median F1 0.53 against 0.29). Hover a dot to read what the agent wrote.</figcaption>
   </figure>
-  <p>It found them because here single neurons do the work. The 2 layer-0 neurons it "missed" it described exactly, as reacting to where the opponent's last stone landed, which is what they are: the circuit's inputs. Its rules also predict the circuit neurons' own firing better (median F1 0.53 against 0.29), and it rated its own confidence higher for them. The full test is in <a href="#appendix-i">Appendix I</a>, and every description is in the <a href="atlas/index.html#library">neuron atlas</a>.</p>
+  <p>It found them because here single neurons do the work. The 2 layer-0 neurons it "missed" it described exactly, as reacting to where the opponent's last stone landed, which is what they are: the circuit's inputs. It also rated its own confidence higher for the circuit neurons than for the decoys. The full test is in <a href="#appendix-i">Appendix I</a>, and every description is in the <a href="atlas/index.html#library">neuron atlas</a>.</p>
+  <p><b>What we take away.</b> Describing neurons one at a time works where the model computes with single neurons, as at the end of the vertical block, and finds nothing where it does not: upstream, and for horizontal and diagonal threats, the information lives in directions spread across many neurons (15 directions against 3,000 neurons for the vertical threat in layers 0–4). Plausible descriptions are also cheap. The agent wrote convincing rules for 9 of 40 random directions in earlier runs, and a model reading the descriptions could not tell circuit neurons from decoys. What separated findings from stories was running the agent's rule against exact labels on held-out games, scored against a circuit frozen before the agent saw anything.</p>
 
-  <h2 id="takeaway"><span class="no">04</span><span class="nl">What we take away</span></h2>
-  <p><b>Single neurons are a good unit of interpretability where the model computes with single neurons.</b> In this model that is true at the end of the vertical block: the threat ends in column alarms, one neuron per job, and an agent describing neurons one at a time found them. Upstream, and for horizontal and diagonal threats, the same information lives in directions spread across hundreds or thousands of neurons (15 directions against 3,000 neurons for the vertical threat in layers 0–4), and a neuron-by-neuron search finds nothing there. Whether a neuron-first method works depends on the computation, not only on the method.</p>
-  <p><b>For an automated interpretability researcher, the checks matter more than the descriptions.</b> Plausible text was cheap here: the agent wrote convincing rules for 9 of 40 random directions, and a model reading the descriptions could not tell circuit neurons from decoys. What separated findings from stories was running the agent's rule against exact labels on held-out games, scored against a circuit frozen before the agent saw anything, with matched decoys and predictions written down first. The next step is an agent that chooses what to study, directions as well as neurons, and is scored against an answer key it never sees.</p>
-  <p><b>How this compares with Goodfire.</b> Their conclusion is broader than ours: neurons are a useful basis for understanding language models in general, with some genuinely polysemantic neurons left over. Ours is conditional on the computation, because with exact labels we can see where it is spread over directions instead. They study a 35-billion-parameter language model; this is a 6.3-million-parameter dense model, so where the two differ, scale is one explanation.</p>
-  <div class="tscroll"><table class="plain cmp">
-    <thead><tr><th>Goodfire's finding</th><th>Here</th><th></th></tr></thead>
-    <tbody>
-      <tr><td>Only the strongest firings matter: replacing the weak 92% of activations with their averages costs 1–2 benchmark points.</td><td>Zeroing the weak 90% costs 28 points of agreement with the search engine. This small model needs its weak activations.</td><td class="v differs">Differs</td></tr>
-      <tr><td>Most neurons have one mode, or one carrying at least 90% of their effect.</td><td>55% of 240 sampled neuron poles do.</td><td class="v agrees">Agrees</td></tr>
-      <tr><td>Neurons are far more meaningful than random directions.</td><td>For local concepts, yes: one neuron captures 31% of our concepts, one random direction 6%. For horizontal and diagonal threats and global concepts, directions carry what single neurons do not.</td><td class="v partly">Partly</td></tr>
-      <tr><td>Descriptions predict firing in the tail (beyond the 97th percentile).</td><td>Same: the circuit neurons' rules predict their strongest firing (median F1 0.53 against 0.29 for decoys), and the advantage vanishes for weaker firing.</td><td class="v agrees">Agrees</td></tr>
-      <tr><td>Descriptions are scored by a model reading them.</td><td>Reading alone did not separate circuit neurons from decoys (18 and 6 of 20 accepted); the agent's rule, run against exact labels, did (14 against 2).</td><td class="v new">Adds a test</td></tr>
-    </tbody>
-  </table></div>
-
-  <h2 id="limits"><span class="no">05</span><span class="nl">Limits</span></h2>
+  <h2 id="limits"><span class="no">04</span><span class="nl">Limits</span></h2>
   <ul class="limits">
     <li><strong>The neuron-first method suits vertical threats only.</strong> For horizontal and diagonal threats no 200 neurons carry 80% of the push; the information is spread over 40 and 60 directions (<a href="#appendix-e">Appendix E</a>).</li>
     <li><strong>4 of our 7 predictions about the mechanism failed</strong>, reported as failures; the readings that replaced them came afterwards (<a href="#appendix-b">Appendix B</a>).</li>
@@ -129,7 +115,7 @@
     <li><strong>One model, one tactic</strong>, and switches that use averages rather than a matched position.</li>
   </ul>
 
-  <h2 id="next"><span class="no">06</span><span class="nl">What comes next: mapping other concepts</span></h2>
+  <h2 id="next"><span class="no">05</span><span class="nl">What comes next: mapping other concepts</span></h2>
   <p>The pipeline is reusable: a concept is a short task file (which positions count, what the right move is, how to build the twin without it), and the same code finds the parts, freezes them and tests an agent against them. The next steps, in order:</p>
   <ul class="limits">
     <li><strong>The other tactics.</strong> Taking a win, setting up a fork and avoiding a move that hands the opponent a win already have exact labels. Each gets the same treatment: find the parts, freeze them, run the blind agent test.</li>

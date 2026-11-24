@@ -92,10 +92,5 @@ main .lead { font-size: 19px; line-height: 1.6; color: var(--ink); }
   .demo-text .demo-h { font-size: 22px; } .demo-hero h1 { font-size: 30px; }
 }
 body.demo-on nav.rail, body.demo-on .rail-toggle { opacity: 0 !important; pointer-events: none !important; }
-table.cmp { width: 100%; font: 14px/1.45 var(--sans); }
-table.cmp th { text-align: left; font-weight: 600; }
-table.cmp td { vertical-align: top; } table.cmp td:first-child { white-space: normal; font-weight: 500; width: 36%; }
-table.cmp td.v { font: 600 12px var(--sans); white-space: nowrap; }
-table.cmp td.v.agrees { color: var(--ok); } table.cmp td.v.differs { color: var(--bad); } table.cmp td.v.partly { color: #8a6a12; } table.cmp td.v.new { color: var(--me); }
 .tscroll { overflow-x: auto; margin: 0 0 14px; max-width: 100%; }
 #described td.n, #testb-table td.n { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
