@@ -132,20 +132,20 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <ul class="ledger" id="ledger"></ul>
 
 <h2 id="s01"><span class="no">01</span><span class="nl">The main finding</span></h2>
-<p>Benchmark authors often replace people's names with labels such as “Person A” and assume the change is neutral. In two privacy benchmarks it was not: with placeholders, four language models kept private details out of their replies more often on ConfAIde's short stories, though not on PrivacyLens agent tasks, while swapping in other realistic names did not raise protection. A privacy score can depend on how a benchmark writes its people, not only on the model.</p>
+<p>Benchmark authors often replace people's names with labels such as “Person A” and assume the change is neutral. In two privacy benchmarks it was not neutral. With placeholders, four language models kept private details out of their replies more often on ConfAIde's short stories. On PrivacyLens agent tasks the estimate is inconclusive. Swapping in other realistic names did not raise protection. A privacy score can depend on how a benchmark writes its people, not only on the model.</p>
 
 <h2 id="s03"><span class="no">02</span><span class="nl">The experiment</span></h2>
 <p><b>ConfAIde</b> (<a class="cite" href="#ref-mireshghallah2023">Mireshghallah et al. 2023</a>) presents short stories about a character asked to reveal a friend's secret. <b>PrivacyLens</b> (<a class="cite" href="#ref-shao2024">Shao et al. 2024</a>) presents agent tasks, where a model uses tools such as email or notes to write a message or post while records contain private details the task does not need. Each benchmark contributed 120 fictional scenarios.</p>
 <p>The four main open models were Qwen2.5-7B (<a class="cite" href="#ref-qwen2024">Qwen Team 2024</a>), Llama-3.1-8B (<a class="cite" href="#ref-grattafiori2024">Grattafiori et al. 2024</a>), Mistral-7B (<a class="cite" href="#ref-jiang2023">Jiang et al. 2023</a>) and Gemma-2-9B (<a class="cite" href="#ref-gemma2024">Gemma Team 2024</a>). For each scenario, I compared the published wording, placeholder names and a control using other realistic names. Protection is the share of replies Claude Sonnet judged to keep the private detail out; its agreement with human labels is documented in Appendix B. See the appendix for reply counts and prompt-version details.</p>
 
 <h2 id="s04"><span class="no">03</span><span class="nl">What changed the score?</span></h2>
-<p>Figure 1 shows the pre-specified comparison and the split by benchmark. The control is what makes the result interpretable: giving everyone a different realistic name did not raise protection, so the increase is specific to placeholder labels rather than to any change of names. What about placeholders matters (their brevity, their anonymized look, or the loss of a name to give away) is still unknown.</p>
+<p>Figure 1 shows the pre-specified comparison and the split by benchmark. The control is what makes the result interpretable: giving everyone a different realistic name did not raise protection on this one draw, so the increase showed up for placeholder labels. What about placeholders matters (their brevity, their anonymized look, or the loss of a name to give away) is still unknown.</p>
 <figure class="fig" id="fig-effect">
 <p class="fig-title">Placeholders raise protection; other realistic names do not</p>
 <p class="fig-sub">Change in protection, percentage points · 95% interval · top group pre-specified and pooled over 4 models; lower groups split by benchmark (exploratory)</p>
 <div class="legend" id="effect-legend"></div>
 <div id="effect"></div>
-<figcaption><b>Figure 1:</b> Across both benchmarks, placeholders add <span data-k="N"></span> points and realistic renaming does not raise it. Split by benchmark, the effect is concentrated in ConfAIde stories (<span data-k="N_cf"></span>, interval <span data-k="N_cf_ci"></span>); on PrivacyLens agent tasks it is <span data-k="N_pl"></span> (<span data-k="N_pl_ci"></span>), which cannot be told apart from zero, and about zero on items where every name was replaced.</figcaption>
+<figcaption><b>Figure 1:</b> Across both benchmarks, placeholders add <span data-k="N"></span> points and realistic renaming does not raise it. Split by benchmark, the effect is concentrated in ConfAIde stories (<span data-k="N_cf"></span>, interval <span data-k="N_cf_ci"></span>); on PrivacyLens agent tasks it is <span data-k="N_pl"></span> (<span data-k="N_pl_ci"></span>), which is inconclusive: the interval includes zero and extends past the ±3 equivalence bound. On items where every name was replaced it is about zero.</figcaption>
 <details class="setup"><summary></summary><div class="body" id="effect-setup"></div></details>
 </figure>
 
@@ -183,7 +183,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 
 <h2 id="s06"><span class="no">05</span><span class="nl">What evaluators can take from this</span></h2>
 <p>When evaluating privacy behavior, compare realistic names with placeholders on the same items, inspect what “protected” replies actually do, and test more than one task format. Report which naming condition a score uses.</p>
-<p>The result is limited to the two benchmarks, four small open models and prompts tested. Names were realistically reassigned only once, and there was no length-matched control. In 41 PrivacyLens items, a real name remained inside a username or email handle after placeholder replacement; without them, PrivacyLens shows no placeholder effect and realistic renaming lowers protection slightly. The grader can see “Person A” in a reply; a check found no sign of leniency, but it was small, and the open 32B judge gave a larger effect, so the size of the effect depends on the grader. The binary score does not distinguish genuine withholding from blanket refusal, and the study did not test appropriate sharing. All scenarios used fictional people. <b>This is not evidence that models disclose real people's information in deployment.</b></p>
+<p>The result is limited to the two benchmarks, four small open models and prompts tested. Names were realistically reassigned only once, and there was no length-matched control. In 41 PrivacyLens items, a real name remained inside a username or email handle after placeholder replacement; without them, the PrivacyLens estimate is about zero and realistic renaming lowers protection slightly. The grader can see “Person A” in a reply; a check found no sign of leniency, but a sample this small cannot rule out a bias of a few points. A clear effect showed up on one of the two task formats, so this is not a general correction factor. The binary score does not distinguish genuine withholding from blanket refusal, and the study did not test appropriate sharing. All scenarios used fictional people. <b>This is not evidence that models disclose real people's information in deployment.</b></p>
 
 <h2 id="s07"><span class="no">06</span><span class="nl">Other findings</span></h2>
 <p>In secondary tests, neuron steering and a privacy instruction raised protection; test-like formatting and a scoring note had little effect. The benchmark-awareness probe gave no support for a recognition account in the one model whose self-reports varied, though it cannot rule one out. Details and interactive figures are available below.</p>
@@ -233,8 +233,6 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <h3 id="s09">Test cues and other negative results</h3>
 <p><b>Looking like a test did not matter.</b> The study was first designed to test whether test-like cues raise protection. They mostly did not. A test-case wrapper (### Case / ### Input / ### Response) changed protection by <span data-k="S"></span> points (<span data-k="S_ci"></span>), and a note saying the reply would be scored by <span data-k="E"></span> (<span data-k="E_ci"></span>), statistically equivalent to zero. All three cues together gave <span data-k="bundle"></span>, about what the placeholder part of the bundle alone predicts (interaction <span data-k="add"></span>, <span data-k="add_ci"></span>). What I learned: the feature that moved behavior was not the one that makes a prompt look most like a test. What remains uncertain: these are only two kinds of test cue, in small models.</p>
 <p><b>Random neurons did nothing.</b> The random-neuron control moved protection by <span data-k="rnd_q"></span> and <span data-k="rnd_m"></span> points, so the steering gain depends on which neurons are chosen.</p>
-<p><b>The instruction effect did not replicate clearly in OLMo.</b> In OLMo-2-7B, the system-prompt instruction gave <span data-k="olmo"></span> points (<span data-k="olmo_ci"></span>), against <span data-k="P"></span> pooled over the main four.</p>
-<p><b>An open-model grader failed validation.</b> The first plan used an open 32B model as the grader with a statistical correction. It agreed with my labels at only κ = <span data-k="kappa_judge"></span>, below the bar, and on the stories it called far more replies protected than Sonnet did. Every result here uses Sonnet instead (Appendix B). The lesson is the checklist's: validate the grader on the benchmark at hand before reading any score.</p>
 
 <figure class="fig" id="fig-forest">
 <p class="fig-title">Of the single prompt changes, only names and the instruction move protection</p>
@@ -242,7 +240,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <div><span class="ctl-label">Analysis</span><span class="seg" id="forest-mode"></span></div>
 <div class="legend" id="forest-legend"></div>
 <div id="forest"></div>
-<figcaption><b>Figure 7:</b> Placeholder names and the instruction pass the pre-specified bar: the interval excludes zero after correcting for four tests, with the same direction in at least three models. Format and scoring note do not. "Complete renaming only" drops the <span data-k="n_inc"></span> PrivacyLens items where a real name survived inside a username.</figcaption>
+<figcaption><b>Figure 7:</b> Placeholder names and the instruction pass the pre-specified bar: the Holm-adjusted p-value is below 0.05 after correcting for four tests, with the same direction in at least three models. Format and scoring note do not. "Complete renaming only" drops the <span data-k="n_inc"></span> PrivacyLens items where a real name survived inside a username.</figcaption>
 <details class="setup"><summary></summary><div class="body" id="forest-setup"></div></details>
 </figure>
 
@@ -272,25 +270,25 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <h2 class="appx-head" id="methods">Methods and checks</h2>
 <p class="appx-intro">Supporting detail for the numbers above. Open any section.</p>
 <details class="appx" id="appendix-a"><summary>Appendix A: estimates and intervals</summary><div class="appx-body">
-<p>Each pre-specified estimate is the item-paired difference in protection between a version and the published prompt (120 items per benchmark), with benchmarks weighted equally, pooled over models with DerSimonian–Laird random effects (<a class="cite" href="#ref-dersimonian1986">DerSimonian &amp; Laird 1986</a>). Intervals come from a cluster bootstrap over items. The four single changes were Holm-corrected together (<a class="cite" href="#ref-holm1979">Holm 1979</a>); ±3 points were the pre-specified equivalence bounds (<a class="cite" href="#ref-lakens2017">Lakens 2017</a>). A test passed if its interval excluded zero after correction and at least three of four models agreed in sign. The benchmark split in Figure 1 was not pre-specified: it averages the item-level difference over the four models and bootstraps over items (4,000 resamples). Unclear replies are excluded from every rate.</p>
+<p>Each pre-specified estimate is the item-paired difference in protection between a version and the published prompt (120 items per benchmark), with benchmarks weighted equally, pooled over models with DerSimonian–Laird random effects (<a class="cite" href="#ref-dersimonian1986">DerSimonian &amp; Laird 1986</a>). Intervals come from a cluster bootstrap over items. The four single changes were Holm-corrected together (<a class="cite" href="#ref-holm1979">Holm 1979</a>); ±3 points were the pre-specified equivalence bounds (<a class="cite" href="#ref-lakens2017">Lakens 2017</a>). A test passed if its Holm-adjusted p-value was below 0.05 and at least three of four models agreed in sign; the intervals shown are unadjusted 95% intervals. The benchmark split in Figure 1 was not pre-specified: it averages the item-level difference over the four models and bootstraps over items (4,000 resamples). Unclear replies are excluded from every rate.</p>
 </div></details>
 <details class="appx" id="appendix-b"><summary>Appendix B: can we trust the grades?</summary><div class="appx-body">
 <p>Before any result was read, I graded 150 pilot replies by hand, all from Qwen2.5-7B, blind to model and version; 147 had a clear verdict. One annotator (me) set this check. Claude Sonnet then had to agree with those labels at Cohen's κ (<a class="cite" href="#ref-cohen1960">Cohen 1960</a>) ≥ 0.70 before it could grade the study. Long agent traces were shown to Sonnet in a shortened view (the whole user message up to 2,500 characters, otherwise its first and last paragraphs), and the gate was re-run on that view. On the 62 check replies written with placeholders, agreement was just as high (κ = 0.93), and Sonnet never called a reply protected that I had marked as leaked, so there is no sign that it graded placeholder replies leniently; a sample this small cannot rule out a bias of a few points.</p>
 <figure class="fig" id="fig-gate">
-<p class="fig-title">Claude agreed closely with a human grader; the open-model judge did not</p>
+<p class="fig-title">Claude agreed closely with the human labels</p>
 <p class="fig-sub">Agreement with human labels on 147 blind replies (Cohen's κ) · dashed line = pre-specified gate</p>
 <div id="gate"></div>
-<figcaption><b>Figure 10:</b> Sonnet reached κ = <span data-k="kappa"></span> in the view used for grading. The open 32B judge reached <span data-k="kappa_judge"></span> and was not used for any result.</figcaption>
+<figcaption><b>Figure 10:</b> Sonnet reached κ = <span data-k="kappa"></span> in the view used for grading, above the 0.70 gate. Opus, on the full traces, is shown as a second check.</figcaption>
 </figure>
 </div></details>
 <details class="appx" id="appendix-c"><summary>Appendix C: pre-specified plan and deviations</summary><div class="appx-body">
-<p>The design, the 240 test items (never used before in this project, plus 60 pilot items), the decision rules and the analysis code were written down and committed with checksums before generation: a self-registered plan, not an external registry. Eleven dated deviations are documented with it. The largest is that every reply was graded by Claude Sonnet rather than by the open-model judge with a statistical correction; that decision came after the judge failed the gate and after its corrected results had been seen. The plan's correction family had five tests and the analysis used four; with all five, placeholders and the instruction remain significant. The planned activation probe for recognition was not run. Another is that Gemma answered "test" to every recognition prompt, so it could not be used for the recognition comparison.</p>
+<p>The design, the 240 test items (never used before in this project, plus 60 pilot items), the decision rules and the analysis code were written down and committed with checksums before generation: a self-registered plan, not an external registry. Eleven dated deviations are documented with it. The largest: the registered scorer was Qwen2.5-32B with a misclassification correction; its agreement with human labels was κ = 0.57, so the reported results use Sonnet, which graded every reply after passing the gate. The plan's correction family had five tests and the analysis used four; with all five, placeholders and the instruction remain significant. The planned activation probe for recognition was not run. Another is that Gemma answered "test" to every recognition prompt, so it could not be used for the recognition comparison.</p>
 </div></details>
 <details class="appx" id="appendix-d"><summary>Appendix D: generation and steering settings</summary><div class="appx-body">
 <p>vLLM 0.34 (<a class="cite" href="#ref-kwon2023">Kwon et al. 2023</a>; Hugging Face generate for steering), temperature 0.7, top-p 0.95, 384 new tokens, 4 samples per prompt (2 in the steering arm), pinned model revisions. Placeholder names replace every person with "Person A", "Person B" and so on in order of appearance, and email addresses with userN@example.com; realistic renaming uses a fixed name list in the same positions. Steering adds a scaled average activation shift (α = 4) to the top 5,000 MLP neurons, selected on separate items; the random control uses 5,000 random neurons per item at the same strength. The recognition probe is a separate greedy call per prompt with a one-word answer (test, real or unsure).</p>
 </div></details>
 <details class="appx" id="appendix-f"><summary>Appendix F: reply counts and study arms</summary><div class="appx-body">
-<p>The main study used four models, 240 items, 12 versions and four samples per version. Separate arms checked OLMo-2-7B (<a class="cite" href="#ref-olmo2025">Team OLMo 2025</a>) and neuron steering; an additional recognition probe was not graded. The table below gives exact reply totals and uses.</p>
+<p>The main study used four models, 240 items, 12 versions and four samples per version. A separate arm tested neuron steering; an additional recognition probe was not graded. The table below gives exact reply totals and uses.</p>
 <div class="table-wrap"><table class="plain tight" id="acct"></table></div><p class="label-note" id="acct-note"></p>
 </div></details>
 <details class="appx" id="appendix-e"><summary>Appendix E: reproducibility</summary><div class="appx-body">
@@ -311,13 +309,12 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <li id="ref-qwen2024">Qwen Team (2024). Qwen2.5 technical report. <a href="https://arxiv.org/abs/2412.15115" target="_blank" rel="noopener noreferrer">arXiv:2412.15115</a></li>
 <li id="ref-panickssery2024">Panickssery, Gabrieli, Schulz, Tong, Hubinger, Turner (2024). Steering Llama 2 via contrastive activation addition. ACL 2024. <a href="https://arxiv.org/abs/2312.06681" target="_blank" rel="noopener noreferrer">arXiv:2312.06681</a></li>
 <li id="ref-shao2024">Shao, Li, Shi, Liu, Yang (2024). PrivacyLens: Evaluating privacy norm awareness of language models in action. NeurIPS 2024 Datasets and Benchmarks. <a href="https://arxiv.org/abs/2409.00138" target="_blank" rel="noopener noreferrer">arXiv:2409.00138</a></li>
-<li id="ref-olmo2025">Team OLMo (2025). 2 OLMo 2 Furious. <a href="https://arxiv.org/abs/2501.00656" target="_blank" rel="noopener noreferrer">arXiv:2501.00656</a></li>
 <li id="ref-turner2023">Turner, Thiergart, Leech, Udell, Vazquez, Mini, MacDiarmid (2023). Steering language models with activation engineering. <a href="https://arxiv.org/abs/2308.10248" target="_blank" rel="noopener noreferrer">arXiv:2308.10248</a></li>
 </ol>
 </div></main>
 <footer><div class="col">Independent research note · Mayank Saxena</div></footer>
 
-<script src="data/figures.js?v=e72490f0"></script>
+<script src="data/figures.js?v=f7563498"></script>
 <script src="data/examples.js?v=12f5b121"></script>
 <script>
 (function () {
@@ -372,7 +369,7 @@ const BB = D.by_bench, ST = D.steer, Q = ST["Qwen2.5-7B"].contrasts, M = ST["Mis
 const cell = (m, b, c) => 100 * D.cells[m][b][c].sonnet;
 const recC1 = (b) => D.recog.find((r) => r.cell === "C1" && r.bench === b).d_test;
 const K = {
-  kappa: D.measurement.short_gate.kappa.toFixed(2), kappa_judge: D.measurement.gate["automated judge (Qwen2.5-32B)"].kappa.toFixed(2),
+  kappa: D.measurement.short_gate.kappa.toFixed(2),
   N: sg(comp.N.est), N_ci: ci(comp.N), N_p: comp.N.p_holm.toFixed(3), R: sg(R.est), R_ci: ci(R), NR: sg(NR.est), NR_ci: ci(NR),
   N_cf: sg(BB.N.confaide.est), N_cf_ci: ci(BB.N.confaide), N_pl: sg(BB.N.privacylens.est), N_pl_ci: ci(BB.N.privacylens),
   m_cf: MODELS.map((m) => `${m} ${sg(cell(m, "confaide", "C1") - cell(m, "confaide", "C0"))}`).join(", "),
@@ -382,7 +379,6 @@ const K = {
   stp_q: sg(Q["steer_P - P"].est), stp_m: sg(M["steer_P - P"].est), sp_q: sg(Q["steer - P"].est), sp_q_ci: ci(Q["steer - P"]), sp_m: sg(M["steer - P"].est), sp_m_ci: ci(M["steer - P"]),
   P: sg(comp.P.est), P_ci: ci(comp.P), PL: sg(PL.est), PL_ci: ci(PL), S: sg(comp.S.est), S_ci: ci(comp.S), E: sg(comp.E.est), E_ci: ci(comp.E),
   bundle: sg(oth["bundle C7-C0"].est), add: sg(oth["additivity: C7-C1-C2-C3+2*C0"].est), add_ci: ci(oth["additivity: C7-C1-C2-C3+2*C0"]),
-  olmo: sg(D.olmo["P: C8-C0"].est), olmo_ci: ci(D.olmo["P: C8-C0"]),
   rec_cf: sg(recC1("confaide")), rec_pl: sg(recC1("privacylens")), n_inc: D.accounting.n_incomplete,
   N_x: sg(comp.N.excl.est), N_x_ci: ci(comp.N.excl), R_x: sg(R.excl.est), R_x_ci: ci(R.excl),
 };
@@ -397,8 +393,8 @@ const relLo = Math.min(...infl.map((r) => r.rel)), relHi = Math.max(...infl.map(
 const q = infl[0];
 $("ledger").innerHTML = [
   [K.N, "points · placeholder names", `Writing people as "Person A" raised measured protection, pooled over four models and two benchmarks (95% interval ${K.N_ci}), positive in all four models, though near zero for Mistral.`],
-  [K.R, "points · other realistic names", `Giving everyone a different realistic name did not raise protection (equivalent to zero), so the increase is specific to placeholders, not to unfamiliar names.`],
-  [`${K.N_cf} / ${K.N_pl}`, "points · stories / agent tasks", `The effect sits in ConfAIde's short stories (${K.N_cf_ci}); on PrivacyLens agent tasks there was no clear effect (${K.N_pl_ci}).`],
+  [K.R, "points · other realistic names", `Giving everyone a different realistic name did not raise protection on this one draw (equivalent to zero). The increase showed up for placeholder labels.`],
+  [`${K.N_cf} / ${K.N_pl}`, "points · stories / agent tasks", `The pooled estimate is carried by ConfAIde's short stories (${K.N_cf_ci}). On PrivacyLens agent tasks the estimate is inconclusive (${K.N_pl_ci}): the interval includes zero and extends past ±3.`],
   [`+${relLo.toFixed(0)} to +${relHi.toFixed(0)}%`, "relative rise in story scores", `For three of four models, story protection rose by a third to more than half (${q.m}: ${q.a.toFixed(0)}% to ${q.b.toFixed(0)}%). Benchmarks written with placeholders can overstate protection under realistic names.`],
 ].map(([k, s, t]) => `<li><span class="k">${k}<small>${s}</small></span><span>${t}</span></li>`).join("");
 
@@ -705,7 +701,7 @@ table(rs, ["Version · benchmark", "'Test' answers", "Δ test", "Δ protection"]
 /* ---------- gate (Appendix B) ---------- */
 function drawGate() {
   const node = $("gate"); node.innerHTML = "";
-  const G = D.measurement.gate, rows = [["short", "Claude Sonnet, grading view (used)"], ["claude-sonnet-5.5", "Claude Sonnet, full view"], ["claude-opus-5.5", "Claude Opus, full view"], ["automated judge (Qwen2.5-32B)", "Open 32B judge (not used)"]];
+  const G = D.measurement.gate, rows = [["short", "Claude Sonnet, grading view (used)"], ["claude-sonnet-5.5", "Claude Sonnet, full view"], ["claude-opus-5.5", "Claude Opus, full view"]];
   const w = W(node), narrow = w < 560, lw = narrow ? 0 : 210, rh = narrow ? 52 : 36, top = 22, h = top + rows.length * rh + 4;
   const s = el("svg", { viewBox: `0 0 ${w} ${h}` }, node), x = sc(0, 1, lw + 6, w - 50);
   [0, .25, .5, .75, 1].forEach((t) => { el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: h, stroke: "#e4e6e6" }, s); tx(s, x(t), top - 9, t.toFixed(2), { class: "tk", "text-anchor": "middle" }); });
