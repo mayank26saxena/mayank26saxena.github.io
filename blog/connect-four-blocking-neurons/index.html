@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/tokens.css?v=344f4f1b">
-<link rel="stylesheet" href="post.css?v=d25837ec">
+<link rel="stylesheet" href="post.css?v=48908fff">
 <style>:root { --split-a: #d09017; --split-b: #2563b0; }</style>
 <style>
   .crumbs { display: flex; gap: 8px; align-items: baseline; padding-top: 26px; font: 500 14px/1 var(--sans); color: var(--muted); }
@@ -37,12 +37,12 @@
 </head>
 <body>
 <div class="col crumbs"><a href="/">Mayank Saxena</a><span aria-hidden="true">/</span><a href="/blog/">Writing</a></div>
-<header class="hero">
+<header class="top"><div class="col">
   <p class="kicker">Interpretability · research note</p>
   <h1>Can an AI Agent Find the Neurons That <span class="hi">Block a Connect Four Threat</span>?</h1>
   <p class="standfirst">A 6.3M-parameter transformer learns to block your threats. We traced how it does it, from one attention head to seven column alarms, and tested whether an AI agent describing its neurons blind would have found them.</p>
   <div class="meta"><span><b>Mayank Saxena</b></span><span>November 2026</span><span><a href="https://github.com/mayank26saxena/connect4-neurons">Code and data</a></span></div>
-</header>
+</div></header>
 
 <figure class="demo-card">
   <a class="demo-shot" href="demo/index.html" aria-label="Open the interactive demo"><img src="img/demo.png?v=16a7770e" alt="The interactive demo: a Connect Four board with three ochre stones stacked in column 3, the model's move bars favouring column 3, a lit lamp over the column, and a map of all 6,144 neurons with the vertical-block circuit highlighted" width="800" height="600" loading="eager"></a>

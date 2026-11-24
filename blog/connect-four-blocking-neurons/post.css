@@ -10,7 +10,7 @@ section.appendix h2 { margin-top: 56px; }
 #described td:nth-child(3), #described-short td:nth-child(2) { font-family: var(--serif); font-size: 14px; }
 
 /* ---------- the scrolling story: hero, pinned dark stage, story cards (this post only) */
-header.hero { max-width: 1120px; margin: 0 auto; padding: 48px 20px 8px; }
+header.hero { max-width: 1120px; margin: 0 auto; padding: 48px 20px 8px; }  /* the demo page only; the post uses the shared header.top */
 header.hero h1 { font-size: 46px; max-width: 900px; }
 header.hero .standfirst { max-width: 760px; }
 .story { max-width: 1120px; margin: 0 auto 40px; padding: 0 20px; display: grid; grid-template-columns: minmax(0, 600px) minmax(0, 1fr); gap: 44px; align-items: start; }
@@ -73,13 +73,13 @@ body.story-on nav.rail, body.story-on .rail-toggle { opacity: 0 !important; poin
 
 /* ---------- the post: lead paragraph and the demo card (after Goodfire's linked demos) */
 main .lead { font-size: 19px; line-height: 1.6; color: var(--ink); }
-.demo-card { max-width: 1040px; margin: 18px auto 34px; padding: 0 20px; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 28px; align-items: center; }
+.demo-card { max-width: var(--measure); margin: 8px auto 38px; padding: 0 20px; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px; align-items: center; }
 .demo-shot { display: block; position: relative; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; background: var(--card); box-shadow: 0 8px 28px rgba(20,25,24,.08); transition: transform .2s, box-shadow .2s; }
 .demo-shot::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--split); z-index: 1; }
 .demo-shot:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(20,25,24,.12); }
 .demo-shot img { display: block; width: 100%; height: auto; }
 .demo-text .kick { font: 600 11.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--brand); margin: 0 0 6px; }
-.demo-text .demo-h { font: 700 26px/1.15 var(--display); letter-spacing: -.02em; margin: 0 0 10px; color: var(--ink); }
+.demo-text .demo-h { font: 700 22px/1.2 var(--display); letter-spacing: -.02em; margin: 0 0 10px; color: var(--ink); }
 .demo-text p { font-size: 16px; line-height: 1.55; color: var(--ink-2); }
 .demo-links { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font: 500 14px var(--sans); }
 .demo-links .btn { background: var(--ink); color: #fff; text-decoration: none; padding: 10px 18px; border-radius: 22px; }
@@ -88,7 +88,7 @@ main .lead { font-size: 19px; line-height: 1.6; color: var(--ink); }
 .demo-hero .back { font: 500 13.5px var(--sans); margin: 0 0 18px; }
 .demo-hero h1 { font-size: 40px; }
 @media (max-width: 760px) {
-  .demo-card { grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; padding: 0 16px; }
+  .demo-card { grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
   .demo-text .demo-h { font-size: 22px; } .demo-hero h1 { font-size: 30px; }
 }
 body.demo-on nav.rail, body.demo-on .rail-toggle { opacity: 0 !important; pointer-events: none !important; }
