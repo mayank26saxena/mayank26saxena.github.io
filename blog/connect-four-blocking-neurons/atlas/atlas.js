@@ -234,6 +234,14 @@
       const prev = n > 0 ? `#n/${l}/${n - 1}/${NEU[l][n - 1].best >= 0 ? POLE[NEU[l][n - 1].best].s : 0}` : null, next = n < F - 1 ? `#n/${l}/${n + 1}/${NEU[l][n + 1].best >= 0 ? POLE[NEU[l][n + 1].best].s : 0}` : null;
       let h = `<div class="nav"><a href="#library">← Library</a><span>${prev ? `<a href="${prev}">‹ neuron ${n - 1}</a>` : ""}${next ? `<a href="${next}">neuron ${n + 1} ›</a>` : ""}</span></div>`;
       h += `<p class="kick"><i style="background:${th[2]}"></i>${th[1]} · layer ${l} · neuron ${n}</p><h1>${poleName(l, n, s)}</h1>`;
+      h += `<details class="howto" data-k="neuron" open><summary>How to read a neuron page</summary><div class="howto-body"><ul>
+        <li><b>Two sides.</b> A neuron can fire strongly positive or strongly negative, and the two sides usually mean different things. The tabs switch between them; everything below is about the side that is selected.</li>
+        <li><b>"Fires when…"</b> is the exact game concept that best matches when this side fires. <b>F1</b> scores that match from 0 to 1 on held-out games: it is high only if the neuron fires when the concept is present and stays quiet when it is not. Above 0.5 is a good match; below 0.3 we call it no match.</li>
+        <li><b>Blue box:</b> what the AI agent wrote after studying this neuron without seeing any labels, scored the same way. <b>Orange box:</b> the neuron's role in the blocking circuit, if it has one.</li>
+        <li><b>Board pictures</b> compare the positions where it fires with usual positions: a blue cell holds that kind of stone (or is empty) more often than usual, a red cell less often. Rows count up from the bottom and columns from the left, starting at 0.</li>
+        <li><b>Where it fires most:</b> the real game positions with the strongest firing, with the number of stones, the activation and the move played next.</li>
+        <li><b>What it does to the move:</b> how much this side pushes each column up (blue) or down (red) on its own. <b>Tactics it supports:</b> how much switching it off hurts each tactic.</li>
+      </ul></div></details>`;
       h += `<div class="poletabs">${[0, 1].map((k) => `<a class="${k === s ? "on" : ""}" href="#n/${l}/${n}/${k}"><b>${k === 0 ? "Positive" : "Negative"} pole</b>${esc(concept(r.poles[k].C[0]))}</a>`).join("")}</div>`;
       h += `<p class="big">${p.f1 >= BAR ? `Fires when ${esc(concept(P.C[0]).replace(/^./, (c) => c.toLowerCase()))}.` : "No game concept describes this pole well; its closest match is below."}</p>`;
       p.descs.forEach((d) => { h += `<div class="agent"><p class="lbl">${d.group ? `Blind test after the circuit was frozen (${d.group === "circuit" ? "one of the 20 key circuit neurons" : "a look-alike decoy"}, hidden among 50 units): rule F1 ${d.f1.toFixed(2)}, block agreement ${d.ta.toFixed(2)}${d.ta >= 0.5 ? " — found as a block detector" : ""}` : `Written by the AI agent, blind, and tested on unseen games (F1 ${d.f1.toFixed(2)}, study ${d.id.slice(0, 1)})`}</p><p>${esc(d.text)}</p></div>`; });
@@ -246,9 +254,20 @@
       h += `<section><h2>What it does to the move</h2>${dle.map((v, c) => bar(`column ${c}`, v, dmax)).join("")}<p class="note">Direct effect on each column's score when this pole fires (through the output layer only, centred across columns).</p></section>`;
       h += `<section><h2>Tactics it supports</h2>${META.tactics.map((t, j) => bar(TACNAME[t] || t, r.tac[j], tmax[j])).join("")}<p class="note">Positive: switching this neuron off makes the model less likely to play the tactic. Scaled to the largest value among all neurons.</p></section>`;
       h += `<p class="note">The other pole matches “${esc(concept(other.C[0]))}” (F1 ${other.F1[0].toFixed(2)}).</p>`;
-      el.innerHTML = h; scrollTo(0, 0);
+      el.innerHTML = h; wireGuides(el); scrollTo(0, 0);
     });
   }
+
+  // ---------- reading guides: open until the reader closes one; the choice is remembered in this browser only
+  const HOWTO = "c4atlas-howto-closed";
+  const closedGuides = () => { try { return JSON.parse(localStorage.getItem(HOWTO) || "[]"); } catch (e) { return []; } };
+  function wireGuides(root) {
+    root.querySelectorAll("details.howto").forEach((d) => {
+      if (closedGuides().includes(d.dataset.k)) d.open = false;
+      d.addEventListener("toggle", () => { try { const c = new Set(closedGuides()); d.open ? c.delete(d.dataset.k) : c.add(d.dataset.k); localStorage.setItem(HOWTO, JSON.stringify([...c])); } catch (e) { /* storage unavailable */ } });
+    });
+  }
+  wireGuides(document);
 
   // ---------- routing
   let view = "layers";
