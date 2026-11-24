@@ -250,7 +250,7 @@
 
 </div>
 <script>
-  // The newest post in blog/posts.json is featured; the rest are listed below it, newest first.
+  // The newest post in blog/posts.json is featured; the next two are listed below it. Older posts are on /blog/.
   // New posts only need an entry in blog/posts.json (add a "result" with bars to show a chart on the card).
   (function () {
     var list = document.getElementById('post-list');
@@ -273,7 +273,7 @@
         card.classList.remove('solo');
       } else { card.classList.add('solo'); }
       card.innerHTML = html;
-      posts = posts.slice(1);
+      posts = posts.slice(1, 3);
       if (!posts.length) return;
       list.innerHTML = posts.map(function (p) {
         return '<li><span class="when">' + fmt(p.date) + '</span><div><p class="t"><a href="/blog/' + encodeURIComponent(p.slug) + '/">' +
