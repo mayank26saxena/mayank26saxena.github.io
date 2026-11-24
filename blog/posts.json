@@ -3,7 +3,25 @@
     "slug": "connect-four-blocking-neurons",
     "title": "An AI Agent Found Most of the Neurons That Block a Connect Four Threat",
     "description": "A small transformer learns to block threats in Connect Four. We traced how, from one attention head to seven column alarms, then asked an AI agent to describe its neurons blind. It picked out 14 of the 20 key neurons as block detectors, and 2 of 20 decoys. With a live demo and a neuron atlas.",
-    "date": "2026-11-24"
+    "date": "2026-11-24",
+    "result": {
+      "title": "Neurons the agent flagged as block detectors",
+      "sub": "Each described blind, 20 neurons per group",
+      "bars": [
+        {
+          "label": "Key neurons",
+          "value": 14,
+          "max": 20,
+          "color": "var(--brand)"
+        },
+        {
+          "label": "Decoy neurons",
+          "value": 2,
+          "max": 20,
+          "color": "#9aa3a0"
+        }
+      ]
+    }
   },
   {
     "slug": "cross-lingual-safety-gap",

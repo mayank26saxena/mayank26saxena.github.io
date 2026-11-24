@@ -101,6 +101,9 @@
   .fill.hi { background: var(--hi); }
   .pair b { font-weight: 600; text-align: right; }
   .pair.hi b { color: var(--hi); }
+  .feature.solo { grid-template-columns: 1fr; }
+  .bars .pair { margin: 0 0 12px; grid-template-columns: 1fr 52px; }
+  .bars .bar-label { font: 600 13px var(--sans); margin: 0 0 5px; }
 
   /* post and paper lists */
   .list { list-style: none; padding: 0; margin: 0 0 36px; }
@@ -171,32 +174,18 @@
   <h2 id="writing-h">Writing</h2>
   <p class="section-note">Research notes on language models, safety and interpretability.</p>
 
-  <!-- Featured post: edit by hand when a new post should lead the page. -->
-  <article class="feature">
+  <!-- Featured post: always the newest entry in blog/posts.json (built by the script at the bottom of the page).
+       The markup below is what shows before the script runs. -->
+  <article class="feature" id="feature">
     <div>
-      <p class="date">17 November 2026</p>
-      <h3><a href="/blog/cross-lingual-safety-gap/">AI Chatbots Refuse Harmful Requests Less Often in Hindi</a></h3>
-      <p class="desc">Asked the same harmful requests in English and in Hindi, Qwen3-8B and Llama-3.1-8B-Instruct refuse far less often in Hindi. What they do instead, what changes inside them, and how far steering can bring the refusals back.</p>
-      <a class="read" href="/blog/cross-lingual-safety-gap/">Read the post</a>
-    </div>
-    <div class="result" role="img" aria-label="Explicit refusal rate on 404 harmful requests. Qwen3-8B: 51% in English, 19% in Hindi. Llama-3.1-8B: 89% in English, 47% in Hindi.">
-      <p class="result-title">Explicit refusal rate</p>
-      <p class="result-sub">The same 404 harmful requests in each language</p>
-      <div class="key"><span><i style="background:var(--en)"></i>English</span><span><i style="background:var(--hi)"></i>Hindi</span></div>
-      <div class="model">
-        <p class="model-name">Qwen3-8B</p>
-        <div class="pair"><div class="track"><div class="fill en" style="width:50.5%"></div></div><b>51%</b></div>
-        <div class="pair hi"><div class="track"><div class="fill hi" style="width:18.6%"></div></div><b>19%</b></div>
-      </div>
-      <div class="model">
-        <p class="model-name">Llama-3.1-8B-Instruct</p>
-        <div class="pair"><div class="track"><div class="fill en" style="width:88.9%"></div></div><b>89%</b></div>
-        <div class="pair hi"><div class="track"><div class="fill hi" style="width:46.5%"></div></div><b>47%</b></div>
-      </div>
+      <p class="date">24 November 2026</p>
+      <h3><a href="/blog/connect-four-blocking-neurons/">An AI Agent Found Most of the Neurons That Block a Connect Four Threat</a></h3>
+      <p class="desc">A small transformer learns to block threats in Connect Four. We traced how, from one attention head to seven column alarms, then asked an AI agent to describe its neurons blind. It picked out 14 of the 20 key neurons as block detectors, and 2 of 20 decoys. With a live demo and a neuron atlas.</p>
+      <a class="read" href="/blog/connect-four-blocking-neurons/">Read the post</a>
     </div>
   </article>
 
-  <!-- All posts except the featured one, filled from blog/posts.json. -->
+  <!-- All posts except the newest, filled from blog/posts.json. -->
   <ul class="list" id="post-list" hidden></ul>
   <p class="more"><a href="/blog/">All posts</a></p>
 </section>
@@ -261,15 +250,30 @@
 
 </div>
 <script>
-  // Lists every post except the featured one, newest first. New posts only need an entry in blog/posts.json.
+  // The newest post in blog/posts.json is featured; the rest are listed below it, newest first.
+  // New posts only need an entry in blog/posts.json (add a "result" with bars to show a chart on the card).
   (function () {
-    var featured = 'cross-lingual-safety-gap';
     var list = document.getElementById('post-list');
+    var card = document.getElementById('feature');
     var esc = function (t) { var e = document.createElement('span'); e.textContent = t; return e.innerHTML; };
     var fmt = function (d) { return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }); };
+    var full = function (d) { return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
     fetch('/blog/posts.json').then(function (r) { return r.json(); }).then(function (posts) {
-      posts = posts.filter(function (p) { return p.slug !== featured; })
-                   .sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      posts = posts.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      var f = posts[0], url = '/blog/' + encodeURIComponent(f.slug) + '/', res = f.result;
+      var html = '<div><p class="date">' + full(f.date) + '</p><h3><a href="' + url + '">' + esc(f.title) + '</a></h3>' +
+        '<p class="desc">' + esc(f.description) + '</p><a class="read" href="' + url + '">Read the post</a></div>';
+      if (res && res.bars) {
+        var label = res.title + '. ' + res.bars.map(function (b) { return b.label + ': ' + b.value + ' of ' + b.max; }).join('. ') + '.';
+        html += '<div class="result bars" role="img" aria-label="' + esc(label) + '"><p class="result-title">' + esc(res.title) + '</p>' +
+          '<p class="result-sub">' + esc(res.sub || '') + '</p>' + res.bars.map(function (b) {
+            return '<p class="bar-label">' + esc(b.label) + '</p><div class="pair"><div class="track"><div class="fill" style="width:' +
+              (100 * b.value / b.max) + '%;background:' + esc(b.color || 'var(--brand)') + '"></div></div><b>' + b.value + '/' + b.max + '</b></div>';
+          }).join('') + '</div>';
+        card.classList.remove('solo');
+      } else { card.classList.add('solo'); }
+      card.innerHTML = html;
+      posts = posts.slice(1);
       if (!posts.length) return;
       list.innerHTML = posts.map(function (p) {
         return '<li><span class="when">' + fmt(p.date) + '</span><div><p class="t"><a href="/blog/' + encodeURIComponent(p.slug) + '/">' +
