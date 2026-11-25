@@ -99,3 +99,5 @@ footer .foot { max-width: 1160px; margin: 0 auto; padding: 20px 24px 50px; font:
   .exg { grid-template-columns: repeat(3, minmax(0, 1fr)); } .hbar { grid-template-columns: 110px 1fr 48px; } .poletabs { grid-template-columns: 1fr; }
   .seg button { padding: 6px 8px; font-size: 12px; }
 }
+
+#npage p.sub { font: 600 12.5px/1.4 Inter, system-ui, sans-serif; color: var(--ink-2); margin: 14px 0 4px; }

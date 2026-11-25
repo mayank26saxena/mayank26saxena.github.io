@@ -226,6 +226,19 @@
       s += `<circle cx="${5 + c * 10}" cy="${5 + (5 - r) * 10}" r="4.2" fill="#fafbfb"/><circle cx="${5 + c * 10}" cy="${5 + (5 - r) * 10}" r="4.2" fill="${col}" opacity="${(0.08 + 0.92 * a).toFixed(2)}"><title>${label}, row ${r}, column ${c}: ${v > 0 ? "+" : v < 0 ? MINUS : ""}${Math.abs(v)} points</title></circle>`; }
     return s + "</svg>"; }
   const bar = (label, v, scale) => { const w = Math.min(50, (Math.abs(v) / scale) * 50); return `<div class="hbar"><span>${label}</span><span class="tr"><em></em><i style="${v >= 0 ? `left:50%;width:${w}%;background:#2563b0` : `right:50%;width:${w}%;background:#c9503a`}"></i></span><span class="v">${sg(v, 2)}</span></div>`; };
+  // what the pole writes (PLAN addendum (v)): read through the later layers, checked by switching it off (data/writes.js)
+  function writesSection(l, n, s) {
+    const Wr = window.WRITES; if (!Wr) return "";
+    const p = (l * F + n) * 2 + s, j = Wr.J[p];
+    if (!j) return "";
+    const jm = Math.max(...j.map(Math.abs), 1e-6), top = j.indexOf(Math.max(...j)), cc = Wr.causal_col[p], ck = Wr.causal_concept[p];
+    const cname = (i) => esc(zb(C4Concepts.describe(Wr.names[i]).text));
+    let h = `<section><h2>What it writes</h2>${j.map((v, c) => bar(`column ${c}`, v, jm)).join("")}`;
+    h += `<p class="note">Effect of a strong firing on each column's score, carried through all the later layers (centred across columns).${cc >= 0 ? ` Checked on unseen games: switching it off lowers column ${cc} most${cc === top ? ", as this reading says" : `, not column ${top}`}.` : " Switching it off moves no column measurably."}</p>`;
+    h += `<p class="sub">Board facts its output raises most</p><ol class="cands">${Wr.C[p].map((k, i) => `<li>${cname(k)} <b>${sg(Wr.CV[p][i], 2)}</b></li>`).join("")}</ol>`;
+    h += `<p class="note">How much a strong firing raises the model's own readout of each exact board fact, in standard deviations.${ck >= 0 ? ` Switching it off lowers “${cname(ck)}” most${Wr.C[p].includes(ck) ? ", which is in this list" : ""}.` : ""}</p></section>`;
+    return h;
+  }
   function npage(l, n, s) {
     $("#lib-list").hidden = true; const el = $("#npage"); el.hidden = false; el.innerHTML = `<p class="hnote">Loading layer ${l}…</p>`;
     layerData(l).then((recs) => {
@@ -245,6 +258,7 @@
       h += `<section><h2>What the board looks like when it fires</h2><div class="boards"><div class="bd">${liftSVG(P.occ.slice(0, 42), "player to move")}player to move's stone</div><div class="bd">${liftSVG(P.occ.slice(42, 84), "opponent")}opponent's stone</div><div class="bd">${liftSVG(P.occ.slice(84, 126), "empty")}empty cell</div></div><p class="note">Blue: more often than usual when this pole fires; red: less often (change in percentage points, full colour at 45).</p></section>`;
       h += `<section><h2>Where it fires most</h2><div class="exg">${P.ex.map(([g, t, a]) => { const b = replay(GAMES[g], t), nx = GAMES[g][t]; return `<div class="ex">${boardSVG(b.g, b.last, t)}<span>${t} stones · ${sg(a, 1)}${nx !== undefined ? ` · played ${nx}` : ""}</span></div>`; }).join("")}</div><p class="note">Blue: the player about to move; ochre: the opponent; ring: the last stone.</p></section>`;
       h += `<section><h2>What it does to the move</h2>${dle.map((v, c) => bar(`column ${c}`, v, dmax)).join("")}<p class="note">Direct effect on each column's score when this pole fires (through the output layer only, centred across columns).</p></section>`;
+      h += writesSection(l, n, s);
       h += `<section><h2>Tactics it supports</h2>${META.tactics.map((t, j) => bar(TACNAME[t] || t, r.tac[j], tmax[j])).join("")}<p class="note">Positive: switching this neuron off makes the model less likely to play the tactic. Scaled to the largest value among all neurons.</p></section>`;
       h += `<p class="note">The other pole matches “${esc(concept(other.C[0]))}” (F1 ${other.F1[0].toFixed(2)}).</p>`;
       h += `<details class="howto" data-k="neuron"><summary>How to read a neuron page</summary><div class="howto-body"><ul>
@@ -254,6 +268,7 @@
         <li><b>Board pictures</b> compare the positions where it fires with usual positions: a blue cell holds that kind of stone (or is empty) more often than usual, a red cell less often. Rows count up from the bottom and columns from the left, starting at 0.</li>
         <li><b>Where it fires most:</b> the real game positions with the strongest firing, with the number of stones, the activation and the move played next.</li>
         <li><b>What it does to the move:</b> how much this side pushes each column up (blue) or down (red) on its own. <b>Tactics it supports:</b> how much switching it off hurts each tactic.</li>
+        <li><b>What it writes:</b> the same push, but carried through every later layer, which is what actually reaches the move for neurons before the last layer; then the board facts its output raises most. Each reading was checked by switching the neuron off on unseen games.</li>
       </ul></div></details>`;
       el.innerHTML = h; wireGuides(el); scrollTo(0, 0);
     });

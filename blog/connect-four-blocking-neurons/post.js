@@ -156,7 +156,36 @@
     g.add("text", { x: x(0.5) + 5, y: m.t + 10, class: "num", fill: css("--ink-2") }, "bar");
   }
 
-  const draws = [["#fig-board .chart", board], ["#fig-curves .chart", curves], ["#fig-circuit .chart", circuit], ["#fig-switch .chart", switches], ["#fig-testb .chart", testb], ["#fig-ladder .chart", ladder], ["#fig-coverage .chart", coverage]];
+  // Figure 5: readout agreement with the causal column by layer, direct (open) and through the later layers (filled)
+  function lens(el) {
+    const d = F.lens, w = W(el), m = { l: 64, r: 48, t: 8 }, rh = 26, h = m.t + d.length * rh + 28, g = svg(el, w, h);
+    const x = (v) => m.l + v * (w - m.l - m.r);
+    [0, 0.25, 0.5, 0.75, 1].forEach((t) => { g.add("line", { x1: x(t), x2: x(t), y1: m.t, y2: h - 22, stroke: css("--rule") }); g.add("text", { x: x(t), y: h - 8, "text-anchor": "middle", class: "num" }, pc(t)); });
+    g.add("line", { x1: x(1 / 7), x2: x(1 / 7), y1: m.t, y2: h - 22, stroke: css("--muted"), "stroke-dasharray": "4 4" });
+    d.forEach((r, i) => {
+      const cy = m.t + i * rh + rh / 2;
+      g.add("text", { x: m.l - 10, y: cy + 4, "text-anchor": "end", "font-size": 12 }, `layer ${r.l}`);
+      g.add("line", { x1: x(Math.min(r.d, r.j)), x2: x(Math.max(r.d, r.j)), y1: cy, y2: cy, stroke: css("--me"), "stroke-width": 2 });
+      g.tip(g.add("circle", { cx: x(r.d), cy, r: r.l === 5 ? 8 : 5, fill: css("--card"), stroke: css("--ink-2"), "stroke-width": 1.6 }), `layer ${r.l}, read directly: ${pc(r.d)} of ${r.n} neurons`);
+      g.tip(g.add("circle", { cx: x(r.j), cy, r: 4.5, fill: css("--me") }), `layer ${r.l}, read through the later layers: ${pc(r.j)} of ${r.n} neurons`);
+      g.add("text", { x: x(Math.max(r.d, r.j)) + 10, y: cy + 4, class: "num" }, `n ${r.n}`);
+    });
+  }
+
+  // Figure 6: share of vertical threats still blocked as neurons are removed
+  function removal(el) {
+    const d = F.removal, w = W(el), narrow = true, m = { l: 8, r: 44, t: 6 }, rh = narrow ? 40 : 30, h = m.t + d.length * rh + 24, g = svg(el, w, h);
+    const x = (v) => m.l + v * (w - m.l - m.r);
+    [0, 0.5, 1].forEach((t) => { g.add("line", { x1: x(t), x2: x(t), y1: m.t, y2: h - 20, stroke: css("--rule") }); g.add("text", { x: x(t), y: h - 6, "text-anchor": "middle", class: "num" }, pc(t)); });
+    d.forEach(([lbl, v], i) => {
+      const y0 = m.t + i * rh, cy = narrow ? y0 + 26 : y0 + rh / 2, rand = i === 3;
+      g.add("text", narrow ? { x: m.l, y: y0 + 12, "font-size": 11.5 } : { x: m.l - 10, y: cy + 4, "text-anchor": "end", "font-size": 12 }, lbl);
+      g.tip(g.add("rect", { x: x(0), y: cy - 7, width: Math.max(1.5, x(v) - x(0)), height: 14, rx: 2, fill: rand ? css("--c-broken") : css("--me") }), `${lbl}: ${pc(v, 1)} still blocked`);
+      g.add("text", { x: x(v) + 6, y: cy + 4, class: "num" }, pc(v, v < 0.1 ? 1 : 0));
+    });
+  }
+
+  const draws = [["#fig-lens .chart", lens], ["#fig-removal .chart", removal], ["#fig-board .chart", board], ["#fig-curves .chart", curves], ["#fig-circuit .chart", circuit], ["#fig-switch .chart", switches], ["#fig-testb .chart", testb], ["#fig-ladder .chart", ladder], ["#fig-coverage .chart", coverage]];
   function drawAll() { draws.forEach(([s, f]) => { const el = document.querySelector(s); if (el && el.offsetParent !== null) f(el); }); }
   drawAll();
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(drawAll, 120); });
@@ -173,6 +202,10 @@
     [...F.testB].sort((a, b) => ["circuit", "decoy", "random"].indexOf(a.g) - ["circuit", "decoy", "random"].indexOf(b.g) || b.ta - a.ta).map((r) =>
       `<tr><td class="n">${r.n == null ? `L${r.l} dir.` : `L${r.l} N${r.n}${r.pole}`}${r.rb ? " *" : ""}</td><td>${G[r.g]}</td><td>${esc(r.text)}</td><td class="n">${r.ta.toFixed(2)}</td><td class="n">${r.f1.toFixed(2)}</td><td class="n">${r.txt ? "yes" : "no"}</td></tr>`).join("") +
     `</tbody><caption>* broke the rule against counting a candidate rule locally (kept, as the protocol requires).</caption>`;
+  // Appendix J: the (v) predictions
+  const vt = document.getElementById("v-table");
+  if (vt) vt.innerHTML = `<thead><tr><th></th><th>Prediction, written before the run</th><th>Result</th><th></th></tr></thead><tbody>` +
+    F.vtable.map((r) => `<tr><td class="n">${r.k}</td><td>${esc(r.pred)}</td><td class="n">${esc(r.res)}</td><td>${r.holds ? "held" : "<b>failed</b>"}</td></tr>`).join("") + "</tbody>";
   // main text: the three most important described neurons, one clause each
   const clip = (s) => { let t = s.split(/(?<=\.)\s(?=[A-Z])/)[0]; const cut = t.search(/ \(|;|, i\.e\.|:/); if (cut > 40) t = t.slice(0, cut); if (t.length > 110) t = t.slice(0, t.lastIndexOf(" ", 106)) + " …"; return t.replace(/\.$/, ""); };
   const ts = document.getElementById("described-short");

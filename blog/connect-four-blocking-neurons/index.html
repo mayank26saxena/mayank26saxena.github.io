@@ -95,23 +95,42 @@
     <figcaption><b>Figure 4:</b> vertical blocks fall from 100% to 73% (head), 64% (directions) and 70% (alarms), on 8,046 positions; "other play" is the search engine's best move on 3,000 ordinary positions.</figcaption>
   </figure>
 
+  <h3 id="writes">What the neurons write</h3>
+  <p>When a neuron fires, it adds a fixed output vector to the model's running state, so that vector is a second way to say what the neuron is for (an idea we took from <a class="cite" href="#ref-shone2026">Shone &amp; Dunlap 2026</a>). Read straight against the seven moves, it names the column the neuron actually pushes (checked by switching it off) for only 29% of neurons in layers 0–3. Read through the later layers first, with our adaptation of the J-lens (<a class="cite" href="#ref-gurnee2026">Gurnee et al. 2026</a>), it names 64% (Figure 5). Against board facts, it names one the neuron really changes 79% of the time (0.6% by chance).</p>
+<figure class="fig" id="fig-lens">
+    <p class="fig-title">A neuron's output names the column it pushes, once it is read through the layers after it</p>
+    <p class="fig-sub">Share of neurons whose readout names the column that falls most when the neuron is switched off, by layer</p>
+    <div class="legend"><span><i class="ring"></i>read directly against the moves</span><span><i style="background:var(--me)"></i>read through the later layers</span><span><i class="dash"></i>chance (1 in 7)</span></div>
+    <div class="chart"></div>
+    <figcaption><b>Figure 5:</b> read through the later layers, the output is right for 71% of 408 neurons in layers 0–4 with a measurable push; in layer 5 the two readings coincide (94% of 594).</figcaption>
+  </figure>
+  <p>Removing the 205 last-layer neurons that most push a column (including 34 of the 36 alarms) still leaves 51% of vertical blocks. A median of 10 more neurons, chosen only because their output reads as that column, removes almost all the rest; as many random neurons remove none (Figure 6). Blocking is spread out, but readable.</p>
+<figure class="fig" id="fig-removal">
+    <p class="fig-title">Readable neurons remove the block; the same number of random neurons do nothing</p>
+    <p class="fig-sub">Share of 1,000 held-out vertical threats the model still blocks, as neurons are removed (set to their average)</p>
+    <div class="chart"></div>
+    <figcaption><b>Figure 6:</b> readable neurons, added in order of their effect, change the move at 99% of positions; the same number of random neurons, at 0%.</figcaption>
+  </figure>
+
   <h2 id="agent"><span class="no">03</span><span class="nl">Would an AI agent have found them?</span></h2>
-  <p>One way to automate interpretability is to hand an AI agent a single neuron and let it work like a scientist: look at the positions where the neuron fires, propose a rule, test it on new positions, and write a short description (<a class="cite" href="#ref-tigges2026">Tigges et al. 2026</a>). We tested whether that finds what matters. After freezing the circuit, we gave a fresh agent its 20 most important neurons shuffled among 20 look-alike decoys and 10 random directions, without saying what any of them were for. For 14 of the 20 it wrote a rule that picks out "block in this column", e.g. "Fires when the opponent threatens to win in column 0, the leftmost column". It did so for 2 of the 20 decoys (Figure 5).</p>
+  <p>One way to automate interpretability is to hand an AI agent a single neuron and let it work like a scientist: look at the positions where the neuron fires, propose a rule, test it on new positions, and write a short description (<a class="cite" href="#ref-tigges2026">Tigges et al. 2026</a>). We tested whether that finds what matters. After freezing the circuit, we gave a fresh agent its 20 most important neurons shuffled among 20 look-alike decoys and 10 random directions, without saying what any of them were for. For 14 of the 20 it wrote a rule that picks out "block in this column", e.g. "Fires when the opponent threatens to win in column 0, the leftmost column". It did so for 2 of the 20 decoys (Figure 7).</p>
 <figure class="fig" id="fig-testb">
     <p class="fig-title">Told nothing about blocking, the agent described 14 of the 20 key neurons as block detectors, and 2 of 20 decoys</p>
     <p class="fig-sub">Each dot is one unit the agent described blind. Position: how well its rule picks out "the player must block in column X" on unseen games (best F1 over the seven columns and "any column")</p>
     <div class="legend"><span><i style="background:var(--me)"></i>circuit neuron</span><span><i style="background:var(--op)"></i>look-alike decoy</span><span><i style="background:#8a9194"></i>random direction</span><span><i class="dash"></i>pre-registered bar (0.5)</span></div>
     <div class="chart"></div>
-    <figcaption><b>Figure 5:</b> above the bar: 14 of 20 circuit neurons, 2 of 20 decoys, 1 of 10 random directions (we had required at least half and at most 10%). The circuit neurons' rules also predict their own firing better (median F1 0.53 against 0.29). Hover a dot to read what the agent wrote.</figcaption>
+    <figcaption><b>Figure 7:</b> above the bar: 14 of 20 circuit neurons, 2 of 20 decoys, 1 of 10 random directions (we had required at least half and at most 10%). The circuit neurons' rules also predict their own firing better (median F1 0.53 against 0.29). Hover a dot to read what the agent wrote.</figcaption>
   </figure>
-  <p>It found them because here single neurons do the work. The 2 layer-0 neurons it "missed" it described exactly, as reacting to where the opponent's last stone landed, which is what they are: the circuit's inputs. It also rated its own confidence higher for the circuit neurons than for the decoys. The full test is in <a href="#appendix-i">Appendix I</a>, and every description is in the <a href="atlas/index.html#library">neuron atlas</a>.</p>
-  <p><b>What we take away.</b> Describing neurons one at a time works where the model computes with single neurons, as at the end of the vertical block, and finds nothing where it does not: upstream, and for horizontal and diagonal threats, the information lives in directions spread across many neurons (15 directions against 3,000 neurons for the vertical threat in layers 0–4). Plausible descriptions are also cheap. The agent wrote convincing rules for 9 of 40 random directions in earlier runs, and a model reading the descriptions could not tell circuit neurons from decoys. What separated findings from stories was running the agent's rule against exact labels on held-out games, scored against a circuit frozen before the agent saw anything.</p>
+  <p>It found them because here single neurons do the work. The 2 layer-0 neurons it "missed" it described exactly, as reacting to where the opponent's last stone landed, which is what they are: the circuit's inputs. The full test is in <a href="#appendix-i">Appendix I</a>, and every description is in the <a href="atlas/index.html#library">neuron atlas</a>.</p>
+  <p><b>Neurons are usable without labels.</b> Using six rule-written example boards per column, we picked ten neurons whose output reads as that column. Averaged, they detect "the opponent threatens column c" with AUROC 0.95 to 0.99, matching a readout trained on 40 labelled positions in 5 of 7 columns, and adding their output vectors makes the model play that column at 61% of ordinary positions (68% for a direction trained on labels, 17% untouched; <a href="#appendix-j">Appendix J</a>).</p>
+  <p><b>What we take away.</b> Describing neurons one at a time works where the model computes with single neurons, as at the end of the vertical block, and finds nothing where it does not: upstream, and for horizontal and diagonal threats, the information lives in directions spread across many neurons. Plausible descriptions are also cheap. The agent wrote convincing rules for 9 of 40 random directions in earlier runs, and a model reading the descriptions could not tell circuit neurons from decoys. What separated findings from stories was running the agent's rule against exact labels on held-out games, scored against a circuit frozen before the agent saw anything.</p>
 
   <h2 id="limits"><span class="no">04</span><span class="nl">Limits</span></h2>
   <ul class="limits">
     <li><strong>The neuron-first method suits vertical threats only.</strong> For horizontal and diagonal threats no 200 neurons carry 80% of the push; the information is spread over 40 and 60 directions (<a href="#appendix-e">Appendix E</a>).</li>
     <li><strong>4 of our 7 predictions about the mechanism failed</strong>, reported as failures; the readings that replaced them came afterwards (<a href="#appendix-b">Appendix B</a>).</li>
     <li><strong>The agent's words alone do not separate the circuit from the decoys.</strong> A second model reading only the descriptions called 18 of 20 circuit neurons and 6 of 20 decoys "about the opponent's threat"; we had required at most 2 decoys. The test that works runs the agent's rule (<a href="#appendix-i">Appendix I</a>).</li>
+    <li><strong>5 of our 13 predictions about what neurons write failed</strong>: early output vectors rarely point at the moves, one neuron adding two unrelated facts looks common (59%) because board facts overlap, a weight-only vote missed the secret openings, and restoring 30 neurons did not undo an unlearning fine-tune (<a href="#appendix-j">Appendix J</a>).</li>
     <li><strong>One model, one tactic</strong>, and switches that use averages rather than a matched position.</li>
   </ul>
 
@@ -125,7 +144,7 @@
   </ul>
 
   <section class="appendix">
-  <h2 id="appendix"><span class="no">A–I</span><span class="nl">Appendices</span></h2>
+  <h2 id="appendix"><span class="no">A–J</span><span class="nl">Appendices</span></h2>
   <details class="appx" id="appendix-a"><summary>Appendix A: the model and how it was trained</summary><div class="appx-body">
     <p>The model has 6 layers, 8 attention heads per layer and 1,024 neurons in each layer's feed-forward block (gated, <a class="cite" href="#ref-shazeer2020">Shazeer 2020</a>), 6.3M parameters in all. Games came from a search engine written in C that looks 10 moves ahead, with a few random opening moves so the games vary. Training took 8,000 steps (6 minutes on one GPU) and matched the engine's preferences over all moves, not just its single choice. The model picks one of the engine's best moves 94% of the time, beats a random player in 100% of games, and against the full-depth engine wins 51%, draws 18% and loses 31%.</p>
     <p>Board edits: flipping the colour of one stone in the model's internal board changed its move 58% of the time when the stone mattered for the best move and 18% when it did not, on 1,069 matched pairs (difference 0.40, 95% interval 0.37 to 0.44).</p>
@@ -140,7 +159,7 @@
       <p class="fig-title">Models with a clearer internal board respond more cleanly to board edits</p>
       <p class="fig-sub">Each dot is one trained model; board readability against edit specificity</p>
       <div class="chart"></div>
-      <figcaption><b>Figure 6:</b> across 43 models the correlation is 0.97; the 6 × 256 models are at the top right.</figcaption>
+      <figcaption><b>Figure 8:</b> across 43 models the correlation is 0.97; the 6 × 256 models are at the top right.</figcaption>
     </figure>
   </div></details>
   <details class="appx" id="appendix-d"><summary>Appendix D: what worked and what didn't</summary><div class="appx-body"><ul>
@@ -159,7 +178,7 @@
       <p class="fig-title">Single neurons capture far more concepts than random directions, but far fewer than a trained readout</p>
       <p class="fig-sub">Share of the 659 concepts read with F1 ≥ 0.5 on held-out games, with 95% intervals</p>
       <div class="chart"></div>
-      <figcaption><b>Figure 7:</b> neurons 31%, random directions 6%, linear readouts 56%.</figcaption>
+      <figcaption><b>Figure 9:</b> neurons 31%, random directions 6%, linear readouts 56%.</figcaption>
     </figure>
   </div></details>
   <details class="appx" id="appendix-g"><summary>Appendix G: the first agent runs, before the circuit was known</summary><div class="appx-body">
@@ -180,21 +199,28 @@
     <p><b>Rule breaks.</b> 13 of the 50 agents counted how often a candidate rule held on saved examples, which the prompt forbids. Their submissions were kept, as the protocol requires. Without them (a check we added afterwards) the picture is the same: 13 of 18 circuit neurons and 2 of 16 decoys above the bar, F1 difference 0.23.</p>
     <div class="tscroll"><table class="plain" id="testb-table"></table></div>
   </div></details>
+  <details class="appx" id="appendix-j"><summary>Appendix J: reading neurons by what they write, in full</summary><div class="appx-body">
+    <p><b>Design.</b> A neuron in a gated feed-forward block fires with one number and adds that number times a fixed output vector to the model's running state; we read the two signs of the number separately. We read each of the 12,265 neuron-signs that fire often enough in three ways: against the seven moves directly; through the later layers, as the average effect of a small push at that point on the moves (our J-lens adaptation); and the same way against readouts of the exact board facts (583 of the 681 facts in our full list can be read from the final layer). Every reading was checked by switching the neuron off where it fires on held-out games. The 13 predictions were written down before anything ran; 8 held.</p>
+    <div class="tscroll"><table class="plain" id="v-table"></table></div>
+    <p><b>What failed, and why we think it did.</b> With only seven moves to write to, most early output vectors point elsewhere, into the board and threat information later layers read. Our test for "two unrelated facts at once" counted facts as unrelated when they rarely co-occur; most pairs it flagged are two facts about one cell or column (a cell being mine and being theirs), and counting same-column facts as related still leaves 36%, a check we added afterwards. Moved to an earlier layer, output vectors that work through the later layers kept their meaning 74% of the time, against 93% for vectors that act on the move directly. The fine-tuned copies all learned their behaviour (after the secret opening they play the target column 98%–99% of the time, against 12%–16% before; the copy taught not to block diagonals blocks 12% of them, against 95%; the unlearning copy blocks 0.2% of vertical threats). But the trigger is a three-move opening read through attention, not a single input, so a vote over first-layer neurons ranked its moves 12–238 of 294; and the unlearning was spread out, so restoring 30 neurons recovered 0.0%. In the 4 backdoored copies, fine-tuning strengthened neurons that already pushed the target column more than chance, though weakly (rank correlation 0.07 to 0.12). A blind auditing game on these fine-tuned copies was planned but not run; its materials are kept for a later study.</p>
+  </div></details>
   </section>
 
   <h2 id="refs"><span class="no">R</span><span class="nl">References</span></h2>
   <ol class="refs">
+    <li id="ref-gurnee2026">Gurnee, W., Sofroniew, N., Pearce, A. et al. (2026). Verbalizable Representations Form a Global Workspace in Language Models. <a href="https://arxiv.org/abs/2607.15495" target="_blank" rel="noopener noreferrer">arXiv:2607.15495</a></li>
     <li id="ref-heimersheim2024">Heimersheim, S. &amp; Nanda, N. (2024). How to use and interpret activation patching. <a href="https://arxiv.org/abs/2404.15255" target="_blank" rel="noopener noreferrer">arXiv:2404.15255</a></li>
     <li id="ref-li2022">Li, K., Hopkins, A. K., Bau, D., Viégas, F., Pfister, H. &amp; Wattenberg, M. (2022). Emergent World Representations: Exploring a Sequence Model Trained on a Synthetic Task. <a href="https://arxiv.org/abs/2210.13382" target="_blank" rel="noopener noreferrer">arXiv:2210.13382</a></li>
     <li id="ref-nanda2023">Nanda, N., Lee, A. &amp; Wattenberg, M. (2023). Emergent Linear Representations in World Models of Self-Supervised Sequence Models. <a href="https://arxiv.org/abs/2309.00941" target="_blank" rel="noopener noreferrer">arXiv:2309.00941</a></li>
     <li id="ref-shazeer2020">Shazeer, N. (2020). GLU Variants Improve Transformer. <a href="https://arxiv.org/abs/2002.05202" target="_blank" rel="noopener noreferrer">arXiv:2002.05202</a></li>
+    <li id="ref-shone2026">Shone, J. &amp; Dunlap, L. (2026). Returning to the Neuron Basis for Interpretability. Anthropic Alignment Science Blog. <a href="https://alignment.anthropic.com/2026/neuron-basis-theory/" target="_blank" rel="noopener noreferrer">Part 1: Answering Three Objections</a>; <a href="https://alignment.anthropic.com/2026/neuron-basis-applications/" target="_blank" rel="noopener noreferrer">Part 2: Using Neurons for Safety Applications</a></li>
     <li id="ref-syed2023">Syed, A., Rager, C. &amp; Conmy, A. (2023). Attribution Patching Outperforms Automated Circuit Discovery. <a href="https://arxiv.org/abs/2310.10348" target="_blank" rel="noopener noreferrer">arXiv:2310.10348</a></li>
     <li id="ref-tigges2026">Tigges, C., Kowal, M., McGrath, T., Lewis, O. &amp; Cammarata, N. (2026). Neurons as an Interpretable Basis. Goodfire Research. <a href="https://www.goodfire.com/research/neurons-as-an-interpretable-basis" target="_blank" rel="noopener noreferrer">goodfire.com</a></li>
     <li id="ref-wang2022">Wang, K., Variengien, A., Conmy, A., Shlegeris, B. &amp; Steinhardt, J. (2022). Interpretability in the Wild: a Circuit for Indirect Object Identification in GPT-2 small. <a href="https://arxiv.org/abs/2211.00593" target="_blank" rel="noopener noreferrer">arXiv:2211.00593</a></li>
   </ol>
 </div></main>
 <footer><div class="col">Every number on this page is filled from the result files by a script that fails if any check does not match.</div></footer>
-<script src="data/figures.js?v=d71117c0"></script>
-<script src="post.js?v=fa1b2901"></script>
+<script src="data/figures.js?v=a3458fc7"></script>
+<script src="post.js?v=55bc0211"></script>
 </body>
 </html>
