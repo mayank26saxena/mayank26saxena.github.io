@@ -139,7 +139,16 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <p>The four main open models were Qwen2.5-7B (<a class="cite" href="#ref-qwen2024">Qwen Team 2024</a>), Llama-3.1-8B (<a class="cite" href="#ref-grattafiori2024">Grattafiori et al. 2024</a>), Mistral-7B (<a class="cite" href="#ref-jiang2023">Jiang et al. 2023</a>) and Gemma-2-9B (<a class="cite" href="#ref-gemma2024">Gemma Team 2024</a>). For each scenario, I compared the published wording, placeholder names and a control using other realistic names. Protection is the share of replies Claude Sonnet judged to keep the private detail out; its agreement with human labels is documented in Appendix B. See the appendix for reply counts and prompt-version details.</p>
 
 <h2 id="s04"><span class="no">03</span><span class="nl">What changed the score?</span></h2>
-<p>Figure 1 shows the pre-specified comparison and the split by benchmark. The control is what makes the result interpretable: giving everyone a different realistic name did not raise protection on this one draw, so the increase showed up for placeholder labels. What about placeholders matters (their brevity, their anonymized look, or the loss of a name to give away) is still unknown.</p>
+<p>Figure 1 shows the pre-specified comparison and the split by benchmark. The control is what makes the result interpretable: giving everyone a different realistic name did not raise protection on this one draw, so the increase showed up for placeholder labels. What about placeholders matters (their brevity, their anonymized look, or the loss of a name to give away) is still unknown. Possible explanations, none of them tested here:</p>
+<div class="table-wrap"><table class="plain tight" id="mech">
+<thead><tr><th>Explanation</th><th>The idea</th><th>How to tell</th></tr></thead>
+<tbody>
+<tr><td>Looks like a test</td><td>Placeholders make the prompt look like an evaluation.</td><td>No support from the benchmark-awareness probe (below)</td></tr>
+<tr><td>No name to give away</td><td>In a story the name is the easiest way to give someone away.</td><td>Fits an effect on stories, not agent tasks</td></tr>
+<tr><td>Name tracking</td><td>Models track who is who partly through repeated names (<a class="cite" href="#ref-wang2022">Wang et al. 2022</a>); “Person” repeats across different people, which could blur whose secret is whose.</td><td>Compare other labels; check attention to the owner's name</td></tr>
+<tr><td>Anonymized look</td><td>Placeholders resemble anonymized records: a push toward caution, or toward sharing if the data seem already anonymized.</td><td>Compare other labels</td></tr>
+<tr><td>Weaker binding</td><td>A generic label may hold a secret less firmly than a distinctive name (<a class="cite" href="#ref-feng2023">Feng &amp; Steinhardt 2023</a>).</td><td>Activation patching</td></tr>
+</tbody></table></div>
 <figure class="fig" id="fig-effect">
 <p class="fig-title">Placeholders raise protection; other realistic names do not</p>
 <p class="fig-sub">Change in protection, percentage points · 95% interval · top group pre-specified and pooled over 4 models; lower groups split by benchmark (exploratory)</p>
@@ -182,8 +191,15 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <div class="ex2 nx" id="nx"></div>
 
 <h2 id="s06"><span class="no">05</span><span class="nl">What evaluators can take from this</span></h2>
-<p>When evaluating privacy behavior, compare realistic names with placeholders on the same items, inspect what “protected” replies actually do, and test more than one task format. Report which naming condition a score uses.</p>
+<p>When evaluating privacy behavior, compare realistic names with placeholders on the same items, inspect what “protected” replies actually do, and test more than one task format. Report which naming condition a score uses. The same goes for interpretability work, where names are often swapped to build counterfactual prompts: realistic renaming did not move behavior here, but placeholder-style swaps did.</p>
 <p>The result is limited to the two benchmarks, four small open models and prompts tested. Names were realistically reassigned only once, and there was no length-matched control. In 41 PrivacyLens items, a real name remained inside a username or email handle after placeholder replacement; without them, the PrivacyLens estimate is about zero and realistic renaming lowers protection slightly. The grader can see “Person A” in a reply; a check found no sign of leniency, but a sample this small cannot rule out a bias of a few points. A clear effect showed up on one of the two task formats, so this is not a general correction factor. The binary score does not distinguish genuine withholding from blanket refusal, and the study did not test appropriate sharing. All scenarios used fictional people. <b>This is not evidence that models disclose real people's information in deployment.</b></p>
+<p><b>A mechanistic next step.</b> The models are open, so the explanations above can be tested on ConfAIde items where the published version leaks and the placeholder version protects:</p>
+<ul>
+<li><b>Measure:</b> cut a leaking reply just before the secret, give both versions that same start, and compare how strongly each favors the secret's first word over a deflection.</li>
+<li><b>Locate:</b> patch activations between the two versions, layer by layer and position by position (<a class="cite" href="#ref-heimersheim2024">Heimersheim &amp; Nanda 2024</a>).</li>
+<li><b>Attend:</b> compare attention from the reply to the secret owner's name.</li>
+<li><b>Vary the label:</b> “Person A/B”, realistic names sharing a surname, bare letters, and distinct short names such as “Zed”/“Quin”, which separate a repeated word from an anonymized look.</li>
+</ul>
 
 <h2 id="s07"><span class="no">06</span><span class="nl">Other findings</span></h2>
 <p>In secondary tests, a privacy instruction raised protection; test-like formatting and a scoring note had little effect. The benchmark-awareness probe gave no support for a recognition account in the one model whose self-reports varied, though it cannot rule one out. Details and interactive figures are available below.</p>
@@ -283,8 +299,10 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <ol class="refs">
 <li id="ref-cohen1960">Cohen (1960). A coefficient of agreement for nominal scales. <i>Educational and Psychological Measurement</i> 20(1), 37–46. <a href="https://doi.org/10.1177/001316446002000104" target="_blank" rel="noopener noreferrer">doi:10.1177/001316446002000104</a></li>
 <li id="ref-dersimonian1986">DerSimonian &amp; Laird (1986). Meta-analysis in clinical trials. <i>Controlled Clinical Trials</i> 7(3), 177–188. <a href="https://doi.org/10.1016/0197-2456(86)90046-2" target="_blank" rel="noopener noreferrer">doi:10.1016/0197-2456(86)90046-2</a></li>
+<li id="ref-feng2023">Feng &amp; Steinhardt (2023). How do language models bind entities in context? <a href="https://arxiv.org/abs/2310.17191" target="_blank" rel="noopener noreferrer">arXiv:2310.17191</a></li>
 <li id="ref-gemma2024">Gemma Team (2024). Gemma 2: Improving open language models at a practical size. <a href="https://arxiv.org/abs/2408.00118" target="_blank" rel="noopener noreferrer">arXiv:2408.00118</a></li>
 <li id="ref-grattafiori2024">Grattafiori et al. (2024). The Llama 3 herd of models. <a href="https://arxiv.org/abs/2407.21783" target="_blank" rel="noopener noreferrer">arXiv:2407.21783</a></li>
+<li id="ref-heimersheim2024">Heimersheim &amp; Nanda (2024). How to use and interpret activation patching. <a href="https://arxiv.org/abs/2404.15255" target="_blank" rel="noopener noreferrer">arXiv:2404.15255</a></li>
 <li id="ref-holm1979">Holm (1979). A simple sequentially rejective multiple test procedure. <i>Scandinavian Journal of Statistics</i> 6(2), 65–70. <a href="https://www.jstor.org/stable/4615733" target="_blank" rel="noopener noreferrer">JSTOR 4615733</a></li>
 <li id="ref-jiang2023">Jiang et al. (2023). Mistral 7B. <a href="https://arxiv.org/abs/2310.06825" target="_blank" rel="noopener noreferrer">arXiv:2310.06825</a></li>
 <li id="ref-kwon2023">Kwon et al. (2023). Efficient memory management for large language model serving with PagedAttention (vLLM). SOSP 2023. <a href="https://arxiv.org/abs/2309.06180" target="_blank" rel="noopener noreferrer">arXiv:2309.06180</a></li>
@@ -292,6 +310,7 @@ table.plain.tight td { padding: 8px 12px; } table.plain.tight td:first-child { w
 <li id="ref-mireshghallah2023">Mireshghallah, Kim, Zhou, Tsvetkov, Sap, Shokri, Choi (2023). Can LLMs keep a secret? Testing privacy implications of language models via contextual integrity theory (ConfAIde). ICLR 2024. <a href="https://arxiv.org/abs/2310.17884" target="_blank" rel="noopener noreferrer">arXiv:2310.17884</a></li>
 <li id="ref-qwen2024">Qwen Team (2024). Qwen2.5 technical report. <a href="https://arxiv.org/abs/2412.15115" target="_blank" rel="noopener noreferrer">arXiv:2412.15115</a></li>
 <li id="ref-shao2024">Shao, Li, Shi, Liu, Yang (2024). PrivacyLens: Evaluating privacy norm awareness of language models in action. NeurIPS 2024 Datasets and Benchmarks. <a href="https://arxiv.org/abs/2409.00138" target="_blank" rel="noopener noreferrer">arXiv:2409.00138</a></li>
+<li id="ref-wang2022">Wang, Variengien, Conmy, Shlegeris, Steinhardt (2022). Interpretability in the wild: A circuit for indirect object identification in GPT-2 small. <a href="https://arxiv.org/abs/2211.00593" target="_blank" rel="noopener noreferrer">arXiv:2211.00593</a></li>
 </ol>
 </div></main>
 <footer><div class="col">Independent research note · Mayank Saxena</div></footer>
